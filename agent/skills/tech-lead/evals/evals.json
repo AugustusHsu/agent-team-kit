@@ -1,0 +1,17 @@
+{
+  "skill_name": "tech-lead",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "根據這個 '使用者考勤管理系統'，幫我設計關聯式資料庫結構，並提供打卡模組的 API 規格。",
+      "expected_output": "必須以 Mermaid erDiagram 語法輸出 ERD 表，並套用標準 Swagger-like 表格寫明 Endpoint、Method 與 Payload。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我想了解前端發起 '結帳' 請求後，我們後端是怎麼呼叫金流 API 跟扣除庫存的，請幫我畫圖。",
+      "expected_output": "必須以 Mermaid Sequence Diagram 嚴謹繪製模組間的互動流程。",
+      "files": []
+    }
+  ]
+}

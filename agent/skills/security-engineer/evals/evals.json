@@ -1,0 +1,17 @@
+{
+  "skill_name": "security-engineer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "這裡有一個 LLD 草稿，裡面說明我們會把使用者的帳號密碼寫入 MySQL 中的 users 資料表。請提供資安審閱意見。",
+      "expected_output": "必須強烈阻止明文儲存，提醒使用 bcrypt 等加鹽雜湊 (Salt + Hash) 技術，並附上標準 OWASP Checklists。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我們前端框架是 React，後端是 Node.js。使用者登入後我們應該怎麼實作身分驗證比較安全？",
+      "expected_output": "詳細解釋 JWT (Token) 搭配 HttpOnly Secure Cookie 的機制，並交代 CORS 及防範 XSS/CSRF 攻擊的對策。",
+      "files": []
+    }
+  ]
+}

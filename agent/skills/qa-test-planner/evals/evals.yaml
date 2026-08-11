@@ -1,0 +1,113 @@
+# qa-test-planner Skill 驗證用 Test Cases
+# 用途：驗證 Skill 是否能正確讀取專案文件並產出結構化的 Test Plan
+# 格式：每組 Eval 定義一個使用者情境 + 預期輸出 + 驗證斷言
+
+skill_name: qa-test-planner
+
+evals:
+  # ─────────────────────────────────────────────
+  # Eval 1: 完整模組的 Test Plan 產出
+  # 驗證情境：使用者提供整個 Feature 模組，要求產出完整的測試計畫
+  # ─────────────────────────────────────────────
+  - id: 1
+    name: "full-module-test-plan"
+    prompt: >
+      我剛寫完 User Management System 的 PRD 和 API 規格，
+      幫我規劃一份完整的測試計畫，要涵蓋登入登出、Token 刷新、
+      還有系統初始化那個 Bootstrap 流程的測試
+    input_files:
+      - docs/features/example_module/prd.md
+      - docs/features/example_module/api_spec.md
+    expected_output: >
+      產出一份 Markdown 格式的 Test Plan，包含表格化的 Test Cases
+      （含 Test ID / 測試目標 / 前置條件 / 測試步驟 / 預期結果 / 層級），
+      涵蓋 Auth 相關的 Happy Path、Error Path 與 Edge Cases，
+      並附上追溯性矩陣。
+    assertions:
+      - text: "輸出包含 Markdown 表格，含有 Test ID、測試目標、前置條件、測試步驟、預期結果、層級六個欄位"
+        type: structural
+        priority: critical
+      - text: "Test ID 格式為 T-AUTH-XXX 或 T-SYS-XXX，遵循專案命名慣例"
+        type: format
+        priority: high
+      - text: "測試案例涵蓋三個層級：Unit、Integration、E2E"
+        type: coverage
+        priority: critical
+      - text: "包含系統初始化 (Bootstrap) 的邊界測試，例如並發競態條件"
+        type: edge_case
+        priority: high
+      - text: "尾部包含追溯性矩陣，列出 BR-* 和 AC-* 需求 ID 與對應 Test Case"
+        type: traceability
+        priority: critical
+      - text: "檔案存放在 docs/features/example_module/test_plan.md"
+        type: file_output
+        priority: high
+
+  # ─────────────────────────────────────────────
+  # Eval 2: API 導向的權限與 Edge Case 測試
+  # 驗證情境：使用者指定一支 API 規格，要求聚焦權限和邊界
+  # ─────────────────────────────────────────────
+  - id: 2
+    name: "api-focused-permission-test"
+    prompt: >
+      docs/features/task_management_system/api_spec.md 這支 API 有哪些要測的？
+      特別關注權限控制和 Edge Cases，幫我產出測試案例
+    input_files:
+      - docs/features/task_management_system/api_spec.md
+      - docs/features/task_management_system/prd.md
+    expected_output: >
+      產出針對 Task Management API 的 Test Plan，聚焦在權限檢查
+      （不同角色的存取結果）與 Edge Cases（空值、非法 ID、跨專案存取等），
+      以 Markdown 表格格式呈現。
+    assertions:
+      - text: "輸出包含 Markdown 表格，含有 Test ID、測試目標、前置條件、測試步驟、預期結果、層級六個欄位"
+        type: structural
+        priority: critical
+      - text: "包含至少 3 個權限相關的測試案例（例如：非成員存取專案任務被拒）"
+        type: coverage
+        priority: high
+      - text: "包含至少 3 個 Edge Cases（例如：不存在的 task ID、空的 title 欄位）"
+        type: edge_case
+        priority: high
+      - text: "Test ID 格式正確且與 Task 模組相關（T-TASK-*）"
+        type: format
+        priority: high
+      - text: "測試案例涵蓋 Unit 和 Integration 至少兩個層級"
+        type: coverage
+        priority: medium
+
+  # ─────────────────────────────────────────────
+  # Eval 3: 聚焦特定業務規則的深度 Edge Case 設計
+  # 驗證情境：使用者指定特定 BR 規則，要求深入挖掘邊界
+  # ─────────────────────────────────────────────
+  - id: 3
+    name: "business-rule-edge-cases"
+    prompt: >
+      我想針對 Workspace 成員管理的這段業務規則做完整的測試覆蓋：
+      BR-PERM-10 (WS Manager 自動同步) 和 BR-PERM-11 (成員移除聯動)，
+      幫我設計 Test Cases，特別是 Edge Cases 的部分
+    input_files:
+      - docs/features/example_module/prd.md
+    expected_output: >
+      產出一份精準聚焦在 BR-PERM-10 和 BR-PERM-11 兩條業務規則的
+      Test Plan，涵蓋正向與反向邏輯、聯動刪除與防呆保護、
+      以及多專案管理員的邊界情境。
+    assertions:
+      - text: "輸出包含 Markdown 表格，含有 Test ID、測試目標、前置條件、測試步驟、預期結果、層級六個欄位"
+        type: structural
+        priority: critical
+      - text: "包含 BR-PERM-10 的正向測試：成員成為 Project Manager 後 WS 角色自動升級"
+        type: coverage
+        priority: critical
+      - text: "包含 BR-PERM-10 的反向測試：成員不再是任何 Project Manager 後 WS 角色自動降級"
+        type: coverage
+        priority: critical
+      - text: "包含 BR-PERM-11 的防呆保護測試：嘗試移除擁有 manager 角色的成員被拒絕"
+        type: coverage
+        priority: critical
+      - text: "包含至少 2 個 Edge Cases（例如：同時是多個 Project Manager 的成員被移除一個 manager 角色後 WS 角色維持 manager）"
+        type: edge_case
+        priority: high
+      - text: "追溯性矩陣明確連結 BR-PERM-10 和 BR-PERM-11"
+        type: traceability
+        priority: high

@@ -1,0 +1,17 @@
+{
+  "skill_name": "product-manager",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "針對剛剛核准的 'AI 自動化設定小幫手' BRD，請將它轉化為完整的系統 PRD，並明確列出 MVP (Minimum Viable Product) 第一階段該包含的功能。",
+      "expected_output": "需產出符合 prd_template 格式的文件，明確列出 User Personas、核心功能模組、非功能性需求，重點是要將功能拆分為不同的優先級 (P0/P1/P2)。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我們公司內部的 ERP 要開發一套新的 '庫存盤點與預警系統'，這是一套純給內部倉庫人員用的工具。請幫忙規劃具體的使用者動線與驗收標準 (Acceptance Criteria)。",
+      "expected_output": "文件內容中必須清楚看見操作動線，並且在最後提供嚴謹的 Gherkin 格式 (Given/When/Then) 的驗收標準。",
+      "files": []
+    }
+  ]
+}

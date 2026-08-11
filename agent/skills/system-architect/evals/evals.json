@@ -1,0 +1,17 @@
+{
+  "skill_name": "system-architect",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "為現有的電商平台設計一個能應付雙十一大促銷的 '秒殺抽獎活動模組'，請給出高階系統架構圖。",
+      "expected_output": "必須產生明確的 HLD (High-Level Design) 文件，並使用 Mermaid (C4Context 或類似架構) 呈現負載平衡、快取與資料庫層。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我們要針對 '訊息通知服務' 進行重構，在 RabbitMQ 跟 Kafka 之間我們該選哪個？請撰寫決策文件。",
+      "expected_output": "產出架構決策紀錄 (ADR) 比較技術選型，重點在於非功能性需求 (NFR) 的驗證。",
+      "files": []
+    }
+  ]
+}
