@@ -49,6 +49,15 @@ install.sh                      # 安裝到目標專案
 tests/                          # 本套件自身的 smoke test（不會被安裝）
 ```
 
+## 開發這個套件
+
+```bash
+uv run pytest
+```
+
+驗證 `install.sh` 的複製行為、三支腳本在安裝後環境的實際輸出，以及 `kit/` 內的 SKILL
+frontmatter、evals schema 與文件連結。全部離線執行。細節見 [tests/README.md](tests/README.md)。
+
 ## 安裝到新專案
 
 ```bash

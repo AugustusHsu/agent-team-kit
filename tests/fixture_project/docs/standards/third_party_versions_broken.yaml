@@ -1,0 +1,9 @@
+# fixture：宣告的版本與實體檔案不一致（Dockerfile 裡是 3.12.7，這裡宣告 3.11.0）
+# 預期 check_versions.py 在階段一即失敗並 exit 1，不會進入階段二。
+versions:
+  - name: python-base-image
+    current_version: "3.11.0"
+    source_type: local
+    declared_in:
+      file: devenv/Dockerfile
+      pattern: "FROM python:{version}-slim"

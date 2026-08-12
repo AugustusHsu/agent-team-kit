@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安裝 uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: 執行測試
+        run: uv run --python ${{ matrix.python-version }} pytest
+
+  # 腳本只依賴標準函式庫，這裡確認「什麼都沒裝」的環境也跑得動
+  stdlib-only:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 安裝到暫存專案並執行腳本
+        run: |
+          mkdir -p /tmp/demo
+          ./install.sh /tmp/demo
+          cd /tmp/demo
+          python .agent/scripts/scan_backlog.py --format summary

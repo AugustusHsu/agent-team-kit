@@ -1,0 +1,17 @@
+# fixture：node-base-image 與 node-runtime 宣稱版本須一致，實際卻不同。
+# 預期在階段一的一致性驗證階段失敗並 exit 1。
+versions:
+  - name: node-base-image
+    current_version: "22.9.0"
+    source_type: local
+    declared_in:
+      file: devenv/Dockerfile
+      pattern: "FROM node:{version}-alpine"
+
+  - name: node-runtime
+    current_version: "20.11.0"
+    source_type: local
+    consistency_check_with: node-base-image
+    declared_in:
+      file: devenv/Dockerfile
+      pattern: "FROM node:"

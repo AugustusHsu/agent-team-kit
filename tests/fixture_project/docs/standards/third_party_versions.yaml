@@ -1,0 +1,22 @@
+# fixture：一份會通過「階段一 自我驗證」的版本宣告清單
+#
+# 注意兩件事：
+#   1. source_type 一律用 local —— 它不是 dockerhub/pypi/npm/github-tag 任一種，
+#      check_upstream() 會直接回 "UNSUPPORTED SOURCE"，階段二因此完全不發網路請求，
+#      測試在離線環境也能穩定重現。
+#   2. declared_in 必須放在每個項目的最後 —— 無 PyYAML 時的 parse_yaml_fallback()
+#      進入 declared_in 區塊後不會自行結束，後續的 key 都會被歸進去。
+versions:
+  - name: python-base-image
+    current_version: "3.12.7"
+    source_type: local
+    declared_in:
+      file: devenv/Dockerfile
+      pattern: "FROM python:{version}-slim"
+
+  - name: node-base-image
+    current_version: "22.9.0"
+    source_type: local
+    declared_in:
+      file: devenv/Dockerfile
+      pattern: "FROM node:{version}-alpine"
