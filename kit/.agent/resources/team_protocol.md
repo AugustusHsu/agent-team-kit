@@ -166,6 +166,10 @@ commit message 原文交付使用者複查並取得當次明確同意**。性質
 - **嚴禁未經複查即 commit**，即使變更微小、即使訊息看起來顯而易見。
 - **上一次的同意不延用到下一個 commit。** 每個 commit 各自取得一次同意。
 - 使用者要求修改訊息時，改完須**重新呈現完整訊息**再確認，不可只回覆「已修正」。
+- **合併產生的 merge commit 同樣適用。** 收尾時 `git merge` 若非 fast-forward，
+  git 會自動寫一則 `Merge branch '...'` 訊息——它從未經過使用者過目，是本閘門最容易
+  漏掉的路徑。非 fast-forward 的合併，必須先呈現 merge commit 訊息再執行。
+  fast-forward 不產生新 commit，不適用。
 
 commit message 的格式、Emoji 對照與**禁止寫入的內容**（AI 署名 trailer、對話脈絡、
 工具／session 內部狀態），一律以

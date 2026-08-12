@@ -289,6 +289,18 @@ Agent 結束工作前必須回報 worktree 狀態（已清理／刻意保留及�
 
 Agent 每次收尾都必須回報，格式固定。
 
+**這份報告只講 worktree 的狀態，不取代任何一份工單報告。** 三份產出對應三個不同時機，
+不要合併：
+
+| 時機 | 狀態轉換 | 產出 |
+|---|---|---|
+| 交付 | `In Progress` → `In Review` | 三段式交付回報（team_protocol §2.2）＋ commit message 複查（§1.10） |
+| 審查 | `In Review` | 審查報告 APPROVED / CHANGES REQUESTED（§2.3） |
+| **收尾** | `In Review` → `Done` | **本節格式** |
+
+尤其**收尾報告內不該出現 commit message**——commit 早在交付時就完成並經過複查，
+到收尾時審查也已通過。若到收尾才在討論要 commit 什麼，代表 §3.2 被跳過了。
+
 **成功：**
 
 ```
