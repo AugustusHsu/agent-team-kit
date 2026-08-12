@@ -155,6 +155,9 @@ def scan_all_tasks(root, project_filter=None):
     for feature_dir in sorted(features_base.iterdir()):
         if not feature_dir.is_dir():
             continue
+        # 跳過骨架目錄（如 _TEMPLATE/）——它是拿來複製的樣板，不是功能模組
+        if feature_dir.name.startswith("_"):
+            continue
         tasks_dir = feature_dir / "tasks"
         if not tasks_dir.is_dir():
             continue

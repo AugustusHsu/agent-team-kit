@@ -45,7 +45,7 @@ cat <<EOF
   1. 編輯 .agent/resources/team_protocol.md §3.1 模組前綴對照表，換成你的模組
   2. 依 docs/features/_TEMPLATE/ 複製出第一個功能模組目錄
   3. 依 CLAUDE.md 模板填寫專案的入口摘要
-  4. 驗證腳本：
+  4. 驗證腳本（需先完成第 2 步——沒有任何功能模組時腳本會提示找不到工單）：
      python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md
 
 EOF

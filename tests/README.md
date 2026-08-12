@@ -38,6 +38,9 @@ uv run pytest -k install   # 只跑 install.sh 相關
 | `XYZ-DEV-MANUAL-001.md` | 1 天前結案 → 應落到「近期結案」；另涵蓋 `manual_user` 類型 |
 | `third_party_versions*.yaml` | 三種情境：通過、宣告與實體檔案不符、關聯項目版本不一致 |
 
+底線開頭的**目錄**（kit 自己帶的 `_TEMPLATE/`）不該被當成功能模組，這條是直接對安裝結果驗證的，
+不放在 fixture 裡：全新安裝掃不到任何模組應以非零狀態碼結束，從骨架複製出模組後則應立刻被掃到。
+
 工單裡的 `{{CLOSED_RECENT}}` / `{{CLOSED_OLD}}` 由 `conftest.py` 在複製時換成相對於
 「現在」的時間。寫死日期的話，`--recent-days` 的測試會隨時間流逝自己壞掉。
 

@@ -3,6 +3,10 @@
 新增功能模組時，複製整個 `_TEMPLATE/` 目錄並改名為模組名（snake_case，例如 `user_management`），
 然後到 `.agent/resources/team_protocol.md` §3.1 登記該模組的三字母前綴。
 
+> **底線開頭 = 不算數**：`scan_backlog.py` 會跳過所有以 `_` 開頭的目錄與檔案。
+> 所以本骨架目錄與其中的 `tasks/_EXAMPLE-DEV-BE-001.md` 都不會出現在 BACKLOG 裡。
+> 同一條規則也可以拿來放索引檔（例如 `tasks/_INDEX.md`）而不污染統計。
+
 ## 檔案與負責角色
 
 | 檔案 | 內容 | 產出角色 |

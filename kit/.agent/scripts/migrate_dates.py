@@ -303,6 +303,9 @@ def main():
     for feature_dir in sorted(features_base.iterdir()):
         if not feature_dir.is_dir():
             continue
+        # 跳過骨架目錄（如 _TEMPLATE/）——與底下「檔名以 _ 開頭者不算工單」同一條規則
+        if feature_dir.name.startswith("_"):
+            continue
         tasks_dir = feature_dir / "tasks"
         if not tasks_dir.is_dir():
             continue

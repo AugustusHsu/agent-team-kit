@@ -107,29 +107,27 @@ def test_backlog_保留既有冰箱內容(project: Path, tmp_path: Path):
     assert marker in out.read_text(encoding="utf-8")
 
 
-def test_沒有任何工單時以非零狀態碼結束(tmp_path: Path):
-    import subprocess
-
-    from conftest import INSTALL_SH
-
-    target = tmp_path / "empty"
-    target.mkdir()
-    subprocess.run([str(INSTALL_SH), str(target)], check=True, capture_output=True, text=True)
-    # kit 只帶 _TEMPLATE（本身沒有可掃描的工單），刪掉後就完全沒有 features
-    import shutil
-
-    shutil.rmtree(target / "docs" / "features")
-    (target / "docs" / "features").mkdir()
-
-    result = run_script(target, "scan_backlog.py", "--format", "json")
+def test_剛安裝完還沒建模組時以非零狀態碼結束(bare_install: Path):
+    """kit 只帶骨架目錄，所以全新安裝掃不到任何模組——這時該明說，而不是給一份空報表。"""
+    result = run_script(bare_install, "scan_backlog.py", "--format", "json")
     assert result.returncode == 1
     assert "未找到任何工單" in result.stderr
 
 
-def test_kit_內建的_TEMPLATE_模組不含可掃描工單(scanned):
-    """`_TEMPLATE/tasks/` 下的範例工單以 `_` 開頭，因此不會被算進統計。
+def test_由骨架複製出的模組會被掃到(bare_install: Path, tmp_path: Path):
+    """照 install.sh 指示複製 `_TEMPLATE/` 出來後，新模組必須立刻出現在報表中。"""
+    import shutil
 
-    附帶效果：`_TEMPLATE` 這個模組本身仍會以 0 張出現在輸出中。
-    這是目前的行為（目錄名不受底線規則影響），在此釘住以免無意間改動。
-    """
-    assert scanned["_TEMPLATE"]["total"] == 0
+    target = tmp_path / "copied"
+    shutil.copytree(bare_install, target)
+    shutil.copytree(target / "docs/features/_TEMPLATE", target / "docs/features/my_module")
+
+    result = run_script(target, "scan_backlog.py", "--format", "json")
+    assert result.returncode == 0, result.stderr
+    assert list(json.loads(result.stdout)) == ["my_module"]
+
+
+def test_底線開頭的目錄不被當成功能模組(scanned):
+    """kit 自己帶的 `_TEMPLATE/` 是拿來複製的骨架，不該以模組身分出現在報表裡。"""
+    assert "_TEMPLATE" not in scanned
+    assert set(scanned) == {"another_module", "example_module"}

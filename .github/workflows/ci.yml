@@ -37,4 +37,8 @@ jobs:
           mkdir -p /tmp/demo
           ./install.sh /tmp/demo
           cd /tmp/demo
+          # 照 install.sh 指示的第 2 步，從骨架複製出第一個功能模組
+          cp -r docs/features/_TEMPLATE docs/features/my_module
           python .agent/scripts/scan_backlog.py --format summary
+          python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md
+          python .agent/scripts/migrate_dates.py
