@@ -3,49 +3,43 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "我剛寫完 User Management System 的 PRD 和 API 規格，幫我規劃一份完整的測試計畫，要涵蓋登入登出、Token 刷新、還有系統初始化那個 Bootstrap 流程的測試",
-      "expected_output": "產出一份 Markdown 格式的 Test Plan，包含：(1) 以表格呈現的 Test Cases，欄位含 Test ID / 測試目標 / 前置條件 / 測試步驟 / 預期結果 / 層級；(2) 測試案例至少涵蓋 Auth 相關的 Happy Path、Error Path 與 Edge Cases；(3) 包含 Unit / Integration / E2E 三種層級的分佈；(4) 尾部附上追溯性矩陣。",
-      "files": [
-        "docs/features/example_module/prd.md",
-        "docs/features/example_module/api_spec.md"
-      ],
+      "prompt": "我剛寫完使用者管理模組的 PRD 和 API 規格，幫我規劃一份完整的測試計畫，要涵蓋登入登出、Token 刷新，還有系統初始化的 Bootstrap 流程。",
+      "expected_output": "產出一份 Markdown 格式的 Test Plan，包含：(1) 以表格呈現的 Test Cases，欄位含 Test ID / 測試目標 / 前置條件 / 測試步驟 / 預期結果 / 層級；(2) 測試案例至少涵蓋 Happy Path、Error Path 與 Edge Cases；(3) 包含 Unit / Integration / E2E 三種層級的分佈；(4) 尾部附上追溯性矩陣。",
+      "files": [],
       "expectations": [
         "輸出包含 Markdown 表格，含有 Test ID、測試目標、前置條件、測試步驟、預期結果、層級 六個欄位",
-        "Test ID 格式為 T-AUTH-XXX 或 T-SYS-XXX，遵循專案命名慣例",
-        "測試案例涵蓋三個層級：Unit、Integration、E2E",
+        "Test ID 有一致的命名慣例並可對應到所屬功能領域",
+        "測試案例涵蓋 Unit、Integration、E2E 三個層級",
         "包含系統初始化 (Bootstrap) 的邊界測試，例如並發競態條件",
-        "尾部包含追溯性矩陣，列出 BR-* 和 AC-* 需求 ID 與對應 Test Case",
-        "檔案存放在 docs/features/example_module/test_plan.md"
+        "尾部包含追溯性矩陣，連結需求 ID 與對應的 Test Case",
+        "指明檔案存放於 docs/features/{模組}/test_plan.md"
       ]
     },
     {
       "id": 2,
-      "prompt": "docs/features/task_management_system/api_spec.md 這支 API 有哪些要測的？特別關注權限控制和 Edge Cases，幫我產出測試案例",
-      "expected_output": "產出一份針對 Task Management API 的 Test Plan，聚焦在 API 端點的權限檢查（不同角色的存取結果）與 Edge Cases（空值、非法 ID、跨專案存取等），以 Markdown 表格格式呈現。",
-      "files": [
-        "docs/features/task_management_system/api_spec.md",
-        "docs/features/task_management_system/prd.md"
-      ],
+      "prompt": "這支任務管理的 API 有哪些要測的？特別關注權限控制和 Edge Cases，幫我產出測試案例。",
+      "expected_output": "產出聚焦在 API 端點權限檢查（不同角色的存取結果）與 Edge Cases（空值、非法 ID、跨專案存取等）的 Test Plan，以 Markdown 表格呈現。",
+      "files": [],
       "expectations": [
         "輸出包含 Markdown 表格，含有 Test ID、測試目標、前置條件、測試步驟、預期結果、層級 六個欄位",
-        "包含至少 3 個權限相關的測試案例（例如：非成員存取專案任務被拒）",
-        "包含至少 3 個 Edge Cases（例如：不存在的 task ID、空的 title 欄位）",
-        "Test ID 格式正確且與 Task 模組相關（T-TASK-*）",
-        "測試案例涵蓋 Unit 和 Integration 至少兩個層級"
+        "包含至少 3 個權限相關的測試案例（例如非成員存取被拒）",
+        "包含至少 3 個 Edge Cases（例如不存在的 ID、空的必填欄位）",
+        "測試案例涵蓋 Unit 和 Integration 至少兩個層級",
+        "每個測試案例的預期結果是客觀可驗證的（明確的狀態碼或回應內容）"
       ]
     },
     {
       "id": 3,
-      "prompt": "我想針對 Workspace 成員管理的這段業務規則做完整的測試覆蓋：BR-PERM-10 (WS Manager 自動同步) 和 BR-PERM-11 (成員移除聯動)，幫我設計 Test Cases，特別是 Edge Cases 的部分",
-      "expected_output": "產出一份精準聚焦在 BR-PERM-10 和 BR-PERM-11 兩條業務規則的 Test Plan，以 Markdown 表格呈現。應涵蓋：(1) Manager 自動同步的正向與反向邏輯；(2) 成員移除時的聯動刪除與防呆保護；(3) 多專案管理員的邊界情境。",
-      "files": ["docs/features/example_module/prd.md"],
+      "prompt": "我想針對成員管理的兩條業務規則做完整測試覆蓋：BR-PERM-01（成員成為專案管理員後，工作區角色自動升級）和 BR-PERM-02（移除工作區成員時聯動刪除其專案成員資格）。特別是 Edge Cases 的部分。",
+      "expected_output": "產出精準聚焦在 BR-PERM-01 與 BR-PERM-02 的 Test Plan，以 Markdown 表格呈現，涵蓋正向／反向邏輯、聯動刪除與防呆保護，以及多重身分的邊界情境。",
+      "files": [],
       "expectations": [
         "輸出包含 Markdown 表格，含有 Test ID、測試目標、前置條件、測試步驟、預期結果、層級 六個欄位",
-        "包含 BR-PERM-10 的正向測試：成員成為 Project Manager 後 WS 角色自動升級",
-        "包含 BR-PERM-10 的反向測試：成員不再是任何 Project Manager 後 WS 角色自動降級",
-        "包含 BR-PERM-11 的防呆保護測試：嘗試移除擁有 manager 角色的成員被拒絕",
-        "包含至少 2 個 Edge Cases（例如：同時是多個 Project Manager 的成員被移除一個 manager 角色後 WS 角色維持 manager）",
-        "追溯性矩陣明確連結 BR-PERM-10 和 BR-PERM-11"
+        "包含 BR-PERM-01 的正向測試：成員成為專案管理員後工作區角色自動升級",
+        "包含 BR-PERM-01 的反向測試：成員不再擔任任何專案管理員後角色自動降級",
+        "包含 BR-PERM-02 的防呆保護測試：嘗試移除仍擔任管理員的成員被拒絕",
+        "包含至少 2 個 Edge Cases（例如同時是多個專案管理員時只被移除其中一個角色）",
+        "追溯性矩陣明確連結 BR-PERM-01 與 BR-PERM-02"
       ]
     }
   ]

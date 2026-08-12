@@ -81,13 +81,21 @@ scrum-master 開單 → (HITL 閘門：問使用者未決事項)
 
 SKILL 檔為 Claude Code 的 Skill 格式（frontmatter `name` / `description`）。放在 `.agent/skills/` 時可由使用者指名觸發；若要用 `/{name}` 斜線指令直接叫，請改放 `.claude/skills/`。內容本身是純 Markdown 指令，其他 Agent 工具也能沿用。
 
+每個角色附一份 `evals/evals.json`，格式對齊 Anthropic 官方 `skill-creator` 的 eval schema：
+
+```json
+{ "skill_name": "...", "evals": [ { "id": 1, "prompt": "...", "expected_output": "...", "files": [], "expectations": ["..."] } ] }
+```
+
+`expectations` 是可被評分者逐條判定的敘述句；`files` 一律留空——本套件的 eval 皆為自足式 prompt，不依賴外部輸入檔。你把 `skill-creator` 裝進來後即可直接跑這些 eval，也可以照同一格式往下加。
+
 ## 沒有包進來的東西
 
 刻意排除、需要你自己補的專案專屬資產：
 
 - `docs/standards/design_system.md`、`devenv_spec.md`、`third_party_versions.yaml`（綁技術棧）
 - 具體的 ADR（只留 `adr/README.md` 慣例）
-- Anthropic 官方 `skill-creator` skill——需要時自行從 [anthropics/skills](https://github.com/anthropics/skills) 取用，避免授權混淆
+- Anthropic 官方 `skill-creator` skill——本套件的 evals 對齊它的格式，但不內含它；需要時自行從 [anthropics/skills](https://github.com/anthropics/skills) 取用，避免授權混淆
 
 ## 授權
 

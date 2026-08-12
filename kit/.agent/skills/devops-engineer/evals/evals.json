@@ -1,0 +1,31 @@
+{
+  "skill_name": "devops-engineer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "幫我把這個 FastAPI + PostgreSQL 的專案容器化，要能一鍵起開發環境。",
+      "expected_output": "產出 Dockerfile 與 docker-compose.yml，版本明確釘定，敏感值走環境變數，並提交三段式交付回報。",
+      "files": [],
+      "expectations": [
+        "產出的 Dockerfile 基底映像檔有明確釘定版本，未使用 latest",
+        "docker-compose.yml 定義了應用與資料庫服務，且服務間依賴關係正確",
+        "敏感值（DB 密碼等）透過環境變數或 .env 注入，未硬編碼在檔案中",
+        "提供 .env.example 說明必要的環境變數",
+        "交付回報包含「✅ 執行項目追蹤」「🚨 矛盾與風險警告」「🧪 驗證/測試建議」三段",
+        "驗證建議提供可直接執行的指令（如 docker compose up）"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "幫我設定 pre-commit，要能擋掉沒格式化的程式碼跟不小心 commit 進去的密鑰。",
+      "expected_output": "產出 .pre-commit-config.yaml，涵蓋格式化、Lint 與密鑰偵測，各 hook 版本釘定。",
+      "files": [],
+      "expectations": [
+        "產出 .pre-commit-config.yaml，且各 repo 的 rev 有釘定版本",
+        "包含格式化與 Lint hook",
+        "包含密鑰／憑證偵測 hook",
+        "說明安裝與首次全檔套用的指令"
+      ]
+    }
+  ]
+}

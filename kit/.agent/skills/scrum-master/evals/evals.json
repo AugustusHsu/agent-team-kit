@@ -1,0 +1,45 @@
+{
+  "skill_name": "scrum-master",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "HLD 已經定稿了，請幫我把「使用者權限管理」這個模組拆成可執行的開發工單。",
+      "expected_output": "依 task_template.md 產出多張獨立的工單 .md 檔案，每張含正確的 Task ID、Status、驗收標準與 Human-in-the-loop 區塊，並在拆分後刷新 BACKLOG。",
+      "files": [],
+      "expectations": [
+        "每張工單為獨立的 .md 檔案，存放於 docs/features/{模組}/tasks/，檔名即 Task ID",
+        "Task ID 遵循 {模組前綴}-{階段}-{佇列}-{流水號} 格式",
+        "工單結構與 .agent/resources/task_template.md 一致，包含 Status、Created、驗收標準、Human-in-the-loop 等欄位",
+        "有前置依賴未完成的工單標為 Pending，無前置依賴者標為 Ready",
+        "工單的 Inputs 區塊填寫可存取的實際檔案路徑，而非抽象描述",
+        "產出工單後執行 scan_backlog.py 刷新 docs/development/BACKLOG.md"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "這張工單有幾個地方我還沒決定（要不要支援 SSO、密碼複雜度規則），但我想先讓開發排進去，不要卡住。",
+      "expected_output": "工單仍標為 Ready（未決事項不阻擋 Ready），未決項目寫入「❓ 需要確認的事項」並附建議值，同時說明執行者會在動工前依 §1.7 強制回頭詢問。",
+      "files": [],
+      "expectations": [
+        "工單 Status 標為 Ready，而非因為有未決事項就標成 Pending",
+        "未決事項逐條列入「❓ 需要確認的事項 (Agent 提問)」區塊",
+        "「✍️ User 補充回覆」區塊留空，未代替使用者填寫答案",
+        "明確說明依 team_protocol.md §1.7，執行者動工前必須先取得使用者回覆，建議值不等於授權"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "剛剛測出來一個 bug，成因就在 ABC-DEV-BE-003 那張還在 In Review 的單裡面。要開一張新的 FIX 單嗎？",
+      "expected_output": "依 §1.8 判定：成因工單尚未結案，一律退回原工單而非新開單，並完成修正錯誤 AC、取消失效勾選、補上新 AC 三件事。",
+      "files": [],
+      "expectations": [
+        "明確回答不新開工單，而是退回 ABC-DEV-BE-003",
+        "引用 team_protocol.md §1.8 缺陷收容優先序作為判斷依據",
+        "指出退回時必須直接改寫導致缺陷的那條 AC，而非只在後面追加新條目",
+        "指出原本已勾選但實際未達成的 AC 要改回未勾選並註明退回原因",
+        "指出需在工單新增退回紀錄，載明退回日期、缺陷成因與對應的 AC",
+        "說明 Epic 的子工單張數 N 不需變動（退回不改變張數）"
+      ]
+    }
+  ]
+}

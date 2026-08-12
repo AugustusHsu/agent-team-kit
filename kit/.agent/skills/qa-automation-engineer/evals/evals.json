@@ -3,51 +3,42 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "docs/features/user_management_system/test_plan.md 裡面 Auth 相關的 Test Cases (T-AUTH-001 ~ T-AUTH-005) 幫我寫成 Pytest 測試腳本，放到 backend/tests/ 裡面",
-      "expected_output": "產出一份 Pytest 測試檔案，包含 5 個測試函式，每個函式嚴格遵循 AAA 結構，使用既有的 conftest.py fixtures (client, db_session)，並附有繁體中文 docstring。",
-      "files": [
-        "docs/features/user_management_system/test_plan.md",
-        "backend/tests/conftest.py",
-        "backend/tests/test_auth.py"
-      ],
+      "prompt": "測試計畫裡 Auth 相關的 Test Cases（T-AUTH-001 ~ T-AUTH-005）幫我寫成 Pytest 測試腳本。",
+      "expected_output": "產出一份 Pytest 測試檔案，包含 5 個測試函式，每個函式嚴格遵循 AAA 結構，沿用專案既有的 conftest.py fixtures，並附有繁體中文 docstring。",
+      "files": [],
       "expectations": [
         "輸出為合法的 Python 檔案，可被 pytest 識別並執行",
         "每個測試函式包含清晰的 Arrange / Act / Assert 三段式結構，以註解分隔",
-        "使用 client: AsyncClient fixture 作為 API 互動入口，不自行建立新的 HTTP Client",
+        "沿用既有 conftest.py 提供的 fixtures，未自行建立新的 HTTP client 或 DB 連線",
         "每個測試函式有繁體中文 docstring，內含對應的 Test ID",
-        "不與既有 test_auth.py 中的測試重複",
-        "測試檔案放在 backend/tests/ 目錄下"
+        "測試檔案放置路徑符合 docs/standards/qa_testing_spec.md 的目錄慣例"
       ]
     },
     {
       "id": 2,
-      "prompt": "backend/tests/test_users.py 這檔案的測試看起來很冗長，有些測試在驗證好幾件事。幫我分析一下它的問題，然後重構成更乾淨的寫法",
-      "expected_output": "先產出一份分析報告（Markdown 表格），列出每個測試函式的實際意圖和問題，然後提出重構方案。經使用者確認後，執行重構並確保 make test 通過。",
-      "files": ["backend/tests/test_users.py", "backend/tests/conftest.py"],
+      "prompt": "這個測試檔案看起來很冗長，有些測試在驗證好幾件事。幫我分析一下它的問題，然後重構成更乾淨的寫法。",
+      "expected_output": "先產出分析報告（Markdown 表格）列出每個測試函式的實際意圖與問題，經使用者確認後才執行重構，並確保測試仍全數通過。",
+      "files": [],
       "expectations": [
         "先輸出分析報告，包含原始函式名、實際測試意圖、問題、重構建議四欄",
+        "在使用者確認重構方案前，未逕自改寫測試檔案",
         "重構後每個測試函式只驗證一件事（Single Assertion Principle）",
-        "重構後使用 class 分組相關測試",
-        "重構前後覆蓋率不降低",
-        "執行 make test 確認所有測試通過"
+        "重構後以 class 分組相關測試",
+        "重構後實際執行測試並回報結果，確認全數通過且覆蓋率未下降"
       ]
     },
     {
       "id": 3,
-      "prompt": "我需要測試 Workspace 成員管理的 API（新增成員、移除成員、搜尋可新增使用者），幫我寫整合測試。要特別注意 BR-PERM-11 的聯動刪除邏輯和 BR-PERM-10 的 Manager 自動同步",
-      "expected_output": "產出一份 Integration 測試檔案，放在 backend/tests/integration/ 目錄下。測試案例涵蓋成員管理的 Happy Path、權限檢查和業務規則的 Edge Cases，使用 AAA 結構，Mock 最少化。",
-      "files": [
-        "docs/features/user_management_system/prd.md",
-        "docs/features/user_management_system/api_spec.md",
-        "backend/tests/conftest.py"
-      ],
+      "prompt": "我需要測試成員管理的 API（新增成員、移除成員、搜尋可新增的使用者），幫我寫整合測試。要特別注意 BR-PERM-02 的聯動刪除跟 BR-PERM-01 的角色自動同步。",
+      "expected_output": "產出整合測試檔案，涵蓋 Happy Path、權限檢查與業務規則的 Edge Cases，使用 AAA 結構，Mock 最少化。",
+      "files": [],
       "expectations": [
-        "檔案放在 backend/tests/integration/ 目錄下",
-        "包含 BR-PERM-10 的測試：成員成為 Project Manager 後 WS 角色自動升級為 manager",
-        "包含 BR-PERM-11 的測試：移除 WS 成員時聯動刪除所有 Project 成員資格",
-        "包含 BR-PERM-11 的防呆測試：嘗試移除擔任 manager 角色的成員被拒（HTTP 400）",
+        "測試檔案放在整合測試目錄下，符合專案的測試分層慣例",
+        "包含 BR-PERM-01 的測試：成員成為專案管理員後角色自動升級",
+        "包含 BR-PERM-02 的測試：移除成員時聯動刪除其專案成員資格",
+        "包含 BR-PERM-02 的防呆測試：嘗試移除仍擔任管理員的成員被拒",
         "每個測試函式使用 AAA 結構並附有繁體中文 docstring",
-        "不自行建立新的 DB connection 或 Redis client，使用 conftest 提供的 fixtures"
+        "沿用 conftest 提供的 fixtures，未自行建立新的 DB 或快取連線"
       ]
     }
   ]

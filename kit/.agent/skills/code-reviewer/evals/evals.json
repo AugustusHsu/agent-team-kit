@@ -1,0 +1,46 @@
+{
+  "skill_name": "code-reviewer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "ABC-DEV-BE-002 開發完成了，這是變更的檔案，幫我審查。",
+      "expected_output": "依四大維度審查並產出標準化審查報告，含明確 Verdict，且必須把審查結果回寫進工單 .md。",
+      "files": [],
+      "expectations": [
+        "審查涵蓋商業邏輯與工單符合度、資安、程式碼品質、測試覆蓋度四個維度",
+        "報告開頭給出明確 Verdict：APPROVED 或 CHANGES REQUESTED",
+        "逐條核對工單的驗收標準，標示通過或未通過",
+        "重大瑕疵與 Nitpicks 分開列出，未混為一談",
+        "實際編輯工單 .md 回寫審查結果（新增「📝 Code Review 備註」或更新對應區塊）",
+        "依 Verdict 更新工單 Status：APPROVED 改為 Done、CHANGES REQUESTED 退回 In Progress",
+        "APPROVED 時同步填寫工單的「✅ 完成時間 (Closed)」欄位"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "這支前端 PR 加了一個功能：從 sessionStorage 讀出使用者進站前的頁面，登入後導回去。幫我看一下。",
+      "expected_output": "依維度 B 覆核前端資安四項，重點檢查 Open Redirect 與客戶端儲存信任邊界，並確認開發者的資安自查段落是否充分。",
+      "files": [],
+      "expectations": [
+        "檢查導航目標是否驗證為站內相對路徑（/ 開頭且非 // 開頭）",
+        "指出只檢查「以 / 開頭」不足以擋下 // 開頭的協議相對 URL",
+        "檢查從 sessionStorage 讀出的值是否在讀取時重新驗證並包 try/catch",
+        "確認是否有站內 fallback，而非驗證失敗就放行",
+        "檢查交付回報是否包含「🔒 資安自查」段落；若缺漏或內容空泛則要求補齊"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "我在審 ABC-DEV-FE-005 的時候發現它把原本好好的搜尋功能弄壞了，這算另一個 bug 要另外開單嗎？",
+      "expected_output": "依 §1.8 判定：成因工單仍在 In Review 未結案，應判 CHANGES REQUESTED 退回原工單，不另開工單。",
+      "files": [],
+      "expectations": [
+        "明確回答不另開工單，判定 CHANGES REQUESTED 並退回 ABC-DEV-FE-005",
+        "引用 team_protocol.md §1.8 作為判斷依據",
+        "說明退回時要直接改寫導致缺陷的 AC，並把不成立的已勾選項目改回未勾選",
+        "要求補上涵蓋此回歸的新 AC 與回歸測試",
+        "工單 Status 由 In Review 退回 In Progress"
+      ]
+    }
+  ]
+}

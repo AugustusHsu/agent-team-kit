@@ -5,13 +5,26 @@
       "id": 1,
       "prompt": "針對剛剛核准的 'AI 自動化設定小幫手' BRD，請將它轉化為完整的系統 PRD，並明確列出 MVP (Minimum Viable Product) 第一階段該包含的功能。",
       "expected_output": "需產出符合 prd_template 格式的文件，明確列出 User Personas、核心功能模組、非功能性需求，重點是要將功能拆分為不同的優先級 (P0/P1/P2)。",
-      "files": []
+      "files": [],
+      "expectations": [
+        "輸出的章節結構與 assets/prd_template.md 一致",
+        "包含 User Personas 章節，且每個 persona 有具體的使用情境",
+        "功能清單標註 P0/P1/P2 優先級，且 MVP 範圍明確對應到 P0",
+        "包含非功能性需求（效能、可用性、安全性等）章節",
+        "全文聚焦「要做成什麼樣子 (What)」，未指定實作技術選型"
+      ]
     },
     {
       "id": 2,
       "prompt": "我們公司內部的 ERP 要開發一套新的 '庫存盤點與預警系統'，這是一套純給內部倉庫人員用的工具。請幫忙規劃具體的使用者動線與驗收標準 (Acceptance Criteria)。",
       "expected_output": "文件內容中必須清楚看見操作動線，並且在最後提供嚴謹的 Gherkin 格式 (Given/When/Then) 的驗收標準。",
-      "files": []
+      "files": [],
+      "expectations": [
+        "包含逐步的使用者操作動線描述，涵蓋主要流程的起點與終點",
+        "驗收標準以 Gherkin 格式撰寫，每條都有 Given / When / Then 三段",
+        "驗收標準是客觀可驗證的條件，不含「好用」「順暢」這類主觀敘述",
+        "有涵蓋異常路徑（如盤點數量不符、預警觸發）的驗收標準"
+      ]
     }
   ]
 }
