@@ -20,12 +20,12 @@ description: 當使用者需要「安排 Sprint 規劃」、「拆解任務 (Bre
 3. **判定工作佇列分類 (Task Type)**：
    - 根據任務的性質指定適當的類型 (對應架構中的不同 Worker Queue)。例如：`queue_frontend` (UI 介面開發)、`queue_backend` (API/核心邏輯)、`queue_agent` (代理或基礎建設)、`queue_data` (資料庫處理)、`docs_generation` (文件產出)、`manual_user` (需使用者親自手動執行的任務，如部署審批、外部服務申請等)。
 4. **指定 Task ID 編碼**：
-   - 所有工單的 ID 須遵循 `{專案前綴}-{階段}-{佇列}-{流水號}` 格式。專案前綴由 `team_protocol.md` §3.1 的「專案前綴對照表」定義（如 `TMS`、`UMS`）。
+   - 所有工單的 ID 須遵循 `{模組前綴}-{階段}-{佇列}-{流水號}` 格式。模組前綴由 `team_protocol.md` §3.1 的「模組前綴對照表」定義（3 個大寫字母，全專案唯一）。
    - 範例：
-     - `TMS-DEV-FE-001` (任務管理系統-開發-前端-第 1 張)
-     - `UMS-DEV-BE-002` (使用者管理系統-開發-後端-第 2 張)
-     - `UMS-DOC-HLD-001` (使用者管理系統-文件產出-HLD-第 1 張)
-     - `TMS-DEV-MANUAL-001` (任務管理系統-開發-人工操作-第 1 張)
+     - `ABC-DEV-FE-001` (ABC 模組-開發-前端-第 1 張)
+     - `ABC-DEV-BE-002` (ABC 模組-開發-後端-第 2 張)
+     - `ABC-DOC-HLD-001` (ABC 模組-文件產出-HLD-第 1 張)
+     - `XYZ-DEV-MANUAL-001` (XYZ 模組-開發-人工操作-第 1 張)
    - 常用的階段前綴：`DOC` (文件產出)、`DEV` (開發)、`TEST` (測試)、`DEPLOY` (部署)。
    - 常用的佇列前綴：`FE` (前端)、`BE` (後端)、`AGENT` (代理)、`DATA` (資料)、`QA` (測試自動化)、`MANUAL` (人工)。
    - ⚠️ 產出工單前，必須先確認目標專案的前綴已在 `team_protocol.md` 的對照表中登記。若為新專案，須先請使用者確認縮寫。
@@ -71,7 +71,7 @@ description: 當使用者需要「安排 Sprint 規劃」、「拆解任務 (Bre
 
 ## 工單存放位置
 
-產出的每張工單應以獨立的 `.md` 檔案儲存至 `docs/features/{功能模組名}/tasks/` 目錄下，檔名即為 Task ID（例如：`docs/features/user_management_system/tasks/UMS-DEV-FE-001.md`）。若該目錄尚不存在，請自動建立。
+產出的每張工單應以獨立的 `.md` 檔案儲存至 `docs/features/{功能模組名}/tasks/` 目錄下，檔名即為 Task ID（例如：`docs/features/example_module/tasks/ABC-DEV-FE-001.md`）。若該目錄尚不存在，請自動建立。
 
 ## 溝通與回報方式
 

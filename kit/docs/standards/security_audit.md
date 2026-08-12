@@ -1,9 +1,10 @@
-# User Management System — 資安防禦與查核表 (Security Audit)
+# 資安防禦與查核表 (Security Audit)
 
-> **更新日期**：2026-04-08（2026-07-20 系統審查對齊：於各查核項目後標註現況，未標註者本輪未覆核）
 > **負責角色**：Security Engineer (資安工程師)
+> **適用範圍**：全專案所有模組。
+> 👉 **安裝後請做**：① 依你的技術棧調整 §3 的框架語彙（本節以 React／Next.js 舉例）；② 每輪覆核後，可在各條目下以 `> ✅ **現況**：…` 附註你專案的實作位置與結論。
 
-本文件作為 LLD (低階設計) 之必要擴充，負責防禦所有端點與底層基礎設施（AuthN/AuthZ）的惡意攻擊可能性。後續進入開發階段時，全體工程師與 QA 均須依循此清單進行驗收。
+本文件作為 LLD (低階設計) 之必要擴充，負責防禦所有端點與底層基礎設施（AuthN/AuthZ）的惡意攻擊可能性，並自 §3 起延伸至前端（客戶端）的實作規範。後續進入開發階段時，全體工程師與 QA 均須依循此清單進行驗收。
 
 ---
 
@@ -21,7 +22,6 @@
 為防止資料庫外洩導致帳密被「彩虹表 (Rainbow Table)」秒解：
 - 使用 **`bcrypt`** 演算法。
 - 強制規範 `Work Factor` (Cost) 至少設定為 **12** (依據機器算力，處理一次應消耗約 200~300ms)。
-  > ✅ **現況**：`backend/app/core/security.py` 使用 `bcrypt.gensalt()` 預設值（12），數值合規；但 `.env.example` 中的 `BCRYPT_ROUNDS` 變數並未被實際讀取接線，屬於死設定，見 UMS-DEV-BE-FIX-007。
 
 ---
 
@@ -35,12 +35,7 @@
 
 ### 🔑 身分驗證 (Authentication)
 - [ ] `/api/v1/auth/login` 等高風險端點是否實作了嚴格的 **Rate Limiting**? (例如：同一 IP 每分鐘最多失敗 5 次，超過封鎖 15 分鐘)。
-  > ✅ **現況（2026-07-28 經 UMS-DEV-BE-061 & UMS-DEV-BE-FIX-008 覆核校正）**：
-  > 1. `/api/v1/auth/login` 與 `/api/v1/auth/oauth/*/callback` 已由 `check_general_rate_limit` 進行 IP 頻率限制，對匿名流量正常生效。
-  > 2. `POST /api/v1/admin/users` 為管理員建立帳號的後台 API（非公開註冊入口），其匿名流量於 `AuthMiddleware` 認證層即被 401 阻擋，刻意未納入路由層限流。
-  > 3. 針對 bootstrap 空窗期（Redis 未標記 `bootstrap_completed`），`_is_bootstrap_bypass()` 於 DB 查詢前加入 IP 頻率限制 (10 次 / 60 秒)，超量時不執行 `select(func.count(User.id))` 並落回 401 阻擋，封堵匿名 DB 成本放大路徑。此結論以 `/admin/users` 非公開註冊入口為前提。
 - [ ] 針對註冊 (`POST /api/v1/users`) 與忘記密碼等 API，是否加入了 Rate Limiting 以防範「可用信箱列舉攻擊 (Email Enumeration)」？
-  > ✅ **現況（2026-07-28）**：已由 `check_general_rate_limit` (10 次 / 60 秒) 實作限流。
 - [ ] 系統是否實施嚴格的密碼強度政策 (Password Policy)？(例如：最少 8~12 碼、包含英數大小寫，並阻擋常見弱密碼)。
 - [ ] API 註冊建立使用者 (`POST /api/v1/users`) 的密碼儲存前是否確實調用 bcrypt 並套用 Salt？
 - [ ] 是否規範 Refresh Token 在資料庫端會以雜湊或加密儲存，且是否實作 Token Rotation 機制 (每次使用 Refresh Token 換發時，舊 Token 立即失效)？
@@ -55,5 +50,50 @@
 - [ ] 正式環境與測試環境的 API Gateway 外部介接，是否強制限制為 `HTTPS`/`TLS 1.2+`（阻擋中間人攻擊 MITM）？
 - [ ] CORS 配置是否明確拒絕 `Access-Control-Allow-Origin: *`？（若使用了 Cookie/Credentials，瀏覽器本就會報錯，但 Gateway 應主動配置白名單如 `https://web.workstation.internal`）。
 - [ ] 針對系統初始化的自舉放行例外 (`GET /api/v1/system/status`)，是否已使用 Redis `SETNX` 機制防堵高併發搶佔建立 `Super Admin`？
-  > ✅ **現況**：`backend/app/api/endpoints/users.py` 已使用 `redis.set("bootstrap_lock", "locked", nx=True, ex=30)` 實作。
 - [ ] 是否針對敏感操作（如：賦予/修改權限、刪除使用者、異常大量登入失敗）實作了不可竄改的獨立稽核日誌 (Audit Logging)，以利後續 SIEM/SOC 工具的對接追蹤？
+
+---
+
+## 3. 前端（客戶端）安全查核表 (Client-side Checklist)
+
+> 📌 **本節是前端資安規範的正版**。`frontend-developer` 與 `code-reviewer` 兩個 SKILL 內的清單是動手時的速查摘要，**判準理由、反例與典型情境只寫在這裡一份**。要修改規則時改本節，摘要端只在條目增減時才同步。
+
+> **大前提｜客戶端不是安全邊界**：瀏覽器裡的一切（JS 變數、storage、hidden 欄位、disabled 按鈕、路由守衛）使用者都能改。前端的檢查一律只算 **UX 與縱深防禦**，真正的授權與驗證必須在後端；本章所有項目都是「不要把後端的洞放大」，不是「用前端補後端的洞」。
+>
+> 前端工單（`queue_frontend`）於 `In Review` 前由 `frontend-developer` 自查，`code-reviewer` 依維度 B 覆核。下列項目以 React／Next.js 語彙舉例，其他框架請自行對應（`v-html`、`innerHTML`、各自的 router API 等）。
+
+### 🧭 導航與重導向 (Open Redirect)
+
+- [ ] 任何**導航目標**（`router.push` / `router.replace` / `location.assign` / `<a href>`）若來源是 URL query、`sessionStorage`／`localStorage`、`postMessage` 或 API 回應，是否在使用前驗證為**站內相對路徑**？
+  - 判準：必須以 `/` 開頭 **且不得以 `//` 開頭**。`//evil.example.com` 是協議相對 URL，瀏覽器會當成站外網址跳出去，只檢查「開頭是 `/`」擋不住。
+  - 驗證失敗時必須有**明確的站內 fallback 目標**，不得放行、也不得停在空白頁。
+- [ ] 是否避免把使用者可控字串直接塞進 `href`／`src`？（`javascript:`、`data:` 協議可造成 XSS）
+- [ ] 對外開啟的連結 `target="_blank"` 是否附上 `rel="noopener noreferrer"`？
+
+### 🗄️ 客戶端儲存的信任邊界 (Client Storage Trust Boundary)
+
+- [ ] `localStorage`／`sessionStorage`／cookie／URL 參數是否一律視為**可被使用者竄改的不可信輸入**？
+  - 規則：**寫入時驗證，讀取時「再驗一次」**。不可假設「我自己寫進去的所以安全」——使用者可用 DevTools 改，舊版本殘留的格式也可能不合法。
+  - 讀到不合法內容時，視同「沒有這筆資料」走安全預設值，不得直接採用、也不得拋例外中斷畫面。
+- [ ] storage 存取是否包在 `try/catch` 中並**安全退化**？（隱私模式、配額用盡會直接 throw，不得讓整個功能連帶壞掉）
+- [ ] 是否確認未把 Token、密碼、個資或後端內部識別碼寫入 storage？（Token 一律走 `HttpOnly` Cookie，見 §1.1）
+
+### 🧪 注入與渲染 (Injection & Rendering)
+
+- [ ] 是否避免 `dangerouslySetInnerHTML`、`eval`、`new Function`、字串型 `setTimeout`？確有必要時是否經過白名單消毒並在 PR 中說明理由？
+- [ ] 由後端或使用者輸入取得的 HTML／Markdown 是否經過消毒後才渲染？
+- [ ] 動態組出的 API 路徑是否對路徑參數做過編碼（`encodeURIComponent`），避免路徑穿越與參數污染？
+
+### 🔐 權限呈現與資料曝光 (AuthZ Presentation & Data Exposure)
+
+- [ ] 依角色隱藏／禁用的 UI，其對應的後端端點**本身**是否已有授權檢查？（前端隱藏只是不給看，不是不給打）
+- [ ] 前端是否只取用「該使用者本就有權取得」的資料？不得為了畫面方便而請後端回傳全量資料再由前端過濾。
+- [ ] 錯誤處理是否避免把後端堆疊、內部路徑、SQL 或他人資料直接顯示給使用者？
+- [ ] 是否清除了會輸出敏感內容的 `console.log` / debug 程式碼？
+
+### 🧾 測試與可稽核性 (Verification)
+
+- [ ] 上述任一項的驗證邏輯，是否有**單元測試釘住「惡意／異常輸入被拒」**的行為？（例：站外絕對 URL、`//` 開頭、毀損的 JSON、storage 不可用）
+- [ ] 安全相關的判斷是否在程式碼中以註解寫明「為什麼」，避免後人重構時當成多餘防禦而移除？
+
+> **📎 典型情境**：「記住使用者從哪一頁進來，返回時導回該頁」一次踩中前兩節的所有要點——進入點寫入前驗證為站內相對路徑、從 `sessionStorage` 讀出時再驗一次、storage 例外一律吞掉並退回明確的站內 fallback，並以單元測試覆蓋站外絕對 URL、`//` 開頭與毀損 JSON 三種惡意輸入。

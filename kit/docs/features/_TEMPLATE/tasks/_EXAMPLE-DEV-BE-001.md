@@ -1,6 +1,6 @@
-# [Task ID: {專案前綴}-{階段}-{佇列}-{流水號}] [在此填寫工單標題]
+# [Task ID: {模組前綴}-{階段}-{佇列}-{流水號}] [在此填寫工單標題]
 
-**🔗 依附母任務 (Parent Task ID):** [在此填寫追溯來源，例如: UMS-DOC-HLD-001 或 Independent]
+**🔗 依附母任務 (Parent Task ID):** [在此填寫追溯來源，例如: ABC-DOC-HLD-001 或 Independent]
 **🏷️ 任務類型 (Task Type):** [在此填寫類型，例如: queue_frontend, queue_backend, queue_agent, queue_data, docs_generation, manual_user]
 **👤 負責人 (Assignee):** [指定 Skill 名稱，例如: backend-developer, frontend-developer, devops-engineer；若需使用者親自處理填 manual_user]
 **🚥 任務狀態 (Status):** Pending / Ready / In Progress / In Review / Done

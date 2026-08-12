@@ -1,4 +1,4 @@
-# [Task ID: {專案前綴}-{階段}-{佇列}-{流水號}] [在此填寫工單標題]
+# [Task ID: {模組前綴}-{階段}-{佇列}-{流水號}] [在此填寫工單標題]
 
 **🔗 依附母任務 (Parent Task ID):** [在此填寫追溯來源，例如: ABC-DOC-HLD-001 或 Independent]
 **🏷️ 任務類型 (Task Type):** [在此填寫類型，例如: queue_frontend, queue_backend, queue_agent, queue_data, docs_generation, manual_user]

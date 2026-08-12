@@ -1,6 +1,6 @@
 # 功能模組文件骨架 (_TEMPLATE)
 
-新增功能模組時，複製整個 `_TEMPLATE/` 目錄並改名為模組名（snake_case，例如 `user_management_system`），
+新增功能模組時，複製整個 `_TEMPLATE/` 目錄並改名為模組名（snake_case，例如 `user_management`），
 然後到 `.agent/resources/team_protocol.md` §3.1 登記該模組的三字母前綴。
 
 ## 檔案與負責角色

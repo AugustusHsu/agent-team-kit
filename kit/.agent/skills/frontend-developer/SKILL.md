@@ -38,16 +38,31 @@ description: 負責執行所有前端與 UI 相關的實作任務。當使用者
 - **色彩與字體**：捨棄瀏覽器預設字體，採用現代感字體 (如 Inter 或 Roboto)；捨棄死板的純黑白與純色，選擇有設計感的現代色票或柔和的暗色系 (Dark Mode/Glassmorphism)。
 - **杜絕佔位符**：絕對不可使用空白或灰色的 `<img src="" />` 佔位符。如果需要展示圖片，且專案內無對應圖檔，請利用你的繪圖工具 (`generate_image`) 幫畫面生成展示用的素材圖片，讓成品能立即「Run」起來。
 
-## 5. 交付與回報格式 (Delivery Report)
+## 5. 資安守則 (Client-side Security)
+
+> **正版查核表在 `docs/standards/security_audit.md` §3**，含各條的判準理由、反例與典型情境。本節只是動手時的速查清單，**不重複那邊的說明**；碰到判斷不確定的情況，去讀 §3，不要憑印象。
+
+**大前提**：瀏覽器裡的一切（JS 變數、storage、hidden 欄位、disabled 按鈕）使用者都能改。前端的檢查只算 UX 與縱深防禦，**真正的授權與驗證在後端**——你的責任是「不要把後端的洞放大」，不是「用前端補後端的洞」。
+
+1. **導航目標必須是站內相對路徑**——以 `/` 開頭**且不以 `//` 開頭**，驗不過時走明確的站內 fallback。來源包含 URL query、storage、`postMessage` 與 API 回應。
+2. **客戶端儲存是不可信輸入**——寫入時驗證，讀取時**再驗一次**；不合法就當作沒這筆資料。
+3. **storage 存取一律包 `try/catch`** 並安全退化。
+4. **Token／密碼／個資不得寫進 storage**——Token 走 `HttpOnly` Cookie。
+5. **避免危險渲染 API**——`dangerouslySetInnerHTML`／`eval`／`new Function` 原則禁用；`href`／`src` 擋掉 `javascript:`／`data:` 協議。
+6. **權限只做呈現**——依角色隱藏 UI 前，先確認對應後端端點本身就有授權檢查。
+7. **安全判斷要有單元測試與「為什麼」的註解**，避免後人重構時當成多餘防禦刪掉。
+
+## 6. 交付與回報格式 (Delivery Report)
 開發完成（或因矛盾而暫停）時，請遵循以下結構回報：
 - **✅ 執行項目追蹤**: 條列你修改/新增的檔案，並逐條敘述你如何滿足對應的驗收標準。
 - **📌 實體打勾 (Checked Off)**: 你必須使用工具實際編輯該工單 `.md` 檔案，將「驗收標準 (Acceptance Criteria)」中已完成的項目從 `[ ]` 改為 `[x]`。
 - **🚨 矛盾與風險警告**: 若有發現 UI 邏輯衝突、Wireframe 與工單不一致等問題，在此高亮標示並等待使用者裁定。(若一切順利則填寫「無」)。
+- **🔒 資安自查**: 對照第 5 節逐條確認並回報結果。本次若有觸及**導航目標、客戶端儲存、動態渲染或權限呈現**，必須明確寫出你做了哪些驗證（不得只寫「無資安疑慮」）；完全未觸及時填寫「本次變更未觸及第 5 節任一情境」。
 - **🧪 驗證建議**: 建議使用者執行 `npm run dev` 並透過 Browser Agent 連線到對應頁面進行視覺確認，或提供具體的手動測試步驟。
 - **➡️ 下一步**: 提示使用者「開發已完成，請先呼叫 `/git-commit` 將變更提交至版本控制，再提交給 `code-reviewer` 進行審查。」
 - **📌 Status 更新**: 開始執行時將工單 Status 改為 `In Progress`；交付完成時改為 `In Review`。（詳見 `team_protocol.md` §1.3）
 - **🔄 刷新 BACKLOG**: 更新完工單的 Status 後，你**必須**使用 `run_command` 執行以下指令來刷新總表，確保團隊進度同步：`uv run python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md`
 
-## 6. 品質保證 (Quality Assurance)
+## 7. 品質保證 (Quality Assurance)
 - 確保所有按鈕與可互動元素都有唯一的 `id`，以便後續進行 E2E 自動化測試。
 - 寫完 Code 後，請先自我審查有無明顯的 Syntax Error。

@@ -56,17 +56,16 @@ docs/features/{功能模組名}/test_plan.md
 
 #### 分層 Makefile 測試指令
 
-專案 Makefile 已將測試指令依 **層級** 與 **業務模組** 分層設計，環境變數 (`TEST_DB_URL`, `TEST_REDIS_URL`) 統一定義於 Makefile 頂部：
+建議把測試指令依 **層級** 分層設計於 Makefile，環境變數（如 `TEST_DB_URL`、`TEST_REDIS_URL`）統一定義於 Makefile 頂部。**動手前先讀專案實際的 Makefile**，以下為建議的基本盤：
 
 | 指令 | 用途 | 你何時該用 |
 |---|---|---|
 | `make test-unit` | 僅跑 `tests/unit/` | 撰寫 Unit Test 後驗證 |
 | `make test-integration` | 僅跑 `tests/integration/` | 撰寫 Integration Test 後驗證 |
-| `make test-auth` | 僅跑身分驗證相關測試 | 處理 UMS-TEST-QA-001~003 工單 |
-| `make test-workspace` | 僅跑工作區/專案相關測試 | 處理 UMS-TEST-QA-007~009 工單 |
-| `make test-admin` | 僅跑全域管理相關測試 | 處理 UMS-TEST-QA-010~012 工單 |
 | `make test-all` | 依序跑 Unit → Integration → E2E | 發布前全面驗證 |
 | `make test-cov` | 跑測試並產出覆蓋率報告 | 需要量化覆蓋率時 |
+
+> 專案也可再依**業務模組**加開捷徑（如 `make test-auth` 只跑身分驗證相關測試），縮短單張工單的回饋迴圈。
 
 #### 關鍵路徑
 
@@ -89,16 +88,16 @@ backend/
 └── pyproject.toml          # Pytest config (asyncio_mode = "auto")
 ```
 
-#### 既有的 conftest.py 模式
+#### conftest.py 模式
 
-專案已建立完善的測試基礎設施（見 `backend/tests/conftest.py`），包含：
+**動手前先確認專案是否已有 `conftest.py`。若有，一律沿用既有 fixtures，不要重新造一套**；需要擴充時（如加入預設測試使用者的 Factory）也應在既有 `conftest.py` 中新增，而非另建檔案。
+
+若專案尚未建立測試基礎設施，以下是一組值得照抄的 fixture 骨架（以 FastAPI + SQLAlchemy + Redis 技術棧為例，其他技術棧請對應調整）：
 - `test_engine`：使用 `NullPool`，避免跨測試連線池污染
 - `_reset_redis_pool`：autouse fixture，每個測試前後重置 Redis
 - `_patch_engine`：autouse fixture，替換 production engine 為 test engine
 - `db_session`：每個測試前 `create_all`，結束後 `drop_all`，完全隔離
-- `client`：覆寫 FastAPI DI 的 `get_db`，注入測試用 Session
-
-**你不需要重新建立這些 Fixtures**，直接使用即可。若需要擴充（如：加入預設測試使用者的 Factory），應在既有 `conftest.py` 中新增，而非另建檔案。
+- `client`：覆寫框架 DI 的 `get_db`，注入測試用 Session
 
 ### 2.2 前端測試 (TypeScript / Next.js)
 

@@ -18,6 +18,9 @@ description: 負責執行所有程式碼審查 (Code Review) 任務。當開發�
 請依序執行以下四大維度的掃瞄：
 - **A. 商業邏輯與工單符合度 (Business Logic)**：強烈比對本次程式碼變更，是否 100% 滿足了原始工單的 `Acceptance Criteria (驗收標準)`？是否出現「過度設計 (Over-engineering)」或是忽略了明顯的邊界/報錯條件？
 - **B. 系統安全防禦 (Security)**：程式碼中是否存在敏感資訊的明文硬編碼 (Hard-coded secrets)？是否有防範 SQL Injection / XSS 等攻擊（如：對送入 Backend 的資料進行嚴謹校驗）？JWT 或 API 認證規則是否完全生效？
+  - **後端／基礎設施**：依 `docs/standards/security_audit.md` §1、§2 覆核（AuthN/AuthZ、Rate Limiting、IDOR、CORS、密碼雜湊）。
+  - **前端（客戶端）**：依同文件 §3 逐條覆核（該節為正版判準），至少確認四項——① 導航目標是否驗證為站內相對路徑（`/` 開頭且非 `//` 開頭）且有站內 fallback；② 取自 storage／URL query／`postMessage` 的值是否**讀取時也重新驗證**並包 `try/catch`；③ 是否出現 `dangerouslySetInnerHTML`／`eval`／未擋 `javascript:` 的 `href`；④ 依角色隱藏 UI 時，對應後端端點是否本身就有授權檢查。
+  - **開發者的資安自查**：前端交付回報應包含「🔒 資安自查」段落。若該段缺漏，或內容只寫「無資安疑慮」卻明顯觸及上述情境，視為**測試/自查不足**，於報告中要求補齊。
 - **C. 程式碼品質與潔癖 (Clean Code)**：變數與函式的命名是否具備自述性 (Self-explanatory)？是不是殘留了不應上線的 `console.log`、`print` 或是 `// TODO`？所有複雜的核心邏輯是否都有加上適當的 JSDoc/TSDoc 註解？
 - **D. 測試覆蓋度 (Test Coverage)**：開發者是否有撰寫對應的單元測試或整合測試？特別是後端 API 端點與涉及資料庫操作的邏輯，應當要有基本的測試案例覆蓋。若完全缺乏測試，請在 Nitpicks 中建議補充。
 

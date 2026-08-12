@@ -16,7 +16,7 @@
 |---|---|
 | [standards/documentation_conventions.md](standards/documentation_conventions.md) | 文件撰寫慣例 |
 | [standards/qa_testing_spec.md](standards/qa_testing_spec.md) | 測試規範與分層策略 |
-| [standards/security_audit.md](standards/security_audit.md) | 資安稽核檢查項 |
+| [standards/security_audit.md](standards/security_audit.md) | 資安查核表（後端 OWASP Checklist + 前端客戶端查核） |
 | [standards/adr/](standards/adr/) | 架構決策紀錄 (ADR) |
 
 <!-- 依專案補上：design_system.md（設計系統）、devenv_spec.md（開發環境）、third_party_versions.yaml -->
