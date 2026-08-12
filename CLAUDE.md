@@ -16,6 +16,9 @@ uv run pytest        # 全套件測試，離線執行
 
 `tests/` 不會被安裝，是這個套件自己的測試。
 
+根目錄的 `docs/features/` 是**這個 repo 自己的工單**（套用 kit 的慣例，但不會被安裝），
+別跟出貨樣板 `kit/docs/features/` 搞混；模組前綴登記在 `docs/features/README.md`。
+
 ## 陷阱
 
 - **`install.sh` 複製的是工作區內容，不是 git 追蹤的內容。** 在 `kit/` 底下跑出來的本機

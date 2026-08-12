@@ -49,6 +49,7 @@ kit/
 install.sh                      # 安裝到目標專案
 tests/                          # 本套件自身的 smoke test（不會被安裝）
 CLAUDE.md                       # 本 repo 自己的開發規則（不會被安裝，別跟 kit/CLAUDE.md 搞混）
+docs/features/                  # 本 repo 自己的工單（不會被安裝，別跟 kit/docs/features/ 搞混）
 ```
 
 ## 開發這個套件
