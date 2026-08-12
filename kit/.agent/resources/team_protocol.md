@@ -137,7 +137,7 @@ Pending → Ready → In Progress → In Review → Done
 | 狀態轉換 | worktree 動作 |
 |---|---|
 | `Ready` → `In Progress` | **建立**，並在工單內登記分支名與建立時間 |
-| `In Progress` → `In Review` | 草擬 commit 訊息 → 取得使用者同意 → commit → **凍結** |
+| `In Progress` → `In Review` | **依 §1.10 交付 commit** → **凍結** |
 | `In Review` | **保留但凍結**：Developer 不得再寫入，Code Reviewer 只讀 |
 | `In Review` → `In Progress` | **解凍**，同一個 worktree 繼續修正 |
 | `In Review` → `Done` | 合併 → 收尾 → **收尾完成才可標 `Done`** |
@@ -156,6 +156,24 @@ Pending → Ready → In Progress → In Review → Done
 > ⚠️ 收尾時 `git branch -d` 的「未合併」警告**在「已合併到非當前分支」時同樣會出現**。
 > **禁止**看到失敗就改用 `-D`，必須先以
 > `git merge-base --is-ancestor <分支> <合併目標>` 客觀驗證。
+
+### 1.10 交付前的 Commit 閘門 (🔒 HITL Gate at Delivery)
+
+`In Progress` → `In Review` 必須經過 commit（見 §1.9），而**任何 commit 之前，都必須把
+commit message 原文交付使用者複查並取得當次明確同意**。性質同 §1.7，差別在 §1.7
+把關「開工前」，本節把關「交付時」。
+
+- **嚴禁未經複查即 commit**，即使變更微小、即使訊息看起來顯而易見。
+- **上一次的同意不延用到下一個 commit。** 每個 commit 各自取得一次同意。
+- 使用者要求修改訊息時，改完須**重新呈現完整訊息**再確認，不可只回覆「已修正」。
+
+commit message 的格式、Emoji 對照與**禁止寫入的內容**（AI 署名 trailer、對話脈絡、
+工具／session 內部狀態），一律以
+[`.agent/workflows/git-commit.md`](../workflows/git-commit.md) 為**正版**，本節不重述。
+
+> 此閘門的成立前提是**工單狀態機不允許自動提交**：Developer 的交付回報止於「訊息已備妥」，
+> 提交動作屬於使用者的決定。Agent 代為執行 `git commit` 只是省下貼指令的工，
+> 不改變決定權歸屬。
 
 ---
 

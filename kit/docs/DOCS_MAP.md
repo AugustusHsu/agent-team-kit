@@ -9,6 +9,7 @@
 | [development/BACKLOG.md](development/BACKLOG.md) | **專案現況唯一來源**：進行中／審查中工單、統計、Icebox。由 `scan_backlog.py` 產生，不要手改。 |
 | `../CLAUDE.md` | 每個 AI session 的入口摘要 |
 | `../.agent/resources/team_protocol.md` | 工單生命週期、角色交接、命名約定（**流程正版**） |
+| `../.agent/workflows/git-commit.md` | Commit message 格式、禁止寫入的內容、交付前複查閘門（**commit 正版**） |
 
 ## 跨功能規範 (standards/)
 

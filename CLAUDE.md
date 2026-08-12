@@ -26,7 +26,8 @@ uv run pytest        # 全套件測試，離線執行
 
 ## Commit
 
-commit message 只描述這個專案的變更，**不得加入 AI 署名 trailer**
+commit 前必須把訊息原文給我複查，取得當次同意才執行；上一次的同意不算。
+訊息只描述這個專案的變更，**不得加入 AI 署名 trailer**
 （`Co-Authored-By:`、`🤖 Generated with ...`）。完整格式見
 `kit/.agent/workflows/git-commit.md`。
 

@@ -66,6 +66,23 @@
 
 段落沒內容就整段刪掉，不要留空標題。
 
+## Commit 規則這裡必須寫
+
+**這是不寫就等於沒有的一條。** `.agent/workflows/git-commit.md` 只有在被明確呼叫
+（`/git-commit`）時才載入；Agent 順手 commit 的路徑完全不經過它。要讓規則對**每一次**
+提交生效，只能靠 CLAUDE.md——它是唯一每次請求都在 context 裡的檔案。
+
+寫**三行以內**，細節一律指向正版：
+
+```markdown
+## Commit
+commit 前必須把訊息原文給我複查，取得當次同意才執行；上一次的同意不算。
+訊息只描述本專案的變更，禁止 AI 署名 trailer。格式見 `.agent/workflows/git-commit.md`。
+```
+
+即使使用者的全域 `~/.claude/CLAUDE.md` 已有同等規則，**這段仍然要寫**——
+專案會被別人 clone、會在別台機器上跑，全域設定不跟著 repo 走。
+
 ## 若專案採用 worktree，這裡必須寫
 
 **這是不寫就完全不會生效的一條。** Claude Code 的 `EnterWorktree` 工具明定：
