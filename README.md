@@ -18,47 +18,51 @@
 
 ## 內容物
 
+`kit/` 底下的結構**就是**安裝後在你專案裡的樣子——安裝＝原封不動複製，不做任何改名。
+
 ```
-agent/                      # 安裝後成為目標專案的 .agent/
-├── resources/
-│   ├── team_protocol.md    # ⭐ 核心：工單生命週期、角色交接、命名約定
-│   ├── task_template.md    # 工單模板
-│   └── backlog_template.md
-├── skills/                 # 13 個角色 SKILL.md
-│   ├── business-analyst/ product-manager/          # 需求
-│   ├── system-architect/ tech-lead/ uiux/ security-engineer/   # 設計
-│   ├── scrum-master/                               # 排程開單
-│   ├── frontend-developer/ backend-developer/ devops-engineer/ # 開發
-│   └── qa-test-planner/ qa-automation-engineer/ code-reviewer/ # 品質
-├── workflows/              # git-commit / product-analysis / validate-wireframes
-└── scripts/
-    ├── scan_backlog.py     # 掃工單 → 產生 BACKLOG.md（狀態儀表板）
-    ├── migrate_dates.py    # 工單日期格式遷移
-    └── check_versions.py   # 第三方版本檢查
+kit/
+├── .agent/
+│   ├── resources/
+│   │   ├── team_protocol.md    # ⭐ 核心：工單生命週期、角色交接、命名約定
+│   │   ├── task_template.md    # 工單模板
+│   │   └── backlog_template.md
+│   ├── skills/                 # 13 個角色 SKILL.md（各含 evals/）
+│   │   ├── business-analyst/ product-manager/                      # 需求
+│   │   ├── system-architect/ tech-lead/ uiux/ security-engineer/   # 設計
+│   │   ├── scrum-master/                                           # 排程開單
+│   │   ├── frontend-developer/ backend-developer/ devops-engineer/ # 開發
+│   │   └── qa-test-planner/ qa-automation-engineer/ code-reviewer/ # 品質
+│   ├── workflows/              # git-commit / product-analysis / validate-wireframes
+│   └── scripts/
+│       ├── scan_backlog.py     # 掃工單 → 產生 BACKLOG.md（狀態儀表板）
+│       ├── migrate_dates.py    # 工單日期格式遷移
+│       └── check_versions.py   # 第三方版本檢查
+├── docs/
+│   ├── DOCS_MAP.md             # 文件導覽入口
+│   ├── development/            # BACKLOG.md、PLAN_FROM_HANDOFF.md
+│   ├── standards/              # 文檔慣例、QA 規範、資安查核、ADR
+│   └── features/_TEMPLATE/     # 單一功能模組的文件骨架
+└── CLAUDE.md                   # 專案接手指南模板
 
-docs-template/              # 安裝後成為目標專案的 docs/
-├── development/{BACKLOG.md, PLAN_FROM_HANDOFF.md}
-├── standards/              # 文檔慣例、QA 規範、資安稽核、ADR
-└── features/_TEMPLATE/     # 單一功能模組的文件骨架
-
-templates/CLAUDE.md         # 專案接手指南模板
-scripts/install.sh          # 安裝到目標專案
+install.sh                      # 安裝到目標專案
+tests/                          # 本套件自身的 smoke test（不會被安裝）
 ```
 
 ## 安裝到新專案
 
 ```bash
 git clone git@github.com:AugustusHsu/agent-team-kit.git
-./agent-team-kit/scripts/install.sh /path/to/your-project
+./agent-team-kit/install.sh /path/to/your-project
 ```
 
-安裝腳本會複製 `agent/` → `.agent/`、`docs-template/` → `docs/`，既有檔案預設不覆蓋（`--force` 可強制）。
+既有檔案預設不覆蓋，`--force` 可強制覆蓋。
 
 ### 安裝後必做
 
 1. 編輯 `.agent/resources/team_protocol.md` §3.1 的**模組前綴對照表**，換成你的模組（前綴取 3 個大寫字母，全專案唯一）。
-2. 依 `docs/features/_TEMPLATE/` 複製出第一個功能模組目錄。
-3. 用 `templates/CLAUDE.md` 為底寫專案的 `CLAUDE.md`（AI 每個 session 的入口摘要）。
+2. 依 `docs/features/_TEMPLATE/` 複製出第一個功能模組目錄，並到 `docs/DOCS_MAP.md` 登記。
+3. 依安裝到專案根目錄的 `CLAUDE.md` 模板，寫成你專案的入口摘要。
 4. 跑一次 `python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md` 確認腳本正常。
 
 ## 日常運作
@@ -71,7 +75,7 @@ scrum-master 開單 → (HITL 閘門：問使用者未決事項)
 ```
 
 狀態流：`Pending → Ready → In Progress → In Review → Done`（另有 `Canceled`）。
-完整規則見 `agent/resources/team_protocol.md`。
+完整規則見 `kit/.agent/resources/team_protocol.md`（安裝後為 `.agent/resources/team_protocol.md`）。
 
 ## 相容性
 
