@@ -17,6 +17,7 @@
 | [standards/documentation_conventions.md](standards/documentation_conventions.md) | 文件撰寫慣例 |
 | [standards/qa_testing_spec.md](standards/qa_testing_spec.md) | 測試規範與分層策略 |
 | [standards/security_audit.md](standards/security_audit.md) | 資安查核表（後端 OWASP Checklist + 前端客戶端查核） |
+| [standards/worktree_workflow.md](standards/worktree_workflow.md) | **Git Worktree 工作流程**：何時開、命名、生命週期對映工單狀態、收尾與防孤兒 |
 | [standards/adr/](standards/adr/) | 架構決策紀錄 (ADR) |
 
 <!-- 依專案補上：design_system.md（設計系統）、devenv_spec.md（開發環境）、third_party_versions.yaml -->

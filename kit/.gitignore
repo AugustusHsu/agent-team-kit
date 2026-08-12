@@ -1,0 +1,25 @@
+# agent-team-kit 出貨的基礎 .gitignore
+# 這是「最低必要」而非完整清單——請依專案技術棧自行往下加。
+
+# --- Worktree（必要，不可移除）---
+# worktree 目錄內含一個 .git 檔案，若被 git add 會變成詭異的 gitlink。
+# 詳見 docs/standards/worktree_workflow.md §2
+.claude/worktrees/
+
+# --- 接手文件 ---
+# 每次對話的暫時狀態，不進版控
+HANDOFF.md
+
+# --- 機密 ---
+.env
+.env.*
+!.env.example
+*.pem
+
+# --- 本套件腳本的產生物 ---
+__pycache__/
+*.py[cod]
+
+# --- OS / 編輯器 ---
+.DS_Store
+*.swp

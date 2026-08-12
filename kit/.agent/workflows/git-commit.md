@@ -23,6 +23,15 @@ description: 根據 git diff 產生符合專案風格的 Git Commit Message
 | 🧪     | test              | 新增或修改測試                 |
 | 💥     | feat! / refactor! | Breaking Change                |
 
+### 禁止寫進 commit message 的內容
+
+commit message **只描述這個專案本身的變更**。以下一律不寫：
+
+- **AI 署名 trailer**——`Co-Authored-By: Claude ...`、`🤖 Generated with ...` 之類。
+  工具來源不是專案歷史的一部分，還會汙染 `git shortlog` 的作者統計。
+- **對話脈絡**——「依你的要求」「上一輪討論到的」。未來讀 log 的人沒有那段對話。
+- **工具或 session 的內部狀態**——worktree 路徑、job ID、暫存目錄。
+
 ---
 
 ## 執行步驟

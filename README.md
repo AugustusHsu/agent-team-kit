@@ -41,12 +41,14 @@ kit/
 ├── docs/
 │   ├── DOCS_MAP.md             # 文件導覽入口
 │   ├── development/            # BACKLOG.md、PLAN_FROM_HANDOFF.md
-│   ├── standards/              # 文檔慣例、QA 規範、資安查核、ADR
+│   ├── standards/              # 文檔慣例、QA 規範、資安查核、worktree 流程、ADR
 │   └── features/_TEMPLATE/     # 單一功能模組的文件骨架
+├── .gitignore                  # 基礎忽略清單（含必要的 .claude/worktrees/）
 └── CLAUDE.md                   # 專案接手指南模板
 
 install.sh                      # 安裝到目標專案
 tests/                          # 本套件自身的 smoke test（不會被安裝）
+CLAUDE.md                       # 本 repo 自己的開發規則（不會被安裝，別跟 kit/CLAUDE.md 搞混）
 ```
 
 ## 開發這個套件

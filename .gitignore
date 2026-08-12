@@ -4,3 +4,9 @@ __pycache__/
 .venv/
 *.zip
 .serena/
+
+# Claude Code 本機狀態（worktree 與個人設定，皆不跨機器）
+# worktree 目錄內含 .git 檔案，被 add 進去會變成詭異的 gitlink
+.claude/worktrees/
+.claude/settings.local.json
+.claude/.headroom_wrap_marker.json

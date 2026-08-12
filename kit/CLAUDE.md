@@ -66,6 +66,23 @@
 
 段落沒內容就整段刪掉，不要留空標題。
 
+## 若專案採用 worktree，這裡必須寫
+
+**這是不寫就完全不會生效的一條。** Claude Code 的 `EnterWorktree` 工具明定：
+只有使用者當下指示、或 CLAUDE.md／記憶庫明確要求時才可使用。
+因此 `docs/standards/worktree_workflow.md` 寫得再完整，若沒有在 CLAUDE.md
+留下觸發指示，Agent 一律不會去開 worktree。
+
+在 CLAUDE.md 內寫**三行以內**即可，細節一律靠導航指向正版文件：
+
+```markdown
+## Worktree
+背景執行或多 Agent 並行時，動程式碼前先開 worktree，分支名 = Task ID。
+預設同時只允許一個；規則見 `docs/standards/worktree_workflow.md`。
+```
+
+單線開發、不使用 worktree 的專案，整段省略。
+
 ## 順便問：這個專案有文檔資料夾嗎？
 
 若有（`docs/`、`doc/`、`spec/` 之類），**不要把文檔內容搬進 CLAUDE.md 或記憶庫**——
