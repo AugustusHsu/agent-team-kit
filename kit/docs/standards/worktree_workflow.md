@@ -164,26 +164,56 @@ reviewer 直接讀該 worktree 的工作目錄，需要實際執行測試時也�
 
 ### 5.1 標準流程
 
+**合併必須發生在主 checkout，worktree 內做不到。** `git merge` 是「併進**當前 HEAD
+所在**的分支」，而 worktree 的 HEAD 是工單分支，主線分支則被主 checkout 佔住——
+一個分支同時只能被一個 worktree checkout，所以 worktree 內切不過去，也就併不了。
+
+但這**不代表要把收尾交回使用者手動執行**：`git -C <主checkout>` 就能指定在哪個
+工作目錄執行，Agent 一次跑完四步即可。
+
 ```bash
 # 0. 前提檢查：已取得 APPROVED，且變更已用確認過的訊息 commit
 #    未 commit 就往下走 = 永久遺失（§3.2）
 git -C .claude/worktrees/<Task-ID> status --porcelain   # 必須為空
 
-# 1. 合併（在主 checkout 執行；worktree 內絕不 merge）
-git merge <Task-ID>
+# 1. 合併：只接受 fast-forward
+git -C <主checkout> merge --ff-only <Task-ID>
 
 # 2. 移除目錄
-git worktree remove .claude/worktrees/<Task-ID>
+git -C <主checkout> worktree remove .claude/worktrees/<Task-ID>
 
 # 3. 刪除分支
-git branch -d <Task-ID>
+git -C <主checkout> branch -d <Task-ID>
 
 # 4. 確認無殘留
-git worktree list      # 應只剩主 checkout
-git worktree prune     # 清掉目錄已消失但登記還在的紀錄
+git -C <主checkout> worktree list      # 應只剩主 checkout
+git -C <主checkout> worktree prune     # 清掉目錄已消失但登記還在的紀錄
 ```
 
+**為什麼是 `--ff-only`**：主線是工單分支的祖先時，合併不產生任何新物件，只是把主線這個
+**標籤往前挪**到工單分支的 commit 上。結果與「這些 commit 從頭到尾都直接打在主線上」
+**完全等價**——沒有分岔、沒有 merge commit。`merge` 這個字在此有誤導性，它移動指標而非合流。
+
+裸 `git merge` 在非 fast-forward 時會自動寫一則使用者從未過目的 `Merge branch '...'`，
+正是 §1.10 要擋的路徑；`--ff-only` 讓它**失敗**而不是自動產生。失敗代表主線在期間前進了，
+處置是**回 worktree 內 `git rebase <主線>` 再重試第 1 步**，不是改用裸 `git merge`。
+
+**不要用 cherry-pick 或 rebase 把 commit「搬」到主線。** 兩者產生的是**內容相同但 SHA
+不同**的新 commit，代價有三：
+
+1. **工單回填的 SHA 失效**——§3.2 要回填的那個 SHA 在主線上根本不存在。
+2. **會逼你使用 `git branch -D`。** `git branch -d` 判斷「是否已合併」看的是 SHA 的
+   祖先關係而非內容；複製出來的 commit 從未成為主線的祖先，`-d` 必然失敗。
+   這等於把 §5.2 明文禁止的 force 寫進標準流程，常態性關掉安全閥。
+3. 一張工單若含多個 commit，要逐一挑、逐一解衝突；`--ff-only` 是零次操作。
+
+cherry-pick 的正當場景是「只要分支上的**部分** commit」，但 §3.2 規定一張工單產出
+一個 commit，這情況不該出現。
+
 **順序不可顛倒**：分支仍被 worktree 佔用時，git 會拒絕刪除該分支。
+**移除目錄也不可提前到合併之前**——commit 已由分支 ref 指著，提前移除不會遺失內容，
+但第 1 步一旦因非 fast-forward 失敗，rebase 需要那個 worktree 才好做。
+先合併能立刻知道是否 FF，成功才移除。
 
 ### 5.2 ⚠️ `git branch -d` 的誤報陷阱
 
