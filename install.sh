@@ -26,7 +26,9 @@ fi
 echo "📦 安裝 agent-team-kit → $TARGET"
 
 # 逐檔複製，預設保留目標端既有檔案（不用 cp -n，各平台行為不一致）
-( cd "$KIT_ROOT" && find . -type f -print0 ) | while IFS= read -r -d '' rel; do
+# 排除本機產生物：kit/ 是工作區，跑過測試就會留下 __pycache__，不該跟著裝進使用者專案
+( cd "$KIT_ROOT" && find . \( -name __pycache__ -o -name .pytest_cache \) -prune -o \
+    -type f ! -name '*.py[cod]' ! -name .DS_Store -print0 ) | while IFS= read -r -d '' rel; do
   rel="${rel#./}"
   if [ -e "$TARGET/$rel" ] && [ "$FORCE" != "--force" ]; then
     echo "  ⏭  略過既有檔案：$rel"

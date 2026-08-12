@@ -6,8 +6,21 @@ from pathlib import Path
 from conftest import INSTALL_SH, KIT_ROOT
 
 
+def _是本機產生物(rel: str) -> bool:
+    """與 install.sh 的排除規則一致：kit/ 是工作區，跑過測試會留下 __pycache__。"""
+    return (
+        "__pycache__/" in rel
+        or ".pytest_cache/" in rel
+        or rel.endswith((".pyc", ".pyo", ".pyd", ".DS_Store"))
+    )
+
+
 def kit_relative_files():
-    return sorted(p.relative_to(KIT_ROOT).as_posix() for p in KIT_ROOT.rglob("*") if p.is_file())
+    return sorted(
+        rel
+        for rel in (p.relative_to(KIT_ROOT).as_posix() for p in KIT_ROOT.rglob("*") if p.is_file())
+        if not _是本機產生物(rel)
+    )
 
 
 def test_安裝後檔案與_kit_完全一致(bare_install: Path):
@@ -67,6 +80,28 @@ def test_目標目錄不存在時拒絕安裝(tmp_path: Path):
     assert result.returncode == 1
     assert "目標目錄不存在" in result.stderr
     assert not target.exists()
+
+
+def test_不複製本機產生物(tmp_path: Path):
+    """kit/ 是工作區，跑過 pytest 就會留下 __pycache__——那不該跟著裝進使用者專案。"""
+    junk_dir = KIT_ROOT / ".agent" / "scripts" / "__pycache__"
+    junk_file = junk_dir / "_installtest.cpython-999.pyc"
+    created_dir = not junk_dir.exists()
+    junk_dir.mkdir(parents=True, exist_ok=True)
+    junk_file.write_bytes(b"\x00fake bytecode")
+    try:
+        target = tmp_path / "proj"
+        target.mkdir()
+        subprocess.run([str(INSTALL_SH), str(target)], check=True, capture_output=True, text=True)
+
+        assert not (target / ".agent" / "scripts" / "__pycache__").exists()
+        assert not list(target.rglob("*.pyc"))
+        # 排除產生物不能連正常檔案一起漏掉
+        assert (target / ".agent" / "scripts" / "scan_backlog.py").is_file()
+    finally:
+        junk_file.unlink(missing_ok=True)
+        if created_dir and junk_dir.exists() and not any(junk_dir.iterdir()):
+            junk_dir.rmdir()
 
 
 def test_未給參數時列出用法():
