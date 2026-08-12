@@ -68,11 +68,11 @@ worktree 目錄一律放在 `.claude/worktrees/` 底下，**且該路徑必須�
 | 工單狀態轉換 | worktree 動作 |
 |---|---|
 | `Ready` → `In Progress` | **建立** worktree，分支名 = Task ID，並在工單登記（§6.1） |
-| `In Progress` | 自由 commit |
-| `In Progress` → `In Review` | 草擬 commit 訊息 → 取得使用者同意 → commit → **凍結** |
-| `In Review` | worktree **保留但凍結**：developer 不得再寫入，reviewer 只讀 |
+| `In Progress` | 自由編輯，**原則上不 commit**（見 §3.2） |
+| `In Progress` → `In Review` | 產出交付回報＋commit message 草案一併呈交 → **凍結**（此時尚未 commit） |
+| `In Review` | worktree **保留且凍結**：developer 不得再寫入，審查對象是 worktree 內的變更 |
 | `In Review` → `In Progress`（CHANGES REQUESTED） | **解凍**，同一個 worktree 繼續改 |
-| `In Review` → `Done`（APPROVED） | 合併 → 收尾（§5）→ **收尾完成才可標 `Done`** |
+| `In Review` → `Done`（APPROVED） | **用已確認的訊息 commit** → 合併 → 收尾（§5）→ **收尾完成才可標 `Done`** |
 | 任何狀態 → `Canceled` | 見 §5.4 |
 
 ### 3.1 沒有 `In Progress` → `Done` 的捷徑
@@ -80,36 +80,51 @@ worktree 目錄一律放在 `.claude/worktrees/` 底下，**且該路徑必須�
 狀態機不存在這條路徑，`Done` 只能由 Code Reviewer 從 `In Review` 推進。
 因此**每個 worktree 必然經歷 `In Review`**，不會有「做完直接收掉」的情況。
 
-### 3.2 交付時必須 commit，不得只停在 staged
+### 3.2 commit 發生在 APPROVED 之後，不是交付時
 
-**每個 worktree 有自己私有的暫存區**（`.git/worktrees/<name>/index`，與主 checkout 的
-`.git/index` 是不同檔案）。staged 但未 commit 的內容只存在該私有 index 與工作目錄裡，
-**worktree 一移除就永久消失**。已 commit 的則進入共用物件庫、由分支 ref 指著，
-目錄刪掉照樣還在。
+**一張工單產出一個 commit，而那個 commit 使用的必須是通過審查的那則訊息原文。**
+因此順序是：交付回報與 commit message 草案一併呈交 → 取得同意 → **才 commit** →
+合併 → 收尾。`In Progress` 期間原則上不 commit，避免最後得整併。
 
-另外兩個理由：
+> 工作跨多個 session、或內容龐大到中途遺失代價太高時，可開 WIP commit 保護進度，
+> 但**交付前必須整併回單一 commit**，且該 commit 的訊息仍須經過複查。
 
-- Code Review 需要穩定引用。審 working tree 沒有 SHA 可指、無法回填工單，
-  且 developer 可能還在改，reviewer 看到的內容會浮動。
-- commit message 本身就是交付說明的一部分。
+這個順序有一個必然推論，是本節最重要的一條：
 
-**但不得自動 commit。** 依全域慣例，commit 前必須草擬訊息並取得使用者當下同意。
-HITL 閘門就掛在 `In Progress → In Review` 這個轉換點上（性質同
-team_protocol §1.7，只是那道閘門在「執行前」，這道在「交付時」）。
+> **`In Review` 期間，變更沒有任何 ref 指著它。**
+
+每個 worktree 有自己私有的暫存區（`.git/worktrees/<name>/index`，與主 checkout 的
+`.git/index` 是不同檔案）。未 commit 的內容只存在該私有 index 與工作目錄裡，
+**`git worktree remove` 一執行就永久消失**，沒有 reflog、沒有 dangling object 可救。
+由此推出三條硬規則：
+
+- **未取得 APPROVED，絕對不可移除 worktree。** 收尾程序（§5）的第零步就是確認已 commit。
+- **`In Review` 期間必須凍結**（§3.3）。任何寫入都會讓審查對象漂移，而審查對象是
+  一個會變動的工作目錄，不是不可變的 SHA。
+- **工單回填 SHA 的時機在 APPROVED 之後**，因為審查當下 SHA 還不存在。
+
+**不得自動 commit。** 取得同意後執行 commit 時，必須使用**經確認的那則訊息原文**，
+不得再自行修改；訊息若有調整，須重新呈現並重新取得同意（見 team_protocol §1.10）。
 
 ### 3.3 `In Review` 為什麼是凍結而不是另開 worktree
 
-一旦交付時已 commit，**審查的對象就是一個 SHA，根本不需要工作目錄**——
-`git diff main...DAT-DEV-BE-001` 從主 checkout 就能執行。這正是 §3.2 那條規則換來的好處。
+因為 §3.2：審查當下**變更還沒 commit**，它只存在那一個 worktree 的工作目錄裡。
+另開一個 review 專用 worktree，那裡是一份乾淨的 checkout，**根本拿不到待審的內容**——
+這不是成本問題，是做不到。
 
-另開 review 專用 worktree 的代價則是實在的：
+即使改成「交付時先 commit 好讓 reviewer 有 SHA 可審」，另開 worktree 仍有實在的代價：
 
 - 多一份開發環境（見 §4）
 - `CHANGES REQUESTED` 會退回 `In Progress`，若已銷毀就得重建環境，而退回可能發生多次
 - 違反 §1 的 WIP = 1
 
 因此規則是**凍結而非分裂**：`In Review` 期間 developer 不得再寫入，
-reviewer 需要實際執行測試時就在該 worktree 內執行——因為已凍結，共用是安全的。
+reviewer 直接讀該 worktree 的工作目錄，需要實際執行測試時也在該 worktree 內執行——
+因為已凍結，共用是安全的。
+
+> **代價要講清楚**：審查對象是工作目錄而非 SHA，因此審查當下無法在工單裡寫下
+> 「我審的是哪個版本」。補償做法是 APPROVED 後 commit 完成，把產生的 SHA 回填工單
+> （§2.3 的回寫機制），使事後仍可追溯。
 
 > **真正需要第二個 worktree 的情境不是「審查」，是「審查期間要平行開下一張工單」。**
 > 那個 worktree 屬於下一張工單，不屬於 review。兩者不要混為一談。
@@ -150,6 +165,10 @@ reviewer 需要實際執行測試時就在該 worktree 內執行——因為已�
 ### 5.1 標準流程
 
 ```bash
+# 0. 前提檢查：已取得 APPROVED，且變更已用確認過的訊息 commit
+#    未 commit 就往下走 = 永久遺失（§3.2）
+git -C .claude/worktrees/<Task-ID> status --porcelain   # 必須為空
+
 # 1. 合併（在主 checkout 執行；worktree 內絕不 merge）
 git merge <Task-ID>
 
@@ -193,7 +212,7 @@ If you are sure you want to delete it, run 'git branch -D <name>'
 
 | 阻擋原因 | 風險 |
 |---|---|
-| worktree 內有未提交變更（`remove` 會拒絕） | force 會永久遺失 |
+| worktree 內有未提交變更（`remove` 會拒絕） | force 會永久遺失。**若工單仍在 `In Review`，這是正常狀態不是異常**——尚未 APPROVED 本來就還沒 commit，此時根本不該執行收尾 |
 | 分支有未合併的 commit | 刪分支即遺失 |
 | 有程序仍在該目錄執行（測試、dev server、shell） | 刪除失敗，或刪後被寫回 |
 
@@ -278,7 +297,14 @@ Agent 結束工作前必須回報 worktree 狀態（已清理／刻意保留及�
 這類資產必須 per-worktree 各一份，或以約定／鎖確保同時只有一個使用者。
 **單 worktree 時此問題不存在，因此極容易被忽略。**
 
-### 7.3 合併一次一個
+### 7.3 收尾一次一個，整套跑完才換下一個
+
+**不可把多個 worktree 同時推進到收尾。** 必須一個工單完整跑完
+（APPROVED → commit → 合併 → 移除目錄 → 刪分支 → 標 `Done`）再處理下一個。
+
+理由是 §3.2：`In Review` 期間各 worktree 內都躺著**沒有 ref 保護的變更**，
+同時處理多個時，一次搞錯目錄的 `git worktree remove` 就是不可逆的遺失。
+逐一收尾讓任一時刻最多只有一個「正在被動的」worktree。
 
 第二個 APPROVED 的分支若基底已過期，先在其 worktree 內 `git rebase <主線>`，
 再回主 checkout 合併。嚴守 §7.2 的模組邊界時，幾乎不會產生衝突。
@@ -294,12 +320,13 @@ Agent 每次收尾都必須回報，格式固定。
 
 | 時機 | 狀態轉換 | 產出 |
 |---|---|---|
-| 交付 | `In Progress` → `In Review` | 三段式交付回報（team_protocol §2.2）＋ commit message 複查（§1.10） |
-| 審查 | `In Review` | 審查報告 APPROVED / CHANGES REQUESTED（§2.3） |
-| **收尾** | `In Review` → `Done` | **本節格式** |
+| 交付 | `In Progress` → `In Review` | 交付回報（team_protocol §2.2）＋ **commit message 草案**，一併呈交 |
+| 審查 | `In Review` | 審查結果 APPROVED / CHANGES REQUESTED（§2.3） |
+| **收尾** | `In Review` → `Done` | commit（用已確認的訊息）→ 合併 → **本節格式** |
 
-尤其**收尾報告內不該出現 commit message**——commit 早在交付時就完成並經過複查，
-到收尾時審查也已通過。若到收尾才在討論要 commit 什麼，代表 §3.2 被跳過了。
+**收尾報告不重複 commit message 全文**——它在交付時就已呈交並複查過。收尾報告只需
+列出實際產生的 SHA，讓工單能回填（§3.2）。若到收尾才在討論要 commit 什麼內容，
+代表交付階段被跳過了。
 
 **成功：**
 

@@ -101,6 +101,9 @@ commit message **只描述這個專案本身的變更**。以下一律不寫：
    使用者要求修改時，改完必須**重新呈現完整訊息**再取得一次同意，
    不可只回覆「已修正」就逕自提交。
 
+   > **工單／worktree 流程下的時點**：訊息隨交付回報一併呈交（`In Progress` → `In Review`），
+   > 但**要等審查 APPROVED 之後才執行第 6 步**。詳見 `.agent/resources/team_protocol.md` §1.10。
+
 6. **執行 Commit（待使用者確認後）**
 
    ```bash

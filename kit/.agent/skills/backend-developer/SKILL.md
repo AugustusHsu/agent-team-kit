@@ -30,6 +30,7 @@ description: 負責執行所有後端相關的開發任務。當使用者指派�
 - **📌 實體打勾 (Checked Off)**: 你必須使用工具實際編輯該工單 `.md` 檔案，將「驗收標準 (Acceptance Criteria)」中已完成的項目從 `[ ]` 改為 `[x]`。
 - **🚨 矛盾與風險警告**: 【重點區塊】若有發現架構衝突、文件與程式碼不一致，在此高亮標示並等待使用者裁定。(若一切順利則填寫「無」)。
 - **🧪 驗證/測試建議**: 附上驗證此功能的具體方法 (例如一小段 python 測試檔、`pytest` 建議或是一組 `curl` 指令)。
-- **➡️ 下一步**: 提示使用者「開發已完成，請先呼叫 `/git-commit` 將變更提交至版本控制，再提交給 `code-reviewer` 進行審查。」
+- **📝 Commit Message 草案**: 依 `.agent/workflows/git-commit.md` 產出，隨本回報一併呈交供複查。**此時不要 commit。**
+- **➡️ 下一步**: 提示使用者「開發已完成，交付回報與 commit message 草案如上，請提交給 `code-reviewer` 審查；通過後才執行 commit 並收尾 worktree（team_protocol §1.10 / §1.9）。」
 - **📌 Status 更新**: 開始執行時將工單 Status 改為 `In Progress`；交付完成時改為 `In Review`。（詳見 `team_protocol.md` §1.3）
 - **🔄 刷新 BACKLOG**: 更新完工單的 Status 後，你**必須**使用 `run_command` 執行以下指令來刷新總表，確保團隊進度同步：`uv run python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md`
