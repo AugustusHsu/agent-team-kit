@@ -16,6 +16,35 @@
 worktree 是純本機的東西，永遠不進版控、不跨機器。因此每一個 worktree 都必須在版控裡
 （工單 `.md`）留下對應紀錄——否則沒有任何機制記得它存在。
 
+### 0.1 資料模型：什麼各自一份、什麼共用
+
+多數誤解出自把 worktree 想成「取代暫存區的另一種暫存機制」。**它不是。worktree 換的是
+「工作目錄與暫存區放在哪個目錄」，git 的操作流程完全沒變。**
+
+| 層 | 主 checkout | worktree | 共用？ |
+|---|---|---|---|
+| 工作目錄（磁碟上的檔案） | 各自一份 | 各自一份 | ❌ |
+| index／暫存區 | `.git/index` | `.git/worktrees/<名>/index` | ❌ |
+| HEAD、目前 checkout 的分支 | 各自 | 各自 | ❌ |
+| objects（commit／tree／blob） | `.git/objects` | 同左 | ✅ |
+| refs（分支、tag） | `.git/refs` | 同左 | ✅ |
+
+三個推論，本文其餘章節都建立在上面：
+
+1. **每個 worktree 有自己的暫存區**，`git add` 照常運作，彼此不干擾。
+2. **未 commit 的內容只活在前三層**——純本機、沒有 ref 保護，
+   `git worktree remove` 一執行即永久消失（§3.2）。
+3. **commit 之後內容就進了共用物件庫、由分支 ref 指著**，此時移除 worktree
+   不會遺失任何東西。收尾（§5）之所以安全，理由在此。
+
+**「在哪開發」與「何時 commit」是兩件獨立的事。** worktree 決定前者，工單狀態機（§3）
+決定後者。混為一談就會推出「用了 worktree 就不必 commit」這類錯誤結論。
+
+**一個分支同時只能被一個 worktree checkout。** 因此在主 checkout 對工單分支執行
+`git switch` 必定失敗——要「進到」那個分支是 `cd` 進它的目錄，不是切換。
+（`--ignore-other-worktrees` 可強制繞過，但會讓兩個工作目錄共用同一個分支 ref、
+互相覆蓋彼此的 HEAD 認知，等於自廢隔離，**禁止使用**。）
+
 ---
 
 ## 1. 什麼時候該開 worktree
@@ -93,9 +122,9 @@ worktree 目錄一律放在 `.claude/worktrees/` 底下，**且該路徑必須�
 
 > **`In Review` 期間，變更沒有任何 ref 指著它。**
 
-每個 worktree 有自己私有的暫存區（`.git/worktrees/<name>/index`，與主 checkout 的
-`.git/index` 是不同檔案）。未 commit 的內容只存在該私有 index 與工作目錄裡，
-**`git worktree remove` 一執行就永久消失**，沒有 reflog、沒有 dangling object 可救。
+理由見 §0.1：未 commit 的內容只活在工作目錄與該 worktree 的私有暫存區，兩者都沒有 ref
+保護，**`git worktree remove` 一執行就永久消失**，沒有 reflog、沒有 dangling object 可救。
+（反之，commit 之後移除 worktree 不會遺失任何東西——內容已進共用物件庫、由分支 ref 指著。）
 由此推出三條硬規則：
 
 - **未取得 APPROVED，絕對不可移除 worktree。** 收尾程序（§5）的第零步就是確認已 commit。
