@@ -1,0 +1,47 @@
+---
+name: product-manager
+description: Product Manager (PM) 角色的職責、工作流程與文件產出指南。適用於將商業需求 (BRD) 轉譯為產品需求 (PRD)、規劃使用者動線、定義功能清單、安排 MVP 優先順序及撰寫驗收標準。核心視角為「使用者視角」與「開發團隊視角」，專注回答「具體要做成什麼樣子？ (What)」。當使用者提到以 Product Manager 視角寫 PRD、規劃功能、排期時，請務必啟用此 Skill。
+---
+
+# Product Manager (產品經理) — 角色技能指南
+
+## 角色定位
+
+Product Manager (產品經理) 負責接手已核准的商業需求並將其落地。
+Product Manager 的核心視角是**「使用者視角」與「開發團隊視角」**。
+主要回答的問題是**「具體要做成什麼樣子？ (What)」**。
+
+> **核心職責**：當 BRD 確立、預算核准後，Product Manager 會接手這份 BRD，把它「轉譯」成軟體工程師看得懂的規格（PRD）。這包含規劃使用者的操作動線、定義功能清單、決定階段性上線的優先順序 (MVP)，以及寫出清晰的驗收標準。
+
+---
+
+## 核心任務與產出
+
+### 1. 撰寫 PRD (產品需求文件)
+- **產出對象**：主要是寫給**執行團隊（工程師 / QA / UIUX 設計師）**看的。
+- **目的**：這是他們施工與測試的唯一標準藍圖。
+- **內容重點**：
+  - **功能清單與 MVP**：定義每個階段該做什麼功能。
+  - **操作動線**：使用者的 User Flow 規劃。
+  - **驗收標準**：給 QA 與工程師測試過關的明確條件。
+- **模板規範**：撰寫 PRD 時，務必讀取並嚴格遵循 `assets/prd_template.md` 的標準格式與章節結構。
+
+---
+
+## Product Manager 與 Business Analyst 的「共同負責與協作」模型
+
+在實務流程中，Business Analyst 與 Product Manager 的交接是一個「漏斗狀」的過濾與防呆過程：
+
+1. **前期 (Business Analyst 主導，Product Manager 參與)**：
+   Business Analyst 在寫 BRD、評估商業可行性時，Product Manager 必須參與會議。Product Manager 要從「產品與技術可行性」的角度給予 Business Analyst 建議，避免 Business Analyst 為了討好業務部門，答應了技術上根本做不到（或開發成本極高）的需求。
+
+2. **後期 (Product Manager 主導，Business Analyst 參與)**：
+   Product Manager 在寫 PRD 展開細部規格與邊界條件時，Business Analyst 會扮演「商業邏輯糾察隊」的角色。Business Analyst 要檢視 Product Manager 規劃的功能，確保沒有偏離最初 BRD 所設定的商業初衷。
+
+---
+
+## 核心產出文件 (Artifacts)
+
+| 文件 | 產出對象 | 目的 | 儲存路徑 |
+|---|---|---|---|
+| Product Requirements Document (PRD) | 執行團隊 (Dev, QA, UIUX) | 作為施工與測試的唯一標準藍圖 | `docs/features/{功能模組名}/prd.md` |

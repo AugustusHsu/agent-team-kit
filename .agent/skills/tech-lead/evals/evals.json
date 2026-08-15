@@ -1,0 +1,29 @@
+{
+  "skill_name": "tech-lead",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "根據這個 '使用者考勤管理系統'，幫我設計關聯式資料庫結構，並提供打卡模組的 API 規格。",
+      "expected_output": "必須以 Mermaid erDiagram 語法輸出 ERD 表，並套用標準 Swagger-like 表格寫明 Endpoint、Method 與 Payload。",
+      "files": [],
+      "expectations": [
+        "輸出包含 Mermaid erDiagram 語法的 ERD，且可正確解析",
+        "ERD 中標明主鍵、外鍵與表間關係的基數（1:N 等）",
+        "API 規格以表格呈現，至少含 Endpoint、Method、Request Payload、Response 四項",
+        "API 規格包含錯誤回應的狀態碼與情境"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "我想了解前端發起 '結帳' 請求後，我們後端是怎麼呼叫金流 API 跟扣除庫存的，請幫我畫圖。",
+      "expected_output": "必須以 Mermaid Sequence Diagram 嚴謹繪製模組間的互動流程。",
+      "files": [],
+      "expectations": [
+        "輸出包含 Mermaid sequenceDiagram 語法，且可正確解析",
+        "圖中明確標出前端、後端、金流服務、庫存服務等參與者",
+        "涵蓋失敗路徑（如金流失敗時的庫存回滾）而非只畫 Happy Path",
+        "標示同步／非同步呼叫的差異"
+      ]
+    }
+  ]
+}

@@ -41,7 +41,20 @@ commit 前必須把訊息原文給我複查，取得當次同意才執行；上�
 （`Co-Authored-By:`、`🤖 Generated with ...`）。完整格式見
 `kit/.agent/workflows/git-commit.md`。
 
-## Worktree
+## 本專案自己的開發流程（dogfooding）
 
-背景執行或多 Agent 並行時，動程式碼前先開 worktree，分支名 = Task ID。
-預設同時只允許一個；規則見 `kit/docs/standards/worktree_workflow.md`。
+本 repo **用自己出貨的那套流程開發自己**。根目錄的 `.agent/`、`docs/DOCS_MAP.md`、
+`docs/development/`、`docs/standards/`、`docs/features/_TEMPLATE/` 是 `./install.sh .`
+裝出來的**安裝實例，視為唯讀**——要改流程規範請改 `kit/` 再重跑安裝，
+直接改根目錄那份會在下次升級被 `.new` 衝突淹掉。
+
+例外一（`is_seed_file()` 認定的種子檔，升級不覆蓋）：
+`CLAUDE.md`、`.gitignore`、`docs/development/BACKLOG.md`。
+`docs/features/README.md` 不在 kit 內，是本 repo 自有檔案，安裝從不碰它。
+
+例外二（**已知缺陷**）：`docs/DOCS_MAP.md` 的「功能模組」表 kit 出貨時就要求專案自行填寫，
+但它**不是**種子檔，升級時會被判定為「使用者改過」而產生 `.new` 衝突。
+本 repo 已經填了 `PEV`/`KIT`/`WTG` 三列，等於明知故犯。是否列為種子檔見 BACKLOG Icebox。
+
+**本專案不使用 worktree**，單一工作目錄開發。`docs/standards/worktree_workflow.md`
+是出貨內容，不是本 repo 的行為準則。

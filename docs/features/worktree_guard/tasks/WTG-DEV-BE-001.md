@@ -3,9 +3,19 @@
 **🔗 依附母任務 (Parent Task ID):** Independent
 **🏷️ 任務類型 (Task Type):** queue_backend
 **👤 負責人 (Assignee):** backend-developer
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Canceled
 **📅 建立時間 (Created):** 2026-08-13T02:39+08:00
-**✅ 完成時間 (Closed):** —
+**✅ 完成時間 (Closed):** 2026-08-16T01:03+08:00
+
+> ⛔ **（2026-08-16 取消）** 本專案已停用 worktree 開發流程，本工單失去標的，轉 `Canceled`。
+>
+> 取消理由**不是「機制不需要」**，而是**本專案不再是它的使用者**：worktree 相關規範仍是
+> `kit/` 的出貨內容（通用開發流程），只是本 repo 自己改用單一工作目錄開發。
+>
+> 📌 **這張工單的證據價值要保留**：取消當下，本 repo 實際存在 **2 個孤兒 worktree**
+> （`KIT-DEV-AGENT-001`、`worktree-doc-3fixes`），後者還帶著 1 顆未合併的 commit。
+> 這正是本工單 §1 所指「§6.1 入口登記與 §6.2 對帳只有文字、沒有實作」的實證——
+> 四層防孤兒機制在真實使用下沒有守住。日後若重新設計 worktree 流程，此事實應納入前提。
 
 ## 1. 任務描述 (Description)
 

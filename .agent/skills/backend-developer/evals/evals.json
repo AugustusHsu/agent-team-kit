@@ -1,0 +1,43 @@
+{
+  "skill_name": "backend-developer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "幫我做 ABC-DEV-BE-002 這張工單，實作使用者列表的分頁 API。",
+      "expected_output": "先確認工單的 Human-in-the-loop 區塊無未解答項目，實作後提交三段式交付回報，實際勾選工單 AC，Status 改為 In Review，並刷新 BACKLOG。",
+      "files": [],
+      "expectations": [
+        "動工前先讀取工單並檢查「❓ 需要確認的事項」是否有未解答項目",
+        "交付回報包含「✅ 執行項目追蹤」「🚨 矛盾與風險警告」「🧪 驗證/測試建議」三個段落",
+        "實際編輯工單 .md，將已完成的驗收標準從 [ ] 改為 [x]",
+        "工單 Status 由 In Progress 更新為 In Review",
+        "驗證建議提供可直接執行的具體指令（curl 或 pytest），而非抽象描述",
+        "更新 Status 後執行 scan_backlog.py 刷新 BACKLOG.md"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "工單 ABC-DEV-BE-004 要我在 orders 表加一個 status 欄位，但我看 LLD 裡面寫的是要用獨立的 order_status 關聯表。先照工單做吧。",
+      "expected_output": "偵測到工單與 LLD 的矛盾，必須立即暫停開發並向使用者回報，不得逕自選一邊實作。",
+      "files": [],
+      "expectations": [
+        "明確指出工單要求與 LLD 規格存在矛盾，並具體說明矛盾點",
+        "依 team_protocol.md §1.2 暫停開發，等待使用者裁定，未逕自動手實作",
+        "工單 Status 維持在 In Progress，未推進到 In Review",
+        "提供兩個方案的影響分析，協助使用者裁定"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "這張工單的「❓ 需要確認的事項」寫了『分頁上限預設 100 筆（建議值）』，User 補充回覆是空的。可以直接開始寫了嗎？",
+      "expected_output": "依 §1.7 HITL 閘門，建議值不等於授權，必須先向使用者逐條提問並取得回覆才可實作。",
+      "files": [],
+      "expectations": [
+        "明確回答不可直接開始實作",
+        "引用 team_protocol.md §1.7 說明建議值是提案而非授權",
+        "向使用者提出具體問題以取得裁定，而非自行採用 100 這個建議值",
+        "說明取得回覆後應把裁定補寫回工單的「✍️ User 補充回覆」欄位留痕"
+      ]
+    }
+  ]
+}

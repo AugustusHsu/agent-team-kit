@@ -1,0 +1,30 @@
+{
+  "skill_name": "uiux",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "PRD 裡有一個「批次匯入使用者名單」的功能，請幫我畫出這個流程的 Wireframe。",
+      "expected_output": "以 ASCII-art markdown 產出 Wireframe，涵蓋主要版面與 Loading / Empty / Error 等多種狀態，並存放至 docs/features/{模組}/wireframes/ 下。",
+      "files": [],
+      "expectations": [
+        "Wireframe 以 ASCII-art markdown 呈現版面結構，而非只用文字描述",
+        "涵蓋 Loading、Empty、Error 至少三種狀態的畫面設計",
+        "標示使用者每個動作後的系統回饋（Toast、Spinner 等）",
+        "指明產出檔案應存放於 docs/features/{模組}/wireframes/ 目錄",
+        "流程沒有死胡同：每個錯誤狀態都有明確的下一步或返回路徑"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "使用者反應我們的多步驟表單填到一半跳掉就全沒了，很崩潰。請從 UX 角度給我改善方案跟畫面設計。",
+      "expected_output": "先分析使用者動線上的問題，再提出具體的設計方案與對應 Wireframe，並說明防呆與回饋機制。",
+      "files": [],
+      "expectations": [
+        "先分析問題成因（動線斷點、缺乏保存機制）再提方案，而非直接跳到畫面",
+        "提出的方案包含草稿保存或離開前確認等具體防呆機制",
+        "附上對應的 Wireframe 或版面示意",
+        "說明方案如何與既有 Design System 保持一致"
+      ]
+    }
+  ]
+}
