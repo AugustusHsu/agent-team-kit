@@ -1,9 +1,12 @@
-"""install.sh 的行為：1:1 複製、不覆寫既有檔案、--force 可強制覆寫。"""
+"""install.sh 的行為：1:1 複製、不覆寫既有檔案、--force 可強制覆寫、--upgrade 安全升級。"""
 
+import hashlib
 import subprocess
 from pathlib import Path
 
 from conftest import INSTALL_SH, KIT_ROOT
+
+MANIFEST_REL = ".agent/.kit-manifest"
 
 
 def _是本機產生物(rel: str) -> bool:
@@ -23,12 +26,32 @@ def kit_relative_files():
     )
 
 
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _讀基準線(target: Path) -> dict[str, str]:
+    entries = {}
+    for line in (target / MANIFEST_REL).read_text(encoding="utf-8").splitlines():
+        if line.startswith("#") or not line.strip():
+            continue
+        digest, rel = line.split(maxsplit=1)
+        entries[rel] = digest
+    return entries
+
+
+def _安裝(target: Path, *args: str) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        [str(INSTALL_SH), str(target), *args], check=True, capture_output=True, text=True
+    )
+
+
 def test_安裝後檔案與_kit_完全一致(bare_install: Path):
-    """安裝 = 原封不動複製，不做任何改名。"""
+    """安裝 = 原封不動複製，不做任何改名；額外只多一份升級用的基準線。"""
     installed = sorted(
         p.relative_to(bare_install).as_posix() for p in bare_install.rglob("*") if p.is_file()
     )
-    assert installed == kit_relative_files()
+    assert installed == sorted([*kit_relative_files(), MANIFEST_REL])
 
 
 def test_安裝後內容逐位元組相同(bare_install: Path):
@@ -108,3 +131,143 @@ def test_未給參數時列出用法():
     result = subprocess.run([str(INSTALL_SH)], capture_output=True, text=True)
     assert result.returncode == 1
     assert "用法" in result.stderr
+
+
+# ── 升級模式（--upgrade）─────────────────────────────────────────────
+#
+# 升級的難處在於：安裝後使用者一定會改東西（模組前綴表、自訂規範），
+# 但套件的流程規範又必須能推進去。靠 .kit-manifest 記下「裝進去時長什麼樣」，
+# 才能把「使用者改過的」與「還是原版的」分開處理。
+
+
+def test_安裝後產生基準線且涵蓋所有檔案(bare_install: Path):
+    entries = _讀基準線(bare_install)
+    assert set(entries) == set(kit_relative_files())
+    for rel, digest in entries.items():
+        assert digest == _sha256(KIT_ROOT / rel), rel
+
+
+def _裝成舊版(target: Path, rel: str, 舊內容: str) -> None:
+    """偽造「上一版 kit 裝進來的就是這個內容，使用者沒動過」的狀態。"""
+    (target / rel).write_text(舊內容, encoding="utf-8")
+    manifest = target / MANIFEST_REL
+    lines = []
+    for line in manifest.read_text(encoding="utf-8").splitlines():
+        if not line.startswith("#") and line.split(maxsplit=1)[1:] == [rel]:
+            lines.append(f"{hashlib.sha256(舊內容.encode()).hexdigest()}  {rel}")
+        else:
+            lines.append(line)
+    manifest.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def test_升級會更新使用者沒改過的檔案(tmp_path: Path):
+    target = tmp_path / "proj"
+    target.mkdir()
+    _安裝(target)
+
+    rel = "docs/standards/qa_testing_spec.md"
+    _裝成舊版(target, rel, "上一版 kit 的內容\n")
+
+    result = _安裝(target, "--upgrade")
+    assert (target / rel).read_bytes() == (KIT_ROOT / rel).read_bytes()
+    assert "⬆️  更新" in result.stdout
+    assert not (target / f"{rel}.new").exists()
+
+
+def test_升級不覆蓋使用者改過的檔案而是另存_new(tmp_path: Path):
+    target = tmp_path / "proj"
+    target.mkdir()
+    _安裝(target)
+
+    rel = "docs/standards/qa_testing_spec.md"
+    # 先讓 kit 版本與目標端不同（模擬套件有新版），再讓使用者也改過同一檔
+    _裝成舊版(target, rel, "上一版 kit 的內容\n")
+    (target / rel).write_text("我自己加的專案規範\n", encoding="utf-8")
+
+    result = _安裝(target, "--upgrade")
+    assert (target / rel).read_text(encoding="utf-8") == "我自己加的專案規範\n"
+    assert (target / f"{rel}.new").read_bytes() == (KIT_ROOT / rel).read_bytes()
+    assert "待合併" in result.stdout
+
+
+def test_升級保留種子檔(tmp_path: Path):
+    """CLAUDE.md／.gitignore／BACKLOG.md 安裝後由專案接手，升級不得動它們。"""
+    target = tmp_path / "proj"
+    target.mkdir()
+    _安裝(target)
+
+    種子 = {
+        "CLAUDE.md": "# 我的專案\n",
+        ".gitignore": "node_modules/\n",
+        "docs/development/BACKLOG.md": "# 我的 BACKLOG\n",
+    }
+    for rel, 內容 in 種子.items():
+        (target / rel).write_text(內容, encoding="utf-8")
+
+    _安裝(target, "--upgrade")
+    for rel, 內容 in 種子.items():
+        assert (target / rel).read_text(encoding="utf-8") == 內容, rel
+        assert not (target / f"{rel}.new").exists(), rel
+
+
+def test_升級對沒有基準線的舊安裝採保守處理(tmp_path: Path):
+    """舊版 install.sh 裝的專案沒有 manifest，無從判斷改過與否 → 一律不覆蓋。"""
+    target = tmp_path / "proj"
+    target.mkdir()
+    _安裝(target)
+
+    rel = "docs/standards/qa_testing_spec.md"
+    (target / rel).write_text("不知道是誰改的\n", encoding="utf-8")
+    (target / MANIFEST_REL).unlink()
+
+    _安裝(target, "--upgrade")
+    assert (target / rel).read_text(encoding="utf-8") == "不知道是誰改的\n"
+    assert (target / f"{rel}.new").read_bytes() == (KIT_ROOT / rel).read_bytes()
+
+
+def test_dry_run_不寫入任何檔案(tmp_path: Path):
+    target = tmp_path / "proj"
+    target.mkdir()
+    _安裝(target)
+
+    rel = "docs/standards/qa_testing_spec.md"
+    _裝成舊版(target, rel, "上一版 kit 的內容\n")
+    before = {p: p.read_bytes() for p in target.rglob("*") if p.is_file()}
+
+    result = _安裝(target, "--upgrade", "--dry-run")
+    after = {p: p.read_bytes() for p in target.rglob("*") if p.is_file()}
+    assert before == after
+    assert "dry-run" in result.stdout
+
+
+def test_升級會補上新增的檔案(tmp_path: Path):
+    target = tmp_path / "proj"
+    target.mkdir()
+    _安裝(target)
+
+    rel = "docs/standards/qa_testing_spec.md"
+    (target / rel).unlink()
+
+    result = _安裝(target, "--upgrade")
+    assert (target / rel).read_bytes() == (KIT_ROOT / rel).read_bytes()
+    assert "➕ 新增" in result.stdout
+
+
+def test_dry_run_不可單獨使用(tmp_path: Path):
+    target = tmp_path / "proj"
+    target.mkdir()
+    result = subprocess.run(
+        [str(INSTALL_SH), str(target), "--dry-run"], capture_output=True, text=True
+    )
+    assert result.returncode == 1
+    assert "--dry-run 只能搭配 --upgrade" in result.stderr
+
+
+def test_未知選項會報錯(tmp_path: Path):
+    target = tmp_path / "proj"
+    target.mkdir()
+    result = subprocess.run(
+        [str(INSTALL_SH), str(target), "--wat"], capture_output=True, text=True
+    )
+    assert result.returncode == 1
+    assert "未知的選項" in result.stderr

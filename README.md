@@ -77,6 +77,32 @@ git clone git@github.com:AugustusHsu/agent-team-kit.git
 3. 依安裝到專案根目錄的 `CLAUDE.md` 模板，寫成你專案的入口摘要。
 4. 跑一次 `python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md` 確認腳本正常。
 
+## 升級既有專案
+
+kit 的流程規範會持續演進，但安裝後的專案一定改過東西（至少是 §3.1 模組前綴表）。
+`--upgrade` 就是為了讓兩者能同時成立：
+
+```bash
+./agent-team-kit/install.sh /path/to/your-project --upgrade --dry-run   # 先看會動到什麼
+./agent-team-kit/install.sh /path/to/your-project --upgrade
+```
+
+安裝時會寫下 `.agent/.kit-manifest`，記錄每個檔案「裝進來時」的 sha256。升級靠它分辨：
+
+| 目標端狀態 | 升級行為 |
+|---|---|
+| 檔案不存在 | 直接補上 |
+| 與 kit 新版相同 | 不動（已是最新） |
+| 與 manifest 相同（你沒改過） | **更新為新版** |
+| 與 manifest 不同（你改過） | **不覆蓋**，新版另存 `<檔名>.new` 供 `diff` 後人工合併 |
+| 種子檔（`CLAUDE.md`、`.gitignore`、`docs/development/BACKLOG.md`） | 一律保留，它們安裝後就歸專案自己維護 |
+
+`.kit-manifest` 請納入版控——它是團隊共用的基準線，不在版控裡的話別人升級時會全部變成待合併。
+
+> 在 `--upgrade` 之前用舊版裝的專案沒有 manifest，無從判斷哪些被改過，
+> 因此**所有內容不同的檔案都會走保守路徑產生 `.new`**。合併完那一次之後，
+> 基準線就建立起來了，往後的升級只會提示真正被你改過的檔案。
+
 ## 日常運作
 
 ```

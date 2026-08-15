@@ -13,5 +13,6 @@
 | 前綴 | 模組名稱 | 對應目錄 |
 |------|---------|---------|
 | `WTG` | worktree 防孤兒機制 | `docs/features/worktree_guard/` |
+| `KIT` | 出貨內容同步與安裝／升級機制 | `docs/features/kit_sync/` |
 
 新增模組時先在上表登記前綴，再開工單。

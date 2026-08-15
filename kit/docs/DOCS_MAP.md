@@ -15,6 +15,7 @@
 
 | 文件 | 內容 |
 |---|---|
+| [standards/team_protocol.md](standards/team_protocol.md) | **指路檔**（不含內容）→ 正版在 `../.agent/resources/team_protocol.md`；含章節索引 |
 | [standards/documentation_conventions.md](standards/documentation_conventions.md) | 文件撰寫慣例 |
 | [standards/qa_testing_spec.md](standards/qa_testing_spec.md) | 測試規範與分層策略 |
 | [standards/security_audit.md](standards/security_audit.md) | 資安查核表（後端 OWASP Checklist + 前端客戶端查核） |

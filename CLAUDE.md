@@ -5,8 +5,9 @@
 ## 指令
 
 ```bash
-uv run pytest        # 全套件測試，離線執行
-./install.sh <目標專案路徑>
+uv run pytest                                    # 全套件測試，離線執行
+./install.sh <目標專案路徑>                       # 首次安裝
+./install.sh <目標專案路徑> --upgrade --dry-run   # 升級既有安裝，先看會動到什麼
 ```
 
 ## 架構
@@ -26,6 +27,12 @@ uv run pytest        # 全套件測試，離線執行
   `tests/test_install.py` 的 `_是本機產生物()`，**兩邊必須同步改**，否則
   `test_安裝後檔案與_kit_完全一致` 會失敗。
 - 在 `kit/docs/` 新增文件要同步到 `kit/docs/DOCS_MAP.md` 登記，否則連結測試會抓到孤兒文件。
+- **安裝會多產生一個 `kit/` 裡沒有的檔案：`.agent/.kit-manifest`**（升級用的 sha256 基準線）。
+  `test_安裝後檔案與_kit_完全一致` 的預期清單因此是「kit 檔案 + manifest」，不是純 kit 檔案。
+- **`install.sh` 的種子檔清單**（`is_seed_file()`：`CLAUDE.md`、`.gitignore`、`BACKLOG.md`）
+  決定升級時哪些檔案永不覆蓋。改這份清單要同步改 `tests/test_install.py::test_升級保留種子檔`。
+- `kit/.agent/resources/team_protocol.md` 改章節結構時，要同步 `kit/docs/standards/team_protocol.md`
+  指路檔的章節索引，否則 `test_指路檔章節索引與正版同步` 會失敗。
 
 ## Commit
 

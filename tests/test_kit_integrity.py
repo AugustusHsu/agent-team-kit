@@ -91,8 +91,31 @@ def test_kit_內沒有死連結(kit_root: Path):
 
 
 def test_團隊守則只有一份正版(kit_root: Path):
-    """`team_protocol.md` 若被複製進 docs/standards/ 一定會 drift。"""
-    copies = [p for p in kit_root.rglob("team_protocol.md")]
-    assert [p.relative_to(kit_root).as_posix() for p in copies] == [
-        ".agent/resources/team_protocol.md"
+    """正版只能有一份；`docs/standards/` 那份必須是指路檔，複製過去一定會 drift。"""
+    found = sorted(p.relative_to(kit_root).as_posix() for p in kit_root.rglob("team_protocol.md"))
+    assert found == [".agent/resources/team_protocol.md", "docs/standards/team_protocol.md"]
+
+    正版 = (kit_root / ".agent/resources/team_protocol.md").read_text(encoding="utf-8")
+    指路檔 = (kit_root / "docs/standards/team_protocol.md").read_text(encoding="utf-8")
+
+    assert "本檔不含內容" in 指路檔
+    assert "../../.agent/resources/team_protocol.md" in 指路檔
+    # 指路檔只列章節標題，不得抄任何一段正文
+    正文 = [
+        line.strip()
+        for line in 正版.splitlines()
+        if line.strip() and not line.startswith(("#", "|", ">", "-", "`"))
     ]
+    抄襲 = [line for line in 正文 if line in 指路檔]
+    assert not 抄襲, "指路檔抄了正版的內容：\n" + "\n".join(抄襲)
+
+
+def test_指路檔章節索引與正版同步(kit_root: Path):
+    """索引表是指路檔唯一會過期的部分——正版加章節就必須回來補一列。"""
+    正版 = (kit_root / ".agent/resources/team_protocol.md").read_text(encoding="utf-8")
+    指路檔 = (kit_root / "docs/standards/team_protocol.md").read_text(encoding="utf-8")
+
+    章節 = re.findall(r"^### (\d+\.\d+) ", 正版, flags=re.MULTILINE)
+    assert 章節, "正版找不到任何 §x.y 章節，測試本身可能過期了"
+    缺漏 = [f"§{s}" for s in 章節 if f"| §{s} |" not in 指路檔]
+    assert not 缺漏, "指路檔的章節索引漏了：" + "、".join(缺漏)
