@@ -74,21 +74,26 @@
 
 > 暫時擱置、待未來進一步討論或需要先行更新架構文件 (PRD/API Specs) 的想法與功能點。
 >
-> 📌 **本區只放一行索引，實質內容在 design note**：
-> [`docs/features/process_evolution/design_note.md`](../features/process_evolution/design_note.md)
-> 每一項確定要做時，才畢業成 `PEV-*` 工單。
+> 📌 **Icebox 只放「還沒決定」的事**——一旦決定（做或不做）就離開這裡：
+> 做 → 變成工單；不做 → 只剩 design note 裡的 `Dropped` 紀錄。這條規則讓本區永遠短。
+>
+> 📌 **不是每一項都要有 design note。** 依 [DN-001](../design_notes/DN-001_design_note_mechanism.md) §3.2：
+> **當場寫得出可驗收的 AC → 直接開工單；寫不出來 → 才開 DN。**
+> 沒有 DN 的項目，脈絡暫存在
+> [`process_evolution/design_note.md`](../features/process_evolution/design_note.md)（待拆）。
 
-| 項目 | 描述 | 備註 |
+| 項目 | 狀態 | 卡在哪 |
 |---|---|---|
-| Draft PR + CI 閘門 | `In Progress` 即開 Draft PR，CI 從第一個 commit 就跑；`Done` = merged | design_note §3.1 ⬅ **最優先** |
-| 負向對照自動化 | 新增測試若「還原目標 commit 後仍全綠」= 零鑑別力，CI 擋下 | design_note §3.2 |
-| 審查與開發拆 context | 消除自我審查的獨立性不足 | design_note §3.3 |
-| precheck 腳本 | 審查清單三分法：grep 能證明的不該給 AI 判斷 | design_note §3.4 |
-| 工單瘦身 | 審查輪次與 HITL 問答移出工單檔案 | design_note §3.5 |
-| worktree 重新設計 | 20 KB → 約 3 KB；本專案已停用，出貨版保留程度待定 | design_note §3.6 |
-| design_note 規範化 | 落點、範本欄位、生命週期、與 Icebox 的一對一關係 | design_note §3.9（**元問題**） |
-| Discord 通知／批准層 | 只推「只有人能決定」的第 4 類給使用者 | design_note §3.7 |
-| 展示層生成 | 100% 從 source of truth 生成；Mermaid + 靜態站台，不放專案頁面 | design_note §3.8（排最後） |
-| `DOCS_MAP.md` 是否該列為種子檔 | 其「功能模組」表本應由專案填寫，但 `is_seed_file()` 未涵蓋，升級時會走衝突路徑 | dogfooding 首次發現 |
-| headroom 壓縮工具輸出的副作用 | code-reviewer 讀 diff 時可能讀到壓縮版，審查場景下是風險 | design_note §4.3，待查 |
-| 背景任務 worktree 隔離守衛 | `.claude/settings.json` 的 `worktree.bgIsolation` 與本專案停用 worktree 相衝突 | 本次清理實地遇到 |
+| [DN-001 Design Note 機制本身](../design_notes/DN-001_design_note_mechanism.md) | 🔍 Exploring | 範本欄位、索引生成腳本形狀，要實跑才知道 |
+| [DN-002 Discord 通知與批准層](../design_notes/DN-002_discord_notification_layer.md) | 🌱 Seed | 尚未比方案；先等 CI 閘門定案 |
+| Draft PR + CI 閘門 | 待開 DN | ⬅ **最優先**。AC 寫不出來（`Done` 的定義、CI 紅燈要不要硬擋 merge），需要 DN。design_note §3.1 |
+| 負向對照自動化 | 待開 DN | 要跑在 CI 上，依賴 Draft PR 那份先定案。design_note §3.2 |
+| 工單瘦身 | 待開 DN | 審查輪次與 HITL 問答移出工單檔案，落點未定。design_note §3.5 |
+| worktree 重新設計 | 待開 DN | 本 repo 已停用；出貨版保留到什麼程度未定。design_note §3.6 |
+| 展示層生成 | 待開 DN | 100% 從 source of truth 生成，Mermaid + 靜態站台。排最後。design_note §3.8 |
+| 審查與開發拆 context | 待判定 | 若只有一種做法就直接開工單；若有 subagent／獨立 session／換模型之分則需 DN。design_note §3.3 |
+| precheck 腳本 | 可直接開工單 | 審查清單三分法，做法單一。design_note §3.4 |
+| 生成檔不得含時間相依值 | 可直接開工單 | 立規＋`scan_backlog.py --stale` 只輸出 stdout。理由見 DN-001 §5 |
+| `DOCS_MAP.md` 是否列為種子檔 | 待你決定 | yes/no 一句話。牽涉「專案自填表 vs kit 維護的規範表」的取捨 |
+| headroom 壓縮工具輸出 | 待調查 | code-reviewer 讀 diff 可能讀到壓縮版；本次對話已三度實地遇到。開 spike 工單 |
+| 背景任務 worktree 隔離守衛 | 可直接開工單 | `.claude/settings.json` 的 `worktree.bgIsolation` 與本專案停用 worktree 相衝突 |

@@ -24,6 +24,20 @@
 
 <!-- 依專案補上：design_system.md（設計系統）、devenv_spec.md（開發環境）、third_party_versions.yaml -->
 
+## 設計筆記 (design_notes/)
+
+**開單前置關卡**：把「寫不出驗收標準的東西」變成「寫得出驗收標準的東西」。
+規格見 [DN-001](design_notes/DN-001_design_note_mechanism.md)。
+
+| 編號 | 主題 | 狀態 |
+|---|---|---|
+| [DN-001](design_notes/DN-001_design_note_mechanism.md) | Design Note 機制本身的設計 | 🔍 Exploring |
+| [DN-002](design_notes/DN-002_discord_notification_layer.md) | Discord 作為通知與批准層 | 🌱 Seed |
+
+> ⚠️ **DN 不在 `team_protocol.md` §1.11 的權威階序內**：`Exploring` 的 DN 尚未定案，
+> 不得作為實作依據；`Graduated`／`Dropped` 的 DN 比照已結案工單，是歷史紀錄。
+> 上表日後改由腳本生成（見 DN-001 §3.9），屆時不再手動維護。
+
 ## 功能模組 (features/)
 
 複製 [features/_TEMPLATE/](features/_TEMPLATE/) 建立新模組後，在下表登記：
