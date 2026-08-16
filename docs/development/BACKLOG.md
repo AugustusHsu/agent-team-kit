@@ -18,9 +18,8 @@
 | 4 | PEV-DEV-AGENT-007 | 出貨 `kit/docs/design_notes/`：DN 範本與目錄說明 | process_evolution | devops-engineer | 🟢 Ready |
 | 5 | PEV-DEV-AGENT-008 | `scan_backlog.py` 生成 DN 索引，並檢查懸空依賴 | process_evolution | backend-developer | 🟢 Ready |
 | 6 | PEV-DEV-AGENT-009 | DOCS_MAP 的模組表抽成獨立檔，骨架恢復可升級 | process_evolution | devops-engineer | 🟢 Ready |
-| 7 | PEV-DEV-AGENT-010 | 合併方式的殘留寫死清乾淨，並要求合併訊息帶 Task ID | process_evolution | devops-engineer | 🟢 Ready |
 
-**小計**：7 張（In Progress: 0 / Ready: 7）
+**小計**：6 張（In Progress: 0 / Ready: 6）
 
 ---
 
@@ -54,11 +53,12 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) | 完成時間 |
 |---|---------|------|------|-------------------|---------------|----------|
-| 1 | PEV-DEV-AGENT-003 | 無遠端專案的合併方式降級為 `--no-ff`，補上 squash 前提不成立時的缺口 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T00:15+08:00 |
-| 2 | WTG-DEV-BE-001 | 補齊 worktree 防孤兒機制的登記欄位與對帳邏輯 | worktree_guard | backend-developer | 🚫 Canceled | 2026-08-16T01:03+08:00 |
-| 3 | PEV-DEV-AGENT-001 | 建立 git_workflow.md 並把 DN-003 的裁定落到出貨規範 | process_evolution | devops-engineer | ✅ Done | 2026-08-16 |
+| 1 | PEV-DEV-AGENT-010 | 合併方式的殘留寫死清乾淨，並要求合併訊息帶 Task ID | process_evolution | devops-engineer | ✅ Done | 2026-08-17T14:30+08:00 |
+| 2 | PEV-DEV-AGENT-003 | 無遠端專案的合併方式降級為 `--no-ff`，補上 squash 前提不成立時的缺口 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T00:15+08:00 |
+| 3 | WTG-DEV-BE-001 | 補齊 worktree 防孤兒機制的登記欄位與對帳邏輯 | worktree_guard | backend-developer | 🚫 Canceled | 2026-08-16T01:03+08:00 |
+| 4 | PEV-DEV-AGENT-001 | 建立 git_workflow.md 並把 DN-003 的裁定落到出貨規範 | process_evolution | devops-engineer | ✅ Done | 2026-08-16 |
 
-**小計**：3 張（Done: 2 / Canceled: 1）
+**小計**：4 張（Done: 3 / Canceled: 1）
 
 ---
 
@@ -75,9 +75,9 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟢 Ready | 7 | 70.0% |
+| 🟢 Ready | 6 | 60.0% |
 | ⏳ Pending | 1 | 10.0% |
-| ✅ Done | 2 | 20.0% |
+| ✅ Done | 3 | 30.0% |
 | **總計** | **10** | **100%** |
 
 ### worktree_guard
