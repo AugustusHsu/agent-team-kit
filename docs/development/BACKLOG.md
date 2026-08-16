@@ -1,6 +1,6 @@
 # 📋 待辦總表 (Backlog)
 
-> **最後更新時間**：2026-08-16
+> **最後更新時間**：2026-08-17
 > **工單來源目錄**：`docs/features/*/tasks/`
 > **工單總數**：5 張
 
@@ -10,11 +10,7 @@
 
 > 包含狀態為 `In Progress` 或 `Ready` 的工單。
 
-| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
-|---|---------|------|------|-------------------|---------------|
-| 1 | PEV-DEV-AGENT-003 | 無遠端專案的合併方式降級為 `--no-ff`，補上 squash 前提不成立時的缺口 | process_evolution | devops-engineer | 🔵 In Progress |
-
-**小計**：1 張（In Progress: 1 / Ready: 0）
+*(無)*
 
 ---
 
@@ -48,10 +44,11 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) | 完成時間 |
 |---|---------|------|------|-------------------|---------------|----------|
-| 1 | WTG-DEV-BE-001 | 補齊 worktree 防孤兒機制的登記欄位與對帳邏輯 | worktree_guard | backend-developer | 🚫 Canceled | 2026-08-16T01:03+08:00 |
-| 2 | PEV-DEV-AGENT-001 | 建立 git_workflow.md 並把 DN-003 的裁定落到出貨規範 | process_evolution | devops-engineer | ✅ Done | 2026-08-16 |
+| 1 | PEV-DEV-AGENT-003 | 無遠端專案的合併方式降級為 `--no-ff`，補上 squash 前提不成立時的缺口 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T00:15+08:00 |
+| 2 | WTG-DEV-BE-001 | 補齊 worktree 防孤兒機制的登記欄位與對帳邏輯 | worktree_guard | backend-developer | 🚫 Canceled | 2026-08-16T01:03+08:00 |
+| 3 | PEV-DEV-AGENT-001 | 建立 git_workflow.md 並把 DN-003 的裁定落到出貨規範 | process_evolution | devops-engineer | ✅ Done | 2026-08-16 |
 
-**小計**：2 張（Done: 1 / Canceled: 1）
+**小計**：3 張（Done: 2 / Canceled: 1）
 
 ---
 
@@ -68,9 +65,8 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🔵 In Progress | 1 | 33.3% |
 | ⏳ Pending | 1 | 33.3% |
-| ✅ Done | 1 | 33.3% |
+| ✅ Done | 2 | 66.7% |
 | **總計** | **3** | **100%** |
 
 ### worktree_guard
