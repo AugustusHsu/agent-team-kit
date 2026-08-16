@@ -24,6 +24,17 @@
 
 <!-- 依專案補上：design_system.md（設計系統）、devenv_spec.md（開發環境）、third_party_versions.yaml -->
 
+## 設計筆記 (design_notes/)
+
+**開單前置關卡**：AC 寫不出來時先開一份 DN，寫得出來就直接開工單。
+
+| 文件 | 用途 |
+|---|---|
+| [design_notes/README.md](design_notes/README.md) | 什麼時候該開 DN、取號方式、目錄約定 |
+| [design_notes/_TEMPLATE.md](design_notes/_TEMPLATE.md) | 新 DN 的範本（含狀態機與畢業條件） |
+
+個別 DN 以全域流水號直接放在該目錄下，**不在這裡逐份登記**。
+
 ## 功能模組 (features/)
 
 複製 [features/_TEMPLATE/](features/_TEMPLATE/) 建立新模組後，在下表登記：

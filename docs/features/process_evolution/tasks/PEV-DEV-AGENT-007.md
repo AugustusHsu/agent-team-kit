@@ -3,9 +3,9 @@
 **🔗 依附母任務 (Parent Task ID):** DN-001
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** devops-engineer
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-17T10:05+08:00
-**✅ 完成時間 (Closed):**
+**✅ 完成時間 (Closed):** 2026-08-17T15:10+08:00
 **🔀 審查載體編號 (PR/MR):** —
 
 ## 1. 任務描述 (Description)
@@ -41,17 +41,52 @@ DN-001 §4.4 裁定**完整出貨**：目錄、範本、規範三者都給。本
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] `kit/docs/design_notes/_TEMPLATE.md` 存在，header 有 **5 個欄位**：
+- [x] `kit/docs/design_notes/_TEMPLATE.md` 存在，header 有 **5 個欄位**：
       狀態／建立／依賴／來源／姊妹篇；**沒有**「畢業去向」欄位
-- [ ] `_TEMPLATE.md` 含 DN-001 §3.3 的四狀態說明與 §3.4 的三條畢業條件
-- [ ] `_TEMPLATE.md` 含「⚠️ DN 不得寫實作步驟」的警語（DN-001 §3.9）
-- [ ] `kit/docs/design_notes/README.md` 說明取號方式（DN-001 §3.1 的 grep 指令）
+- [x] `_TEMPLATE.md` 含 DN-001 §3.3 的四狀態說明與 §3.4 的三條畢業條件
+- [x] `_TEMPLATE.md` 含「⚠️ DN 不得寫實作步驟」的警語（DN-001 §3.9）
+- [x] `kit/docs/design_notes/README.md` 說明取號方式（DN-001 §3.1 的 grep 指令）
       與「全域扁平、不放模組底下」的理由
-- [ ] `kit/docs/DOCS_MAP.md` 有 `design_notes/` 一列
+- [x] `kit/docs/DOCS_MAP.md` 有 `design_notes/` 一列
       （⚠️ `test_standards_文件都登記在_DOCS_MAP` **只涵蓋 `standards/`**，這裡要人工確認）
-- [ ] `./install.sh` 裝到全新空目錄後，`docs/design_notes/_TEMPLATE.md` 存在
-- [ ] `uv run pytest` 全綠（含 `test_安裝後檔案與_kit_完全一致`）
-- [ ] `kit/` 內無死連結（`test_kit_內沒有死連結`）
+- [x] `./install.sh` 裝到全新空目錄後，`docs/design_notes/_TEMPLATE.md` 存在
+- [x] `uv run pytest` 全綠（含 `test_安裝後檔案與_kit_完全一致`）
+- [x] `kit/` 內無死連結（`test_kit_內沒有死連結`）
+
+## 📝 Code Review 備註 (Review Notes)
+
+> 審查日期：2026-08-17 ｜ 審查結論：✅ APPROVED
+> 審查方式：作者自審 ＋ 客觀指標核對（含**裝到全新空目錄**的端對端驗證）。
+> 依 `docs/standards/git_workflow.md` §8.3，本工單不推送、無 PR，
+> 本章節即唯一審查載體，編號欄位填 `—`。
+
+### 客觀指標核對（在 `/tmp` 全新安裝的目標專案上量測）
+
+| 指標 | 期望 | 實得 |
+|---|---|---|
+| `ls <新專案>/docs/design_notes/` | `README.md`、`_TEMPLATE.md` | **兩者都在** ✅ |
+| 範本 header 欄位數 | 5（狀態／建立／依賴／來源／姊妹篇） | **5** ✅ |
+| 範本含 `**🎓` header 欄位 | 0 | **0** ✅ |
+| 範本含四狀態列 | 4 | **4** ✅ |
+| 範本含畢業三條件 | 1 | **1** ✅ |
+| 範本含「DN 不得寫實作步驟」 | 1 | **1** ✅ |
+| README 含取號指令 | 1 | **1** ✅ |
+| DOCS_MAP 提及 `design_notes/` | ≥1 | **3** ✅ |
+| `uv run pytest`（含死連結與安裝一致性） | 全綠 | **98 tests / 0 failures** ✅ |
+
+### 兩項超出 AC、但有明確理由的決定
+
+1. **狀態機與畢業條件放在範本的「📎 填寫指引（寫完可以整段刪掉）」段落。**
+   AC 要求範本必須含這兩者，但若當成正文留著，每一份 DN 都會揹一份重複的規範副本。
+   標成可刪的指引段落，既滿足「開檔當下看得到」，又不會製造 N 份會 drift 的副本。
+2. **README 不放 DN 一覽表。** DN-001 §3.9 已定「索引用腳本生成」，
+   手抄索引必然出現孤兒；此處明文寫下這條禁令，避免日後有人好意補一張表。
+
+### 一個測試涵蓋不到、已人工確認的點
+
+`test_standards_文件都登記在_DOCS_MAP` **只掃 `docs/standards/`**，
+`design_notes/` 的登記沒有自動防線。已人工確認 DOCS_MAP 新增「設計筆記」一節，
+且兩條連結都通過 `test_kit_內沒有死連結`。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
