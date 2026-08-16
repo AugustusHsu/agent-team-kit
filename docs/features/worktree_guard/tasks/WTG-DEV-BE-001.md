@@ -9,8 +9,13 @@
 
 > ⛔ **（2026-08-16 取消）** 本專案已停用 worktree 開發流程，本工單失去標的，轉 `Canceled`。
 >
-> 取消理由**不是「機制不需要」**，而是**本專案不再是它的使用者**：worktree 相關規範仍是
-> `kit/` 的出貨內容（通用開發流程），只是本 repo 自己改用單一工作目錄開發。
+> 取消理由**不是「機制不需要」**，而是**本專案不再是它的使用者**：本 repo 改用單一工作目錄開發。
+>
+> 📌 **（2026-08-16 追記）** 同日稍晚，`kit/docs/standards/worktree_workflow.md`
+> 已**整份從出貨內容移除**，分支規則抽回 `team_protocol.md` §1.9（平台中立）。
+> 本工單引用的所有 `worktree_workflow.md` 章節編號（§5.2、§6.1、§6.2）皆已隨檔案消失，
+> 僅作歷史對照。worktree 流程待
+> [DN-003](../../../design_notes/DN-003_git_workflow_and_pr_gate.md) 畢業後另開 DN 重新設計。
 >
 > 📌 **這張工單的證據價值要保留**：取消當下，本 repo 實際存在 **2 個孤兒 worktree**
 > （`KIT-DEV-AGENT-001`、`worktree-doc-3fixes`），後者還帶著 1 顆未合併的 commit。

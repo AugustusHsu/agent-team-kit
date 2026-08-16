@@ -9,7 +9,7 @@
 | [development/BACKLOG.md](development/BACKLOG.md) | **專案現況唯一來源**：進行中／審查中工單、統計、Icebox。由 `scan_backlog.py` 產生，不要手改。 |
 | `../CLAUDE.md` | 每個 AI session 的入口摘要 |
 | `../.agent/resources/team_protocol.md` | 工單生命週期、角色交接、命名約定（**流程正版**） |
-| `../.agent/workflows/git-commit.md` | Commit message 格式、禁止寫入的內容、交付前複查閘門（**commit 正版**） |
+| `../.agent/workflows/commit-message.md` | Commit message 格式、禁止寫入的內容、交付前複查閘門（**commit 正版**） |
 
 ## 跨功能規範 (standards/)
 
@@ -19,7 +19,6 @@
 | [standards/documentation_conventions.md](standards/documentation_conventions.md) | 文件撰寫慣例 |
 | [standards/qa_testing_spec.md](standards/qa_testing_spec.md) | 測試規範與分層策略 |
 | [standards/security_audit.md](standards/security_audit.md) | 資安查核表（後端 OWASP Checklist + 前端客戶端查核） |
-| [standards/worktree_workflow.md](standards/worktree_workflow.md) | **Git Worktree 工作流程**：何時開、命名、生命週期對映工單狀態、收尾與防孤兒 |
 | [standards/adr/](standards/adr/) | 架構決策紀錄 (ADR) |
 
 <!-- 依專案補上：design_system.md（設計系統）、devenv_spec.md（開發環境）、third_party_versions.yaml -->

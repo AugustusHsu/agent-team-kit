@@ -39,7 +39,7 @@ uv run pytest                                    # 全套件測試，離線執�
 commit 前必須把訊息原文給我複查，取得當次同意才執行；上一次的同意不算。
 訊息只描述這個專案的變更，**不得加入 AI 署名 trailer**
 （`Co-Authored-By:`、`🤖 Generated with ...`）。完整格式見
-`kit/.agent/workflows/git-commit.md`。
+`kit/.agent/workflows/commit-message.md`。
 
 ## 本專案自己的開發流程（dogfooding）
 
@@ -56,5 +56,6 @@ commit 前必須把訊息原文給我複查，取得當次同意才執行；上�
 但它**不是**種子檔，升級時會被判定為「使用者改過」而產生 `.new` 衝突。
 本 repo 已經填了 `PEV`/`KIT`/`WTG` 三列，等於明知故犯。是否列為種子檔見 BACKLOG Icebox。
 
-**本專案不使用 worktree**，單一工作目錄開發。`docs/standards/worktree_workflow.md`
-是出貨內容，不是本 repo 的行為準則。
+**本專案不使用 worktree**，單一工作目錄開發。kit 的 worktree 規範已於 2026-08-16
+整份移除（見 [DN-003](docs/design_notes/DN-003_git_workflow_and_pr_gate.md)），
+日後另開 DN 重新設計。

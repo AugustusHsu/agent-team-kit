@@ -33,7 +33,7 @@ kit/
 │   │   ├── scrum-master/                                           # 排程開單
 │   │   ├── frontend-developer/ backend-developer/ devops-engineer/ # 開發
 │   │   └── qa-test-planner/ qa-automation-engineer/ code-reviewer/ # 品質
-│   ├── workflows/              # git-commit / product-analysis / validate-wireframes
+│   ├── workflows/              # commit-message / product-analysis / validate-wireframes
 │   └── scripts/
 │       ├── scan_backlog.py     # 掃工單 → 產生 BACKLOG.md（狀態儀表板）
 │       ├── migrate_dates.py    # 工單日期格式遷移
@@ -41,9 +41,9 @@ kit/
 ├── docs/
 │   ├── DOCS_MAP.md             # 文件導覽入口
 │   ├── development/            # BACKLOG.md、PLAN_FROM_HANDOFF.md
-│   ├── standards/              # 文檔慣例、QA 規範、資安查核、worktree 流程、ADR
+│   ├── standards/              # 文檔慣例、QA 規範、資安查核、ADR
 │   └── features/_TEMPLATE/     # 單一功能模組的文件骨架
-├── .gitignore                  # 基礎忽略清單（含必要的 .claude/worktrees/）
+├── .gitignore                  # 基礎忽略清單
 └── CLAUDE.md                   # 專案接手指南模板
 
 install.sh                      # 安裝到目標專案

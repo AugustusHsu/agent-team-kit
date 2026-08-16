@@ -119,47 +119,39 @@ Pending → Ready → In Progress → In Review → Done
 
 > 📌 立規背景：某張工單在 `In Review` 期間被發現引入功能全阻斷的回歸，最初以新開 FIX 工單處理，後改為**退回原工單**——成因工單既未結案，新開單只會讓同一份錯誤 AC 留在已「完成」的工單裡，並在同一個檔案上製造兩張工單的並行修改風險。
 
-### 1.9 程式碼隔離與 Worktree 生命週期 (🌲 Code Isolation)
+### 1.9 程式碼隔離與分支 (🔀 Code Isolation)
 
-工單定義工作的**狀態**，本節定義工作的**實體位置**。完整規則見
-[`docs/standards/worktree_workflow.md`](../../docs/standards/worktree_workflow.md)，
-以下為與狀態機直接相關的部分。
+工單定義工作的**狀態**，本節定義工作的**實體位置**。
 
-**何時開**：並行度 > 1 才開（Agent 在背景執行、或多個 Agent 平行作業）。
-單線工作直接在主 checkout 開分支即可。**預設同一時間只允許一個活躍 worktree。**
+**一張工單 = 一個分支，分支名 = Task ID。** 使 `git branch` 的每一行都對得回
+`docs/features/{模組}/tasks/{TaskID}.md`。
+**沒有工單的臨時工作，一律先開一張最小工單再開分支。**
 
-**命名**：分支名與 worktree 目錄名皆為 **Task ID**，使 `git worktree list` 的每一行
-都對得回 `docs/features/{模組}/tasks/{TaskID}.md`。
-**沒有工單的臨時工作，一律先開一張最小工單再開 worktree。**
+**分支生命週期對映工單狀態：**
 
-**worktree 的存活期橫跨 `In Progress` 與 `In Review`：**
-
-| 狀態轉換 | worktree 動作 |
+| 狀態轉換 | 分支動作 |
 |---|---|
-| `Ready` → `In Progress` | **建立**，並在工單內登記分支名與建立時間 |
-| `In Progress` → `In Review` | 交付回報＋commit message 草案一併呈交（§2.2）→ **凍結**（尚未 commit） |
-| `In Review` | **保留且凍結**：Developer 不得再寫入，Code Reviewer 讀該 worktree 的工作目錄 |
-| `In Review` → `In Progress` | **解凍**，同一個 worktree 繼續修正 |
-| `In Review` → `Done` | APPROVED → **依 §1.10 commit** → 合併 → 收尾 → **收尾完成才可標 `Done`** |
-| → `Canceled` | 內有 commit 時**必須詢問使用者**保留或丟棄，不可逕自刪除 |
+| `Ready` → `In Progress` | **建立分支**，分支名 = Task ID |
+| `In Progress` → `In Review` | 交付回報＋commit message 草案一併呈交（§2.2）→ **凍結** |
+| `In Review` | **凍結**：Developer 不得再寫入——任何寫入都會讓審查對象漂移 |
+| `In Review` → `In Progress` | **解凍**，同一分支繼續修正 |
+| `In Review` → `Done` | APPROVED → 依 §1.10 commit → 合併 → 刪除分支 → **收尾完成才可標 `Done`** |
+| → `Canceled` | 分支內有 commit 時**必須詢問使用者**保留或丟棄，不可逕自刪除 |
 
-- **不存在 `In Progress` → `Done` 的捷徑**，故每個 worktree 必然經歷 `In Review`。
-- **commit 發生在 APPROVED 之後，不是交付時。** 一張工單產出一個 commit，用的是
-  通過審查的那則訊息原文。
-- **因此 `In Review` 期間，變更沒有任何 ref 指著它**——只存在該 worktree 的工作目錄與
-  私有暫存區（`.git/worktrees/<name>/index`），`git worktree remove` 一執行即**永久消失**。
-  由此推出：**未取得 APPROVED 絕對不可移除 worktree**，且審查期間必須凍結，
-  任何寫入都會讓審查對象漂移。
-- **`In Review` 是凍結而非另開 worktree。** 待審內容尚未 commit，只在那一個 worktree 裡，
-  另開的乾淨 checkout 根本拿不到。真正需要第二個 worktree 的是「審查期間平行開下一張
-  工單」，那屬於下一張工單，與 review 無關。
-- **多 worktree 時收尾一次一個**，整套跑完（commit → 合併 → 移除 → 刪分支）才換下一個。
-- **`Done` 的前置條件**：worktree 已收尾，由 Code Reviewer 在 APPROVED 時一併檢查；
+- **不存在 `In Progress` → `Done` 的捷徑**，故每張工單必然經歷 `In Review`。
+- **commit 發生在 APPROVED 之後，不是交付時。** 一張工單產出一個 commit，
+  用的是通過審查的那則訊息原文。
+- 由此推出：**`In Review` 期間變更沒有任何 ref 指著它**，只存在工作目錄與暫存區。
+  任何 `git checkout`／`git reset`／清理動作都會使它**永久消失**。
+- **`Done` 的前置條件**：分支已收尾，由 Code Reviewer 在 APPROVED 時一併檢查；
   commit 產生的 SHA 於此時回填工單。
 
-> ⚠️ 收尾時 `git branch -d` 的「未合併」警告**在「已合併到非當前分支」時同樣會出現**。
+> ⚠️ 刪分支時 `git branch -d` 的「未合併」警告**在「已合併到非當前分支」時同樣會出現**。
 > **禁止**看到失敗就改用 `-D`，必須先以
 > `git merge-base --is-ancestor <分支> <合併目標>` 客觀驗證。
+
+> 📌 **本節是最小保底規範。** 合併策略、遠端同步、PR／MR 等平台上的審查流程
+> 尚未定案，待專案自行約定。
 
 ### 1.10 Commit 閘門 (🔒 HITL Gate before Commit)
 
@@ -181,7 +173,7 @@ commit 則在取得 APPROVED 之後才執行**（見 §1.9）。
 
 commit message 的格式、Emoji 對照與**禁止寫入的內容**（AI 署名 trailer、對話脈絡、
 工具／session 內部狀態），一律以
-[`.agent/workflows/git-commit.md`](../workflows/git-commit.md) 為**正版**，本節不重述。
+[`.agent/workflows/commit-message.md`](../workflows/commit-message.md) 為**正版**，本節不重述。
 
 > 此閘門的成立前提是**工單狀態機不允許自動提交**：Developer 的交付回報止於「訊息已備妥」，
 > 提交動作屬於使用者的決定。Agent 代為執行 `git commit` 只是省下貼指令的工，
@@ -224,14 +216,14 @@ commit message 的格式、Emoji 對照與**禁止寫入的內容**（AI 署名 
   - **🚨 矛盾與風險警告**: 列出開發過程中發現的任何風險或架構衝突（無則填「無」）。
   - **🧪 驗證/測試建議**: 提供具體的驗證方法（`curl` 指令、`pytest` 指令、或瀏覽器頁面路徑）。
 - 交付回報連同工單原文一併提交給 Code Reviewer。
-- **交付回報須附上 commit message 草案**（依 `.agent/workflows/git-commit.md` 產出），
+- **交付回報須附上 commit message 草案**（依 `.agent/workflows/commit-message.md` 產出），
   與報告**一併呈交、一次表態**。此時**尚未 commit**——commit 在 APPROVED 之後才執行（§1.10）。
 - 審查者可只針對報告表態退回；退回時訊息一併作廢，重新交付須重新呈現。
-  通過後由 Developer 執行 commit，並依 §1.9 收尾 worktree。
+  通過後由 Developer 執行 commit，並依 §1.9 收尾分支。
 
 ### 2.3 Code Reviewer → Done / 退回
 - Code Reviewer 審查後產出標準化審查報告（含 Verdict: APPROVED 或 CHANGES REQUESTED）。
-- 若 APPROVED，**Developer 隨即以複查通過的訊息執行 commit**，再標記工單 `Done`。**若該工單使用了 worktree，必須先確認收尾完成（commit、合併、目錄移除、分支刪除）才可標 `Done`**，並把產生的 SHA 回填工單——見 §1.9。
+- 若 APPROVED，**Developer 隨即以複查通過的訊息執行 commit**，再標記工單 `Done`。**必須先確認分支收尾完成（commit、合併、分支刪除）才可標 `Done`**，並把產生的 SHA 回填工單——見 §1.9。
 - 若 CHANGES REQUESTED，工單退回 `In Progress`，Developer 根據報告修正。
 - **回寫機制 (Write-back)**：Code Reviewer 審查完成後，**必須**將審查結果直接寫入對應工單的 `.md` 檔案（可更新驗收標準、規格區塊，或新增「📝 Code Review 備註」章節），確保 Developer 重新開工時無需額外查找審查報告。詳細寫入格式請參照 `code-reviewer` SKILL.md 中的「回寫審查結果至工單」條款。
 

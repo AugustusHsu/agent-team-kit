@@ -3,7 +3,7 @@
 
 # --- Worktree（必要，不可移除）---
 # worktree 目錄內含一個 .git 檔案，若被 git add 會變成詭異的 gitlink。
-# 詳見 docs/standards/worktree_workflow.md §2
+# 即使專案不採用 worktree 流程，Claude Code 仍可能建立，故保留本規則。
 .claude/worktrees/
 
 # --- 接手文件 ---

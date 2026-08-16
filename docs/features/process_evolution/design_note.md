@@ -158,24 +158,21 @@ BACKLOG 可從 merged PR 生成，狀態漂移消失。
 
 ### 3.6 worktree 重新設計
 
-**現況**：`kit/docs/standards/worktree_workflow.md` **20 KB，是整個 kit 最大的文件**，
-其中 §6 防孤兒機制、§5.2 `git branch -d` 誤報陷阱、§5.3 force 代價分類佔大半。
+**現況（2026-08-16 更新）**：`kit/docs/standards/worktree_workflow.md`（421 行、20 KB，
+曾是整個 kit 最大的文件）**已整份移除**。移除前它同時扛著 worktree 與通用 git 規則，
+兩者混在一起；移除時把分支規則抽回 `team_protocol.md` §1.9（改寫為平台中立），
+worktree 本身留待日後重新設計。
 
-**實證**：本 repo 於 2026-08-16 清理時，實際存在 **2 個孤兒 worktree**
-（其中一個帶著未合併的 commit）。**四層防孤兒機制沒有守住。**
-詳見已取消的 `WTG-DEV-BE-001`。
+**實證**：本 repo 於 2026-08-16 清理時實際存在 **2 個孤兒 worktree**
+（`KIT-DEV-AGENT-001`、`worktree-doc-3fixes`），後者還帶著 1 顆未合併的 commit——
+文件裡的四層防孤兒機制在真實使用下沒有守住，見已取消的 `WTG-DEV-BE-001`。
 
 **重新設計的關鍵前提**：**worktree 的價值是「同時擁有多個工作目錄」，不是「隔離」——
 隔離是 branch 給的。** 導入 PR 後分支會 push 到 remote，worktree 目錄砍掉也不丟東西，
-防孤兒機制的必要性蒸發九成。
+四層防孤兒機制的必要性大幅下降。因此重新設計必須排在
+[DN-003](../../design_notes/DN-003_git_workflow_and_pr_gate.md) 之後。
 
-**判準**：會不會同時需要兩個目錄各自跑起來（兩個 dev server、兩套 compose）？
-會 → 用；不會 → 只開 branch，`git switch` 足夠。
-
-**目標**：20 KB → 約 3 KB，只留「何時值得開／開幾個／怎麼收」。
-§5.1 的 `--ff-only` merge 流程可整段刪除（merge 改由 PR 執行）。
-
-**待決**：本專案已停用，那 kit 出貨版要保留到什麼程度？
+**下一步**：DN-003 畢業後另開 DN。
 
 ### 3.7 Discord 作為通知與批准層
 

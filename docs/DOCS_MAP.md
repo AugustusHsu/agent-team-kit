@@ -9,7 +9,7 @@
 | [development/BACKLOG.md](development/BACKLOG.md) | **專案現況唯一來源**：進行中／審查中工單、統計、Icebox。由 `scan_backlog.py` 產生，不要手改。 |
 | `../CLAUDE.md` | 每個 AI session 的入口摘要 |
 | `../.agent/resources/team_protocol.md` | 工單生命週期、角色交接、命名約定（**流程正版**） |
-| `../.agent/workflows/git-commit.md` | Commit message 格式、禁止寫入的內容、交付前複查閘門（**commit 正版**） |
+| `../.agent/workflows/commit-message.md` | Commit message 格式、禁止寫入的內容、交付前複查閘門（**commit 正版**） |
 
 ## 跨功能規範 (standards/)
 
@@ -19,7 +19,6 @@
 | [standards/documentation_conventions.md](standards/documentation_conventions.md) | 文件撰寫慣例 |
 | [standards/qa_testing_spec.md](standards/qa_testing_spec.md) | 測試規範與分層策略 |
 | [standards/security_audit.md](standards/security_audit.md) | 資安查核表（後端 OWASP Checklist + 前端客戶端查核） |
-| [standards/worktree_workflow.md](standards/worktree_workflow.md) | **Git Worktree 工作流程**（出貨內容；⚠️ **本 repo 自己不採用**，見 `../CLAUDE.md`） |
 | [standards/adr/](standards/adr/) | 架構決策紀錄 (ADR) |
 
 <!-- 依專案補上：design_system.md（設計系統）、devenv_spec.md（開發環境）、third_party_versions.yaml -->
@@ -33,6 +32,7 @@
 |---|---|---|
 | [DN-001](design_notes/DN-001_design_note_mechanism.md) | Design Note 機制本身的設計 | 🔍 Exploring |
 | [DN-002](design_notes/DN-002_discord_notification_layer.md) | Discord 作為通知與批准層 | 🌱 Seed |
+| [DN-003](design_notes/DN-003_git_workflow_and_pr_gate.md) | Git 流程與 PR 閘門 | 🔍 Exploring |
 
 > ⚠️ **DN 不在 `team_protocol.md` §1.11 的權威階序內**：`Exploring` 的 DN 尚未定案，
 > 不得作為實作依據；`Graduated`／`Dropped` 的 DN 比照已結案工單，是歷史紀錄。

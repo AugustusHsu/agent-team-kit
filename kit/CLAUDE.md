@@ -68,8 +68,8 @@
 
 ## Commit 規則這裡必須寫
 
-**這是不寫就等於沒有的一條。** `.agent/workflows/git-commit.md` 只有在被明確呼叫
-（`/git-commit`）時才載入；Agent 順手 commit 的路徑完全不經過它。要讓規則對**每一次**
+**這是不寫就等於沒有的一條。** `.agent/workflows/commit-message.md` 只有在被明確呼叫
+（`/commit-message`）時才載入；Agent 順手 commit 的路徑完全不經過它。要讓規則對**每一次**
 提交生效，只能靠 CLAUDE.md——它是唯一每次請求都在 context 裡的檔案。
 
 寫**三行以內**，細節一律指向正版：
@@ -77,28 +77,11 @@
 ```markdown
 ## Commit
 commit 前必須把訊息原文給我複查，取得當次同意才執行；上一次的同意不算。
-訊息只描述本專案的變更，禁止 AI 署名 trailer。格式見 `.agent/workflows/git-commit.md`。
+訊息只描述本專案的變更，禁止 AI 署名 trailer。格式見 `.agent/workflows/commit-message.md`。
 ```
 
 即使使用者的全域 `~/.claude/CLAUDE.md` 已有同等規則，**這段仍然要寫**——
 專案會被別人 clone、會在別台機器上跑，全域設定不跟著 repo 走。
-
-## 若專案採用 worktree，這裡必須寫
-
-**這是不寫就完全不會生效的一條。** Claude Code 的 `EnterWorktree` 工具明定：
-只有使用者當下指示、或 CLAUDE.md／記憶庫明確要求時才可使用。
-因此 `docs/standards/worktree_workflow.md` 寫得再完整，若沒有在 CLAUDE.md
-留下觸發指示，Agent 一律不會去開 worktree。
-
-在 CLAUDE.md 內寫**三行以內**即可，細節一律靠導航指向正版文件：
-
-```markdown
-## Worktree
-背景執行或多 Agent 並行時，動程式碼前先開 worktree，分支名 = Task ID。
-預設同時只允許一個；規則見 `docs/standards/worktree_workflow.md`。
-```
-
-單線開發、不使用 worktree 的專案，整段省略。
 
 ## 順便問：這個專案有文檔資料夾嗎？
 

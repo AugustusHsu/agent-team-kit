@@ -38,6 +38,6 @@ description: 負責執行所有開發環境建設、容器化配置與 DevOps �
 - **📌 實體打勾 (Checked Off)**: 你必須使用工具實際編輯該工單 `.md` 檔案，將「驗收標準 (Acceptance Criteria)」中已完成的項目從 `[ ]` 改為 `[x]`。
 - **🚨 矛盾與風險警告**: 【重點區塊】若有發現配置衝突、ADR 與產出不一致、安全風險，在此高亮標示並等待使用者裁定。(若一切順利則填寫「無」)。
 - **🧪 驗證/測試建議**: 附上驗證此配置的具體指令（例如 `docker compose config --quiet`、`make help`、`pre-commit run --all-files`、`docker compose up -d && docker compose ps` 等）。
-- **📝 Commit Message 草案**: 依 `.agent/workflows/git-commit.md` 產出，隨本回報一併呈交供複查。**此時不要 commit。**
-- **➡️ 下一步**: 提示使用者「開發已完成，交付回報與 commit message 草案如上，請提交給 `code-reviewer` 審查；通過後才執行 commit 並收尾 worktree（team_protocol §1.10 / §1.9）。」
+- **📝 Commit Message 草案**: 依 `.agent/workflows/commit-message.md` 產出，隨本回報一併呈交供複查。**此時不要 commit。**
+- **➡️ 下一步**: 提示使用者「開發已完成，交付回報與 commit message 草案如上，請提交給 `code-reviewer` 審查；通過後才執行 commit 並收尾分支（team_protocol §1.10 / §1.9）。」
 - **📌 Status 更新**: 開始執行時將工單 Status 改為 `In Progress`；交付完成時改為 `In Review`。（詳見 `team_protocol.md` §1.3）

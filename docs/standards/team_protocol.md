@@ -24,7 +24,7 @@
 | §1.6 | 日期欄位更新規則 |
 | §1.7 | 執行前的 Human-in-the-loop 確認 (🔒 HITL Gate at Execution) |
 | §1.8 | 新發現缺陷的收容優先序 (🔁 Defect Routing Priority) |
-| §1.9 | 程式碼隔離與 Worktree 生命週期 (🌲 Code Isolation) |
+| §1.9 | 程式碼隔離與分支 (🔀 Code Isolation) |
 | §1.10 | Commit 閘門 (🔒 HITL Gate before Commit) |
 | §1.11 | 文檔權威階序 (📚 Source of Truth Hierarchy) |
 | §2 | 角色交接規範 (Handoff Rules) |
@@ -41,5 +41,4 @@
 
 - 工單模板：[`.agent/resources/task_template.md`](../../.agent/resources/task_template.md)
 - 文件分檔與交叉引用守則：[documentation_conventions.md](documentation_conventions.md)
-- Worktree 完整規則：[worktree_workflow.md](worktree_workflow.md)
-- Commit message 正版：[`.agent/workflows/git-commit.md`](../../.agent/workflows/git-commit.md)
+- Commit message 正版：[`.agent/workflows/commit-message.md`](../../.agent/workflows/commit-message.md)

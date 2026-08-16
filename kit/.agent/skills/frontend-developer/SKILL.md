@@ -59,8 +59,8 @@ description: 負責執行所有前端與 UI 相關的實作任務。當使用者
 - **🚨 矛盾與風險警告**: 若有發現 UI 邏輯衝突、Wireframe 與工單不一致等問題，在此高亮標示並等待使用者裁定。(若一切順利則填寫「無」)。
 - **🔒 資安自查**: 對照第 5 節逐條確認並回報結果。本次若有觸及**導航目標、客戶端儲存、動態渲染或權限呈現**，必須明確寫出你做了哪些驗證（不得只寫「無資安疑慮」）；完全未觸及時填寫「本次變更未觸及第 5 節任一情境」。
 - **🧪 驗證建議**: 建議使用者執行 `npm run dev` 並透過 Browser Agent 連線到對應頁面進行視覺確認，或提供具體的手動測試步驟。
-- **📝 Commit Message 草案**: 依 `.agent/workflows/git-commit.md` 產出，隨本回報一併呈交供複查。**此時不要 commit。**
-- **➡️ 下一步**: 提示使用者「開發已完成，交付回報與 commit message 草案如上，請提交給 `code-reviewer` 審查；通過後才執行 commit 並收尾 worktree（team_protocol §1.10 / §1.9）。」
+- **📝 Commit Message 草案**: 依 `.agent/workflows/commit-message.md` 產出，隨本回報一併呈交供複查。**此時不要 commit。**
+- **➡️ 下一步**: 提示使用者「開發已完成，交付回報與 commit message 草案如上，請提交給 `code-reviewer` 審查；通過後才執行 commit 並收尾分支（team_protocol §1.10 / §1.9）。」
 - **📌 Status 更新**: 開始執行時將工單 Status 改為 `In Progress`；交付完成時改為 `In Review`。（詳見 `team_protocol.md` §1.3）
 - **🔄 刷新 BACKLOG**: 更新完工單的 Status 後，你**必須**使用 `run_command` 執行以下指令來刷新總表，確保團隊進度同步：`uv run python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md`
 

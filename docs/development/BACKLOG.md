@@ -86,10 +86,10 @@
 |---|---|---|
 | [DN-001 Design Note 機制本身](../design_notes/DN-001_design_note_mechanism.md) | 🔍 Exploring | 範本欄位、索引生成腳本形狀，要實跑才知道 |
 | [DN-002 Discord 通知與批准層](../design_notes/DN-002_discord_notification_layer.md) | 🌱 Seed | 尚未比方案；先等 CI 閘門定案 |
-| Draft PR + CI 閘門 | 待開 DN | ⬅ **最優先**。AC 寫不出來（`Done` 的定義、CI 紅燈要不要硬擋 merge），需要 DN。design_note §3.1 |
-| 負向對照自動化 | 待開 DN | 要跑在 CI 上，依賴 Draft PR 那份先定案。design_note §3.2 |
+| [DN-003 Git 流程與 PR 閘門](../design_notes/DN-003_git_workflow_and_pr_gate.md) | 🔍 Exploring | ⬅ **最優先**。兩個直接衝突待你裁定：commit 時點、push 授權（DN-003 §3） |
+| 負向對照自動化 | 待開 DN | 要跑在 CI 上，依賴 DN-003 先定案。design_note §3.2 |
 | 工單瘦身 | 待開 DN | 審查輪次與 HITL 問答移出工單檔案，落點未定。design_note §3.5 |
-| worktree 重新設計 | 待開 DN | 本 repo 已停用；出貨版保留到什麼程度未定。design_note §3.6 |
+| worktree 重新設計 | 待開 DN | kit 內容已於 2026-08-16 整份移除、分支規則搬回 team_protocol §1.9。**必須排在 DN-003 之後**：導入 PR 後 worktree 的必要性會重估 |
 | 展示層生成 | 待開 DN | 100% 從 source of truth 生成，Mermaid + 靜態站台。排最後。design_note §3.8 |
 | 審查與開發拆 context | 待判定 | 若只有一種做法就直接開工單；若有 subagent／獨立 session／換模型之分則需 DN。design_note §3.3 |
 | precheck 腳本 | 可直接開工單 | 審查清單三分法，做法單一。design_note §3.4 |
