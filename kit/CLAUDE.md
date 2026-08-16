@@ -76,9 +76,14 @@
 
 ```markdown
 ## Commit
-commit 前必須把訊息原文給我複查，取得當次同意才執行；上一次的同意不算。
-訊息只描述本專案的變更，禁止 AI 署名 trailer。格式見 `.agent/workflows/commit-message.md`。
+工單分支上的 commit 直接做，不用先問。**合併回主線前**須把訊息原文給我複查、
+取得當次同意；上一次的同意不算。訊息只描述本專案的變更，禁止 AI 署名 trailer。
+格式見 `.agent/workflows/commit-message.md`。
 ```
+
+⚠️ **閘門的範圍是「進入主線前」，不是「每一顆 commit 前」。** 寫成後者會讓 Agent
+在工單分支上每提交一次就停下來問一次——那既不是規則的原意，也會讓開發寸步難行。
+正版定義見 `.agent/resources/team_protocol.md` §1.10。
 
 即使使用者的全域 `~/.claude/CLAUDE.md` 已有同等規則，**這段仍然要寫**——
 專案會被別人 clone、會在別台機器上跑，全域設定不跟著 repo 走。

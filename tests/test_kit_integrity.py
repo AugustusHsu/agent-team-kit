@@ -45,6 +45,13 @@ LINK_PLACEHOLDERS = {"路徑", "relative/path"}
         r"§6\.1 的 squash|\| *squash 合併 *\|",
         "一般流程不得寫死 squash，合併方式依平台分流（§6.1）",
     ),
+    # commit 閘門的範圍是「進入主線前」，不是「每一顆 commit 前」。抓兩種殘留形狀：
+    # §1.10 那句「任何 commit 之前」，以及 kit/CLAUDE.md 模板叫每個專案抄進自己
+    # CLAUDE.md 的嚴格版——後者槓桿最大，抄錯就會在每個裝了 kit 的專案每次請求生效。
+    (
+        r"任何 commit 之前|commit 前必須把訊息原文",
+        "commit 閘門在進入主線那一刻；工單分支上的中間 commit 不需事前同意（§1.10）",
+    ),
 ]
 
 

@@ -47,7 +47,9 @@ BACKLOG 卻完全沒更新。
 
 ## Commit
 
-commit 前必須把訊息原文給我複查，取得當次同意才執行；上一次的同意不算。
+工單分支（含 worktree）上的 commit 直接做，不用先問。**合併回整合分支或主線前**，
+必須把合併訊息原文給我複查、取得當次同意；上一次的同意不算。
+直接在主線／整合分支上 commit 不適用這項豁免，仍須事前同意。
 訊息只描述這個專案的變更，**不得加入 AI 署名 trailer**
 （`Co-Authored-By:`、`🤖 Generated with ...`）。完整格式見
 `kit/.agent/workflows/commit-message.md`。
