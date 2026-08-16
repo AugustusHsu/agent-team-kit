@@ -131,3 +131,91 @@ def test_底線開頭的目錄不被當成功能模組(scanned):
     """kit 自己帶的 `_TEMPLATE/` 是拿來複製的骨架，不該以模組身分出現在報表裡。"""
     assert "_TEMPLATE" not in scanned
     assert set(scanned) == {"another_module", "example_module"}
+# ---------------------------------------------------------------------------
+# 設計筆記 (Design Notes) 索引
+# ---------------------------------------------------------------------------
+
+
+def _寫一份_dn(dn_dir: Path, 編號: str, 標題: str, 狀態: str, 依賴: str) -> None:
+    dn_dir.mkdir(parents=True, exist_ok=True)
+    (dn_dir / f"{編號}_fixture.md").write_text(
+        f"# [{編號}] {標題}\n\n"
+        f"**🚥 狀態 (Status):** {狀態}\n"
+        f"**📅 建立 (Created):** 2026-01-01\n"
+        f"**🔗 依賴 (Depends on):** {依賴}\n"
+        f"**📌 來源 (Origin):** 測試 fixture\n",
+        encoding="utf-8",
+    )
+
+
+@pytest.fixture
+def 有_dn_的專案(project: Path, tmp_path: Path) -> Path:
+    """把 session 級的 project 複製一份再鋪 DN，避免污染其他測試。"""
+    import shutil
+
+    dest = tmp_path / "proj_with_dn"
+    shutil.copytree(project, dest)
+    dn_dir = dest / "docs" / "design_notes"
+    _寫一份_dn(dn_dir, "DN-001", "第一份設計筆記", "🌱 Seed", "—")
+    _寫一份_dn(dn_dir, "DN-002", "第二份設計筆記", "🔍 Exploring", "DN-001（格式）")
+    return dest
+
+
+def test_backlog_列出設計筆記且排在冰箱之前(有_dn_的專案: Path, tmp_path: Path):
+    out = tmp_path / "BACKLOG_dn.md"
+    result = run_script(有_dn_的專案, "scan_backlog.py", "--format", "backlog", "--output", str(out))
+    assert result.returncode == 0, result.stderr
+    text = out.read_text(encoding="utf-8")
+
+    assert "🧪 設計筆記 (Design Notes)" in text
+    assert "DN-001" in text and "第一份設計筆記" in text
+    assert "🔍 Exploring" in text
+    assert "../design_notes/DN-002_fixture.md" in text
+    # 開單前置關卡排在冰箱之前：DN 是「還沒變成工單」的東西，冰箱是「決定不做」的東西
+    assert text.index("🧪 設計筆記") < text.index("🧊 冰箱")
+
+
+def test_backlog_標出懸空的_dn_依賴(有_dn_的專案: Path, tmp_path: Path):
+    """依賴指向一份不存在的 DN 時要自己浮出來——DN-002 曾懸空六份 DN 的時間都沒人發現。"""
+    dn_dir = 有_dn_的專案 / "docs" / "design_notes"
+    _寫一份_dn(dn_dir, "DN-003", "指向不存在的依賴", "🌱 Seed", "DN-099（根本沒這份）")
+
+    out = tmp_path / "BACKLOG_dangling.md"
+    run_script(有_dn_的專案, "scan_backlog.py", "--format", "backlog", "--output", str(out))
+    text = out.read_text(encoding="utf-8")
+
+    assert "懸空依賴" in text
+    assert "DN-003 → `DN-099`" in text
+    # 存在的依賴不該被誤報
+    assert "`DN-001`" not in text.split("懸空依賴")[1]
+
+
+def test_backlog_沒有_dn_時整段省略(project: Path, tmp_path: Path):
+    """裝了 kit 但還沒開過 DN 的專案不該看到一張空表，也不該報錯。"""
+    out = tmp_path / "BACKLOG_no_dn.md"
+    result = run_script(project, "scan_backlog.py", "--format", "backlog", "--output", str(out))
+    assert result.returncode == 0, result.stderr
+    text = out.read_text(encoding="utf-8")
+
+    assert "🧪 設計筆記" not in text
+    assert "🧊 冰箱 (Icebox)" in text
+
+
+def test_backlog_的設計筆記區塊不含時間相依值(有_dn_的專案: Path, tmp_path: Path):
+    """納入版控的生成檔內容必須是輸入的純函數，否則每天重跑都生出假 diff。"""
+    第一次 = tmp_path / "BACKLOG_pure_1.md"
+    run_script(有_dn_的專案, "scan_backlog.py", "--format", "backlog", "--output", str(第一次))
+    區塊 = 第一次.read_text(encoding="utf-8").split("🧪 設計筆記")[1].split("🧊 冰箱")[0]
+
+    for 時間詞 in ("天前", "距今", "已開", "days"):
+        assert 時間詞 not in 區塊, f"設計筆記區塊不得出現時間相依值：{時間詞}"
+
+
+def test_backlog_重跑不改變設計筆記區塊(有_dn_的專案: Path, tmp_path: Path):
+    """就地重跑必須冪等——冰箱是人工維護的，DN 索引是生成的，兩者都不能在重跑時漂移。"""
+    out = tmp_path / "BACKLOG_idem.md"
+    run_script(有_dn_的專案, "scan_backlog.py", "--format", "backlog", "--output", str(out))
+    第一次 = out.read_text(encoding="utf-8")
+
+    run_script(有_dn_的專案, "scan_backlog.py", "--format", "backlog", "--output", str(out))
+    assert out.read_text(encoding="utf-8") == 第一次

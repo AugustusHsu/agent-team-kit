@@ -12,10 +12,9 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
 |---|---------|------|------|-------------------|---------------|
-| 1 | PEV-DEV-AGENT-008 | `scan_backlog.py` 生成 DN 索引，並檢查懸空依賴 | process_evolution | backend-developer | 🟢 Ready |
-| 2 | PEV-DEV-AGENT-009 | DOCS_MAP 的模組表抽成獨立檔，骨架恢復可升級 | process_evolution | devops-engineer | 🟢 Ready |
+| 1 | PEV-DEV-AGENT-009 | DOCS_MAP 的模組表抽成獨立檔，骨架恢復可升級 | process_evolution | devops-engineer | 🟢 Ready |
 
-**小計**：2 張（In Progress: 0 / Ready: 2）
+**小計**：1 張（In Progress: 0 / Ready: 1）
 
 ---
 
@@ -49,17 +48,18 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) | 完成時間 |
 |---|---------|------|------|-------------------|---------------|----------|
-| 1 | PEV-DEV-AGENT-006 | scrum-master 加上「開單前置關卡」 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:40+08:00 |
-| 2 | PEV-DEV-AGENT-005 | `team_protocol.md`：DN 的權威效力與模組「類型」欄位 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:10+08:00 |
-| 3 | PEV-DEV-AGENT-011 | commit 閘門的範圍：把關「進入主線」，不是每一顆 commit | process_evolution | devops-engineer | ✅ Done | 2026-08-17T16:40+08:00 |
-| 4 | PEV-DEV-AGENT-004 | `documentation_conventions.md` 新增 Design Note 機制章節 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T15:45+08:00 |
-| 5 | PEV-DEV-AGENT-007 | 出貨 `kit/docs/design_notes/`：DN 範本與目錄說明 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T15:10+08:00 |
-| 6 | PEV-DEV-AGENT-010 | 合併方式的殘留寫死清乾淨，並要求合併訊息帶 Task ID | process_evolution | devops-engineer | ✅ Done | 2026-08-17T14:30+08:00 |
-| 7 | PEV-DEV-AGENT-003 | 無遠端專案的合併方式降級為 `--no-ff`，補上 squash 前提不成立時的缺口 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T00:15+08:00 |
-| 8 | WTG-DEV-BE-001 | 補齊 worktree 防孤兒機制的登記欄位與對帳邏輯 | worktree_guard | backend-developer | 🚫 Canceled | 2026-08-16T01:03+08:00 |
-| 9 | PEV-DEV-AGENT-001 | 建立 git_workflow.md 並把 DN-003 的裁定落到出貨規範 | process_evolution | devops-engineer | ✅ Done | 2026-08-16 |
+| 1 | PEV-DEV-AGENT-008 | `scan_backlog.py` 生成 DN 索引，並檢查懸空依賴 | process_evolution | backend-developer | ✅ Done | 2026-08-17T18:20+08:00 |
+| 2 | PEV-DEV-AGENT-006 | scrum-master 加上「開單前置關卡」 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:40+08:00 |
+| 3 | PEV-DEV-AGENT-005 | `team_protocol.md`：DN 的權威效力與模組「類型」欄位 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:10+08:00 |
+| 4 | PEV-DEV-AGENT-011 | commit 閘門的範圍：把關「進入主線」，不是每一顆 commit | process_evolution | devops-engineer | ✅ Done | 2026-08-17T16:40+08:00 |
+| 5 | PEV-DEV-AGENT-004 | `documentation_conventions.md` 新增 Design Note 機制章節 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T15:45+08:00 |
+| 6 | PEV-DEV-AGENT-007 | 出貨 `kit/docs/design_notes/`：DN 範本與目錄說明 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T15:10+08:00 |
+| 7 | PEV-DEV-AGENT-010 | 合併方式的殘留寫死清乾淨，並要求合併訊息帶 Task ID | process_evolution | devops-engineer | ✅ Done | 2026-08-17T14:30+08:00 |
+| 8 | PEV-DEV-AGENT-003 | 無遠端專案的合併方式降級為 `--no-ff`，補上 squash 前提不成立時的缺口 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T00:15+08:00 |
+| 9 | WTG-DEV-BE-001 | 補齊 worktree 防孤兒機制的登記欄位與對帳邏輯 | worktree_guard | backend-developer | 🚫 Canceled | 2026-08-16T01:03+08:00 |
+| 10 | PEV-DEV-AGENT-001 | 建立 git_workflow.md 並把 DN-003 的裁定落到出貨規範 | process_evolution | devops-engineer | ✅ Done | 2026-08-16 |
 
-**小計**：9 張（Done: 8 / Canceled: 1）
+**小計**：10 張（Done: 9 / Canceled: 1）
 
 ---
 
@@ -76,9 +76,9 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟢 Ready | 2 | 18.2% |
+| 🟢 Ready | 1 | 9.1% |
 | ⏳ Pending | 1 | 9.1% |
-| ✅ Done | 8 | 72.7% |
+| ✅ Done | 9 | 81.8% |
 | **總計** | **11** | **100%** |
 
 ### worktree_guard
@@ -87,6 +87,23 @@
 |------|------|------|
 | 🚫 Canceled | 1 | 100.0% |
 | **總計** | **1** | **100%** |
+
+---
+
+## 🧪 設計筆記 (Design Notes)
+
+> 開單前置關卡：AC 寫不出來時先開 DN，寫得出來就直接開工單。
+> **本節由 `scan_backlog.py` 生成，不要手動編輯。**
+
+| DN | 狀態 | 標題 | 依賴 |
+|---|---|---|---|
+| [DN-001](../design_notes/DN-001_design_note_mechanism.md) | 🎓 Graduated | Design Note 機制本身的設計 | — |
+| [DN-002](../design_notes/DN-002_discord_notification_layer.md) | 🌱 Seed | Discord 作為通知與批准層 | DN-001（本檔的格式）；DN-007（CI 閘門，2026-08-17 開出，解除本欄長期懸空） |
+| [DN-003](../design_notes/DN-003_git_workflow_and_pr_gate.md) | 🎓 Graduated | Git 流程與 PR 閘門 | DN-001（格式） |
+| [DN-004](../design_notes/DN-004_skill_system_realignment.md) | 🌱 Seed | Skill 體系與現行流程的重新對齊 | DN-001（本檔的格式）；DN-003（git 流程，其落地會先改動 6 份 skill）； |
+| [DN-005](../design_notes/DN-005_parallel_task_decomposition.md) | 🌱 Seed | 並行開發的任務拆解與變更傳播 | DN-001（本檔的格式）；DN-003（git 流程，本 DN 視其為「基本層」並在其上擴充） |
+| [DN-006](../design_notes/DN-006_branch_topology_and_isolation.md) | 🌱 Seed | 分支拓撲與並行隔離 | DN-001（本檔的格式）；DN-003（已畢業的單線 git 流程，本 DN 在其上擴充） |
+| [DN-007](../design_notes/DN-007_ci_gate.md) | 🔍 Exploring | CI 閘門：kit 要不要出貨自動檢查，以及檢查什麼 | DN-001（本檔的格式）；DN-003（已畢業，`git_workflow.md` 是本檔要補的那份規範） |
 
 ---
 
@@ -104,12 +121,9 @@
 
 | 項目 | 狀態 | 卡在哪 |
 |---|---|---|
-| [DN-002 Discord 通知與批准層](../design_notes/DN-002_discord_notification_layer.md) | 🌱 Seed | 尚未比方案；等 [DN-007](../design_notes/DN-007_ci_gate.md) 定案 |
-| [DN-007 CI 閘門](../design_notes/DN-007_ci_gate.md) | 🔍 Exploring | 規範要求 CI 擋合併但 `kit/.github/` 不存在；六項待決，出貨形式待裁定 |
 
 | 負向對照自動化 | 待開工單 | 要跑在 CI 上，等 [DN-007](../design_notes/DN-007_ci_gate.md) 定出檢查落點 |
 | 工單瘦身 | 待開 DN | 審查輪次與 HITL 問答移出工單檔案，落點未定。design_note §3.5 |
-| [DN-006 分支拓撲與隔離](../design_notes/DN-006_branch_topology_and_isolation.md) | 🌱 Seed | kit 內容已於 2026-08-16 整份移除、分支規則搬回 team_protocol §1.9。DN-006 §4.1：worktree 要回來**必須連同所有權規則一起設計**，只加回 worktree 等於沒加。2026-08-17 追加待決：有 PR 時是否也保住分支拓撲（使用者要求分支要在 history 呈現） |
 | 展示層生成 | 待開 DN | 100% 從 source of truth 生成，Mermaid + 靜態站台。排最後。design_note §3.8 |
 | 審查與開發拆 context | 待判定 | 若只有一種做法就直接開工單；若有 subagent／獨立 session／換模型之分則需 DN。design_note §3.3 |
 | precheck 腳本 | 可直接開工單 | 審查清單三分法，做法單一。design_note §3.4 |
