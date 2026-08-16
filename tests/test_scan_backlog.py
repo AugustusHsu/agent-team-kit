@@ -127,6 +127,57 @@ def test_由骨架複製出的模組會被掃到(bare_install: Path, tmp_path: P
     assert list(json.loads(result.stdout)) == ["my_module"]
 
 
+@pytest.fixture
+def 有模組的專案(bare_install: Path, tmp_path: Path) -> Path:
+    """由骨架複製出一個模組，讓測試可以自己塞工單進去。"""
+    import shutil
+
+    target = tmp_path / "with_module"
+    shutil.copytree(bare_install, target)
+    shutil.copytree(target / "docs/features/_TEMPLATE", target / "docs/features/my_module")
+    return target
+
+
+def _工單內文(closed_行: str, 後續: str) -> str:
+    return (
+        "# [Task ID: MOD-DEV-BE-001] 測試工單\n\n"
+        "**🔗 依附母任務 (Parent Task ID):** —\n"
+        "**🏷️ 任務類型 (Task Type):** queue_agent\n"
+        "**👤 負責人 (Assignee):** backend-engineer\n"
+        "**🚥 任務狀態 (Status):** In Progress\n"
+        "**📅 建立時間 (Created):** 2026-01-01T00:00+08:00\n"
+        + closed_行
+        + 後續
+    )
+
+
+def _掃一張工單(專案: Path, 內文: str) -> dict:
+    (專案 / "docs/features/my_module/tasks/MOD-DEV-BE-001.md").write_text(內文, encoding="utf-8")
+    result = run_script(專案, "scan_backlog.py", "--format", "json")
+    assert result.returncode == 0, result.stderr
+    return _flatten(json.loads(result.stdout)["my_module"])["MOD-DEV-BE-001"]
+
+
+def test_欄位留空時不會抓到下一行(有模組的專案: Path):
+    """Closed 留空是進行中工單的常態，不能把下一行整行當成完成時間。"""
+    task = _掃一張工單(
+        有模組的專案,
+        _工單內文("**✅ 完成時間 (Closed):**\n", "**🔀 審查載體編號 (PR/MR):** —\n"),
+    )
+    assert task["closed"] is None
+    assert task["status"] == "In Progress"
+
+
+def test_欄位留空且後接空行時不會跨行(有模組的專案: Path):
+    """空白行也是 \\s 的一員；跨過空行抓到下一段內容同樣是誤配。"""
+    task = _掃一張工單(
+        有模組的專案,
+        _工單內文("**✅ 完成時間 (Closed):**   \n", "\n## 1. 任務描述 (Description)\n\n內文\n"),
+    )
+    assert task["closed"] is None
+
+
+
 def test_底線開頭的目錄不被當成功能模組(scanned):
     """kit 自己帶的 `_TEMPLATE/` 是拿來複製的骨架，不該以模組身分出現在報表裡。"""
     assert "_TEMPLATE" not in scanned
