@@ -92,10 +92,11 @@
 
 | 項目 | 狀態 | 卡在哪 |
 |---|---|---|
-| [DN-001 Design Note 機制本身](../design_notes/DN-001_design_note_mechanism.md) | 🔍 Exploring | 範本欄位、索引生成腳本形狀，要實跑才知道 |
-| [DN-002 Discord 通知與批准層](../design_notes/DN-002_discord_notification_layer.md) | 🌱 Seed | 尚未比方案；先等 CI 閘門定案 |
+| [DN-001 Design Note 機制本身](../design_notes/DN-001_design_note_mechanism.md) | 🔍 Exploring | 五項待決已有建議（§4），卡在使用者裁定三項 ⭐ ＋ 畢業簽核 |
+| [DN-002 Discord 通知與批准層](../design_notes/DN-002_discord_notification_layer.md) | 🌱 Seed | 尚未比方案；等 [DN-007](../design_notes/DN-007_ci_gate.md) 定案 |
+| [DN-007 CI 閘門](../design_notes/DN-007_ci_gate.md) | 🔍 Exploring | 規範要求 CI 擋合併但 `kit/.github/` 不存在；六項待決，出貨形式待裁定 |
 
-| 負向對照自動化 | 待開 DN | 要跑在 CI 上，依賴 DN-003 先定案。design_note §3.2 |
+| 負向對照自動化 | 待開工單 | 要跑在 CI 上，等 [DN-007](../design_notes/DN-007_ci_gate.md) 定出檢查落點 |
 | 工單瘦身 | 待開 DN | 審查輪次與 HITL 問答移出工單檔案，落點未定。design_note §3.5 |
 | [DN-006 分支拓撲與隔離](../design_notes/DN-006_branch_topology_and_isolation.md) | 🌱 Seed | kit 內容已於 2026-08-16 整份移除、分支規則搬回 team_protocol §1.9。DN-006 §4.1：worktree 要回來**必須連同所有權規則一起設計**，只加回 worktree 等於沒加 |
 | 展示層生成 | 待開 DN | 100% 從 source of truth 生成，Mermaid + 靜態站台。排最後。design_note §3.8 |
