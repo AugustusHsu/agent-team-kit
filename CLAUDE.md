@@ -33,7 +33,11 @@ BACKLOG 卻完全沒更新。
   產生物（`__pycache__`、`.pyc`）會被裝進使用者專案。排除清單同時寫在 `install.sh` 與
   `tests/test_install.py` 的 `_是本機產生物()`，**兩邊必須同步改**，否則
   `test_安裝後檔案與_kit_完全一致` 會失敗。
-- 在 `kit/docs/` 新增文件要同步到 `kit/docs/DOCS_MAP.md` 登記，否則連結測試會抓到孤兒文件。
+- 在 `kit/docs/standards/` 新增文件要同步登記到 `kit/docs/DOCS_MAP.md`，否則
+  `test_standards_文件都登記在_DOCS_MAP` 會失敗（登記檢查只涵蓋 `standards/`）。
+- **推翻既有流程規範時**，要把被廢除的舊說法加進 `tests/test_kit_integrity.py` 的
+  `已廢除的流程規則` 表。規則散在十三份 SKILL.md 與 evals.json 裡，只靠人工 grep
+  漏改不會有任何執行期錯誤——`test_kit_不得殘留已廢除的流程規則` 就是為此而存在。
 - **安裝會多產生一個 `kit/` 裡沒有的檔案：`.agent/.kit-manifest`**（升級用的 sha256 基準線）。
   `test_安裝後檔案與_kit_完全一致` 的預期清單因此是「kit 檔案 + manifest」，不是純 kit 檔案。
 - **`install.sh` 的種子檔清單**（`is_seed_file()`：`CLAUDE.md`、`.gitignore`、`BACKLOG.md`）

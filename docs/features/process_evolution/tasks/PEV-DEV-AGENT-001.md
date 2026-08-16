@@ -6,7 +6,7 @@
 **🚥 任務狀態 (Status):** In Review
 **📅 建立時間 (Created):** 2026-08-16T14:06+08:00
 **✅ 完成時間 (Closed):**
-**🔀 審查載體編號 (PR/MR):** — （本次依使用者裁定不推送，審查載體為本機分支 `PEV-DEV-AGENT-001`）
+**🔀 審查載體編號 (PR/MR):** — （依使用者裁定不推送，無 PR；依 `docs/standards/git_workflow.md` §8.3，審查載體為本工單的「📝 Code Review 備註」章節）
 
 ## 1. 任務描述 (Description)
 
@@ -66,6 +66,8 @@ DN 不在第 1 層，agent 讀規範時看不到它——**裁定必須落到出
 - [x] **只有平台相關的規則帶 `[平台相關]` 標記**，L1／L2 不標
 - [x] 末章「換平台檢查清單」列出全部 `[平台相關]` 標記處，
       且**與正文的標記數量一致**（可 `grep -c` 驗證）
+      〔首輪審查判未達成：§1 的說明散文自身含 `[平台相關]` 方括號而被一併命中，
+      `grep -c` 回傳 10 ≠ 清單 9 列；2026-08-16 移除該字面值後修正〕
 - [x] 含 DN-003 §5 能力對照表六列，並保留
       「只要一個平台能填滿這六列，就能套用本流程」的結論
 - [x] 寫出五條裁定：`Done` = merged、工單 `In Review` 保留、
@@ -107,6 +109,9 @@ DN 不在第 1 層，agent 讀規範時看不到它——**裁定必須落到出
       （GitHub = PR 連結／GitLab = MR／無遠端 = 分支名），不寫死 "PR 連結"
 - [x] **PR 編號的回填時點提前到「開 PR 當下」**（`In Progress` 階段），
       不再等結案 commit；結案 commit 只負責改 `Status` 與 `Closed`
+      〔首輪審查判未達成：`git_workflow.md` §6.2、`team_protocol.md`、
+      `code-reviewer/SKILL.md` 三處仍把「填 PR 編號」列在結案 commit，
+      與本條對撞；2026-08-16 修正〕
 - [x] `task_template.md` 的回填欄位為 PR 編號，且**未使用 PR 時有明確預設值**
       （例如 `—`），不是留空——留空無法區分「沒有 PR」與「忘了填」
 
@@ -130,6 +135,9 @@ DN 不在第 1 層，agent 讀規範時看不到它——**裁定必須落到出
       `grep -rn "此時不要 commit\|通過後才執行 commit\|APPROVED 之後才執行\|commit 發生在 APPROVED 之後\|尚未 commit\|回填 commit SHA" kit/`
 - [x] `grep -rn "APPROVED" kit/` 的每一處都經人工確認語意仍成立
       （APPROVED 本身沒有被廢除，只是不再等於 `Done`）
+      〔首輪審查判未達成：`code-reviewer/evals/evals.json:15-16` 兩條 expectation
+      仍在教已廢除的舊規則，`evals/` 整批漏看；2026-08-16 修正，
+      並依 §1.8 第 3 條補上下方兩條回歸測試 AC〕
 
 > ⚠️ **grep 清零 ≠ 改完。** 上面那條 pattern 目前命中 13 處，但**抓不到**
 > 最關鍵的三處——`team_protocol.md` §1 狀態表與狀態轉換表的 `Done` 定義、
@@ -142,6 +150,23 @@ DN 不在第 1 層，agent 讀規範時看不到它——**裁定必須落到出
       `test_指路檔章節索引與正版同步`、死連結檢查）
 - [x] `./install.sh . --upgrade` 後根目錄安裝實例同步，**除已知的
       `docs/DOCS_MAP.md.new` 外無其他 `.new` 衝突**
+
+> 🔁 **以下兩條為首輪審查後依 §1.8 第 3 條補入**——缺陷暴露的是「規則散在
+> 十三份 SKILL.md 與 evals.json 裡，反轉規範時只靠人工 grep 收工」這個面向，
+> 原工單完全沒涵蓋。全綠的測試套件放行了對撞的 evals，等於沒有防線。
+
+- [x] `tests/test_kit_integrity.py` 新增 `test_kit_不得殘留已廢除的流程規則`：
+      以模組層級的「已廢除規則禁語表」掃 `kit/` 全樹的 `.md`／`.json`，
+      至少涵蓋「APPROVED 改為 Done」與「APPROVED 時填 Closed」兩條，
+      失敗訊息要指出 `檔案:行號` 與該規則被廢除的原因。
+      **必須反證它會紅**：把同一套判準套在修正前的 `74aed5c` 內容上要命中
+      `code-reviewer/evals/evals.json`，否則只是加了一條永遠綠的假測試
+- [x] `tests/test_kit_integrity.py` 新增 `test_standards_文件都登記在_DOCS_MAP`：
+      `kit/docs/standards/*.md`（排除目錄自身索引 `README.md`）都必須出現在
+      `kit/docs/DOCS_MAP.md`。同時修正 `CLAUDE.md` 原本聲稱「連結測試會抓到
+      孤兒文件」的不實敘述——補上這條之前，那個保護根本不存在
+- [x] 上述兩條測試的維護義務寫進 `CLAUDE.md` 的「陷阱」段
+      （日後推翻流程規範時要回來加禁語表；新增 standards 檔要登記 DOCS_MAP）
 
 ## 📝 執行紀錄 (Implementation Notes)
 
@@ -167,6 +192,64 @@ DN 不在第 1 層，agent 讀規範時看不到它——**裁定必須落到出
 **已知偏離**：`git_workflow.md` §7 指向 DN-005／DN-006 時**用的是 GitHub URL，
 不是相對路徑**——kit 不出貨 `docs/design_notes/`，寫相對連結會被
 `test_kit_內沒有死連結` 抓到，且安裝到別的專案後必然是死連結。
+
+## 📝 Code Review 備註 (Review Notes)
+
+> 審查日期：2026-08-16 | 審查結論：❌ CHANGES REQUESTED
+> 審查方式：兩名獨立審查員平行核對（作者不自審）＋作者自查。
+> 依 `docs/standards/git_workflow.md` §8.3，本工單不推送、無 PR，
+> **本章節即為此次的審查載體**。
+
+第一輪核對 32 條 AC：**29 條通過，3 條不通過**。六項一致性掃描
+（死連結 0、指路檔章節同步、kit↔根目錄一致、交叉引用未斷、模板逐字相同、
+`commit SHA` 殘留皆為合理否定語境）全數通過，`uv run pytest` 96 passed。
+
+### 待修正項目（第一輪）
+
+- 🚨 **[kit/.agent/skills/code-reviewer/evals/evals.json : 15-16]**（AC 3.5 FAIL）
+  兩條 expectation 仍在教被本次變更廢除的規則——「APPROVED 改為 Done」
+  「APPROVED 時同步填寫 Closed」，與同目錄 `SKILL.md:61-62,96` 直接對撞。
+  `git show --stat 74aed5c` 確認 `evals/` 整批漏改。evals 是該 skill 的行為驗收
+  基準，基準與規範相反等於出貨一份「官方版的錯誤答案」。
+- 🚨 **[kit/docs/standards/git_workflow.md : 144]**（AC 3.3 FAIL）
+  §6.2 把「填 PR 編號」列入結案 commit，與 20 行外的 §6.3「回填時點在開 PR 當下，
+  不等結案 commit」直接矛盾。`team_protocol.md:234`、
+  `code-reviewer/SKILL.md:90-92` 有同一處錯誤。
+- 🚨 **[kit/docs/standards/git_workflow.md : 235-239]**（AC 3.1 FAIL）
+  §9 寫死「共九處，數量對不上就是有一處漏改」，但 `grep -c` 實際回傳 10，
+  註解又自承「應為 10」。同一節兩個數字並存，AC 要求的自動驗證形同虛設。
+  根因是第 12 行的說明散文本身含 `[平台相關]` 方括號而被一併命中。
+- 🚨 **[kit/docs/standards/git_workflow.md : 201,204,229]**（作者自查）
+  §8.1／§8.3 指涉「工單內的審查報告」章節，但 kit 內定義的章節名是
+  「📝 Code Review 備註」，且該章節現行只在 CHANGES REQUESTED 時新增——
+  無遠端 ＋ APPROVED 時載體是空的，降級路徑走不通。本次審查即踩到。
+- 💡 **[kit/docs/standards/git_workflow.md : 71,95,124,219,220]**
+  `§2 裁定 4／5` 是從 DN-003 抄來的殘留（五條裁定實際在 DN-003 §3.4），
+  而 **kit 不出貨 DN-003**，裝到別的專案後是找不到的引用；
+  `:71` 的「（§6）」指向自己所屬的整章，等於沒指。
+
+### 修正紀錄
+
+> ✅ 2026-08-16：上述四項 🚨 與一項 💡 全數修正，驗證通過——
+> `grep "APPROVED 改為 Done"` 0 筆、結案 commit 步驟不再提回填編號、
+> `grep -c '[平台相關]'` 回到乾淨的 **9**（等於 §9 的 9 列）、
+> 未定義章節名 0 筆、`§2 裁定` 0 筆。根目錄安裝實例以
+> `./install.sh . --upgrade` 同步，四個檔案 `diff` 無差異。
+> Status 推回 `In Review`，待二輪審查。
+>
+> ✅ 2026-08-16（續）：依 §1.8 第 3 條補入兩條回歸測試（見 §3.5 末尾），
+> `uv run pytest` **98 passed**。兩條測試都經反證：禁語表對修正前的 `74aed5c`
+> 命中 evals.json 兩行、對反轉前的 `f2d1b10` 全樹命中 6 筆（涵蓋本次反轉的
+> 全部落點）、對現況 0 筆；DOCS_MAP 測試抽掉 `git_workflow` 那列即轉紅。
+> **若當初就有這條測試，`74aed5c` 提交當下就會直接紅燈指向 evals.json。**
+
+### 移交給後續工單的建議（不阻擋本工單）
+
+- ~~CI 抓不到這類漂移~~、~~沒有 DOCS_MAP 登記完整性測試~~：
+  **這兩項已依 §1.8 第 3 條收容進本工單**，見 §3.5 末尾新增的兩條 AC。
+  成因工單（本單）尚未結案，依 §1.8 第 1 條不另開新工單。
+- `scrum-master` 的 evals 列舉工單欄位時未含新的審查載體編號欄位（有「等」字，
+  不構成矛盾）。**這項仍為移交項**——屬敘述完整性，非矛盾。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 

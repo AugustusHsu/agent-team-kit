@@ -88,9 +88,13 @@ Code Reviewer 同樣肩負著「最終防線」的矛盾偵測責任：
    - 確認所有 `3. 驗收標準 (Acceptance Criteria)` 的 `- [ ]` 皆已變更為 `- [x]`。
    - 若工單存在「📝 Code Review 備註」章節（代表先前曾被退回），在該章節末尾追加一行：`> ✅ {YYYY-MM-DD}：所有問題已修正，審查通過。`
    - **提醒 Developer 執行收尾**：APPROVED 後由 Developer 做結案 commit
-     （Status → `Done`、填 Closed、回填**審查載體編號**——不是 commit SHA，
-     因為 squash 合併會產生全新的 SHA），再合併、刪除分支。
+     （Status → `Done`、填 Closed），再合併、刪除分支。**審查載體編號**在開 PR／MR
+     的當下就該回填了，此時只需確認它不是空的——該欄位填的不是 commit SHA，
+     因為 squash 合併會產生全新的 SHA。
      **審查者不代為 commit、不代為合併，也不自行把 Status 改成 `Done`。**
+   - **無遠端專案**：沒有 PR／MR 可當載體時，APPROVED **也必須**新增「📝 Code Review 備註」
+     章節寫入審查報告——它是此情境下唯一的審查載體，工單的編號欄位填 `—`
+     （見 `docs/standards/git_workflow.md` §8.3）。
 
 4. **完成時間 (Closed Date)**：
    - 此欄位**由 Developer 在結案 commit 時填寫**（與 Status → `Done` 同一次寫入），**不由審查者填**——`Done` 的時點在合併之後，那時審查已經結束。

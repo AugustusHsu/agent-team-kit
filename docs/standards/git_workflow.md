@@ -9,7 +9,7 @@
 
 **平台預設為 GitHub。** 但規則本身描述的是**能力**，不是指令——kit 不說
 「必須開 GitHub PR」，而說「必須有一個地方讓審查在合併前發生」。
-凡是換 git server 就要重新對應的規則，都標了 `[平台相關]`；
+凡是換 git server 就要重新對應的規則，都標了「平台相關」標記；
 §8 給出三種平台的對應答案，§9 把標記處彙整成換平台檢查清單。
 
 ---
@@ -68,7 +68,7 @@
 
 - **分支名 = Task ID**，不加前綴、不加描述。
 - **建立時機**：工單 `Ready` → `In Progress` 的當下，從最新的主線切出。
-- **刪除時機**：合併完成之後。刪除前必須先驗證確實已合併（§6）。
+- **刪除時機**：合併完成之後。刪除前必須先驗證確實已合併（§6.4）。
 - **工單轉 `Canceled` 時，分支內若已有 commit，必須詢問使用者保留或丟棄**，
   不可逕自刪除。
 
@@ -92,7 +92,7 @@
 它只存在於工作目錄與暫存區。任何 `git checkout`／`git reset`／清理動作
 都會使它**永久消失**。commit 並推送之後，這個風險自然消失。
 
-- 一張工單在分支上可以有多顆 commit；主線上仍是一顆（§2 裁定 5 的 squash）。
+- 一張工單在分支上可以有多顆 commit；主線上仍是一顆（§6.1 的 squash）。
 - **commit message 的 HITL 複查閘門依然成立**，見
   [`.agent/resources/team_protocol.md`](../../.agent/resources/team_protocol.md) §1.10。
   改變的只是複查對象：從「即將寫下的訊息」變成
@@ -121,7 +121,7 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 
 ### 6.1 合併方式
 
-- **一律 squash**（§2 裁定 5）。主線上一張工單一顆 commit。
+- **一律 squash**。主線上一張工單一顆 commit。
 - **阻擋未通過的合併 `[平台相關]`**：審查未通過或自動檢查紅燈時，
   合併動作必須在**機制上**被擋住，不能只靠自律。
 - **squash 的執行方式 `[平台相關]`**：由平台的合併動作完成，
@@ -141,7 +141,7 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 | # | 誰 | 動作 |
 |---|---|---|
 | 1 | Code Reviewer | 審查通過——**工單此時仍是 `In Review`** |
-| 2 | Developer | 在 `{TaskID}` 分支做**結案 commit**：Status → `Done`、填 Closed、填 PR 編號 |
+| 2 | Developer | 在 `{TaskID}` 分支做**結案 commit**：Status → `Done`、填 Closed（PR 編號早在開 PR 當下就填好了，見 §6.3） |
 | 3 | Developer | squash 合併 |
 | 4 | — | 主線上工單即為 `Done`，刪除分支 |
 
@@ -198,10 +198,10 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 | kit 要求的能力 | GitHub（預設） | GitLab | 無遠端／純本地 |
 |---|---|---|---|
 | 隔離變更 | branch | branch | branch |
-| 合併前審查的載體 | **Pull Request** | Merge Request | 工單內的審查報告 |
+| 合併前審查的載體 | **Pull Request** | Merge Request | 工單的「📝 Code Review 備註」章節 |
 | 自動檢查 | **Actions** | GitLab CI | 合併前手動跑測試 |
 | 阻擋未通過的合併 | Branch protection ＋ required checks | Protected branch ＋ pipeline | 人工紀律 |
-| 審查意見的落點 | PR review comment | MR discussion | 工單「審查報告」章節 |
+| 審查意見的落點 | PR review comment | MR discussion | 同上 |
 | 「已合併」的訊號 | PR merged | MR merged | 主線含該 commit |
 
 **只要一個平台能填滿這六列，就能套用本流程。**
@@ -215,9 +215,9 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 | 設定 | 值 | 依據 |
 |---|---|---|
 | 禁止直接 push | ✅ 開 | §3.1 |
-| 合併前必須經過 PR | ✅ 開 | §2 |
-| 合併前必須通過 CI | ✅ 開 | §2 裁定 4 |
-| 允許的合併方式 | **只留 squash** | §2 裁定 5 |
+| 合併前必須經過 PR | ✅ 開 | §1 原則 2 |
+| 合併前必須通過 CI | ✅ 開 | §6.1 |
+| 允許的合併方式 | **只留 squash** | §6.1 |
 | Dismiss stale pull request approvals when new commits are pushed | ❌ **必須關** | 見下 |
 
 > ⚠️ **"Dismiss stale pull request approvals" 一定要關。**
@@ -226,9 +226,10 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 
 ### 8.3 無遠端專案的降級
 
-沒有遠端時，審查載體改為工單內的「審查報告」章節，
+沒有遠端時，審查載體改為工單的「📝 Code Review 備註」章節——
+此情境下 **APPROVED 也必須寫**，否則工單裡不會留下任何審查紀錄，載體等於是空的。
 合併前手動跑完測試，`Done` 的訊號改為「主線含該 commit」，
-工單的 PR 編號欄位填 `—`。**§1 三條核心原則不降級**。
+工單的審查載體編號欄位填 `—`。**§1 三條核心原則不降級**。
 
 ## 9. 換平台檢查清單
 
@@ -236,7 +237,7 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 共九處，與本清單一一對應**——數量對不上就是有一處漏改。
 
 ```bash
-grep -c '\[平台相關\]' docs/standards/git_workflow.md   # 應為 10：規則 9 處 ＋ 開頭說明本慣例的那行
+grep -c '\[平台相關\]' docs/standards/git_workflow.md   # 應為 9，與本清單的 9 列一一對應
 ```
 
 | # | 出處 | 要對應的能力 |

@@ -14,6 +14,14 @@ LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 EVAL_KEYS = {"id", "prompt", "expected_output", "files", "expectations"}
 # 文中拿來說明格式、不是真實路徑的字面值
 LINK_PLACEHOLDERS = {"路徑", "relative/path"}
+# 每次推翻一條流程規則，就把舊說法加進這張表。反轉規範時你清楚自己廢除了什麼，
+# 不清楚的是它還躺在哪幾個角落。
+已廢除的流程規則 = [
+    (r"APPROVED[^\n]{0,8}改為\s*[`「]?Done", "Done 已改為「已合併進主線」，APPROVED 只是放行訊號"),
+    (r"APPROVED\s*時[^\n]{0,10}填寫[^\n]{0,20}Closed", "Closed 改由 Developer 在結案 commit 填"),
+    (r"審查通過後才[^\n]{0,6}commit", "commit 時點已改為開發期間即可 commit"),
+    (r"此時不要\s*commit", "同上"),
+]
 
 
 def skill_dirs(kit_root: Path):
@@ -119,3 +127,37 @@ def test_指路檔章節索引與正版同步(kit_root: Path):
     assert 章節, "正版找不到任何 §x.y 章節，測試本身可能過期了"
     缺漏 = [f"§{s}" for s in 章節 if f"| §{s} |" not in 指路檔]
     assert not 缺漏, "指路檔的章節索引漏了：" + "、".join(缺漏)
+
+
+
+def test_kit_不得殘留已廢除的流程規則(kit_root: Path):
+    """規範反轉後，舊敘述會躺在沒人想到要改的角落，而且不會有任何執行期錯誤。
+
+    規則散落在 team_protocol、十三份 SKILL.md、十三份 evals.json 與 workflows，
+    靠人工 grep 收工已經失守過一次：PEV-DEV-AGENT-001 改了四份 SKILL.md，
+    漏掉 code-reviewer 的 evals.json，而當時的測試全綠照樣放行。
+
+    邊界：這是回顧性防護，只擋「已知被廢除」的說法，擋不了新產生的不一致。
+    維護方式就是每次推翻一條規則，回來加一列。
+    """
+    命中 = []
+    for path in sorted(kit_root.rglob("*")):
+        if not path.is_file() or path.suffix not in {".md", ".json"}:
+            continue
+        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            for pattern, 為什麼 in 已廢除的流程規則:
+                if re.search(pattern, line):
+                    命中.append(f"{path.relative_to(kit_root)}:{lineno} → {為什麼}")
+    assert not 命中, "殘留已廢除的流程規則：\n" + "\n".join(命中)
+
+
+def test_standards_文件都登記在_DOCS_MAP(kit_root: Path):
+    """漏登記的規範文件等於不存在——沒有人用 ls 找規範，只會查 DOCS_MAP。"""
+    docs_map = (kit_root / "docs/DOCS_MAP.md").read_text(encoding="utf-8")
+    漏登記 = [
+        p.name
+        for p in sorted((kit_root / "docs/standards").glob("*.md"))
+        # README.md 是 standards/ 自己的目錄索引，DOCS_MAP 不必再列一次
+        if p.name != "README.md" and p.name not in docs_map
+    ]
+    assert not 漏登記, "這些規範文件沒登記進 DOCS_MAP：" + "、".join(漏登記)

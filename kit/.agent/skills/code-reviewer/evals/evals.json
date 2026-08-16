@@ -12,8 +12,8 @@
         "逐條核對工單的驗收標準，標示通過或未通過",
         "重大瑕疵與 Nitpicks 分開列出，未混為一談",
         "實際編輯工單 .md 回寫審查結果（新增「📝 Code Review 備註」或更新對應區塊）",
-        "依 Verdict 更新工單 Status：APPROVED 改為 Done、CHANGES REQUESTED 退回 In Progress",
-        "APPROVED 時同步填寫工單的「✅ 完成時間 (Closed)」欄位"
+        "依 Verdict 更新工單 Status：APPROVED 維持 In Review（放行訊號，不是結案）、CHANGES REQUESTED 退回 In Progress",
+        "APPROVED 時提醒 Developer 於結案 commit 填寫「✅ 完成時間 (Closed)」，審查者不自行代填"
       ]
     },
     {

@@ -231,7 +231,7 @@ commit message 的格式、Emoji 對照與**禁止寫入的內容**（AI 署名 
 
 ### 2.3 Code Reviewer → Done / 退回
 - Code Reviewer 審查後產出標準化審查報告（含 Verdict: APPROVED 或 CHANGES REQUESTED）。
-- 若 APPROVED，**工單狀態維持 `In Review`**——APPROVED 是放行訊號，不是結案。接著由 Developer 做**結案 commit**（Status → `Done`、填 Closed、填審查載體編號）、合併、刪除分支；**合併完成之後工單才是 `Done`**——見 §1.9。
+- 若 APPROVED，**工單狀態維持 `In Review`**——APPROVED 是放行訊號，不是結案。接著由 Developer 做**結案 commit**（Status → `Done`、填 Closed；審查載體編號早在開 PR／MR 當下就已回填）、合併、刪除分支；**合併完成之後工單才是 `Done`**——見 §1.9。
 - 若 CHANGES REQUESTED，工單退回 `In Progress`，Developer 根據報告修正。
 - **回寫機制 (Write-back)**：Code Reviewer 審查完成後，**必須**將審查結果直接寫入對應工單的 `.md` 檔案（可更新驗收標準、規格區塊，或新增「📝 Code Review 備註」章節），確保 Developer 重新開工時無需額外查找審查報告。詳細寫入格式請參照 `code-reviewer` SKILL.md 中的「回寫審查結果至工單」條款。
 
