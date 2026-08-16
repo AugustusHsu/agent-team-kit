@@ -22,7 +22,7 @@ kit 領先一整套 worktree／commit 閘門流程，而 my_workstation 領先�
    加了會輾掉 §3.1 模組前綴表、`BACKLOG.md`、`DOCS_MAP.md` 等專案客製內容。
    kit 再怎麼演進都送不進已安裝的專案。
 
-**編號決策**：kit 的 §1.9／§1.10 已被 15 處交叉引用（跨 9 個檔）引用，my_workstation 端
+**編號決策**：kit 的 §1.9／§1.10 各被 7 處交叉引用（跨 7 個檔），my_workstation 端
 只有 3 處引用 §1.9。因此文檔權威階序在 kit 落為 **§1.11**，不動既有編號。代價是它與
 語意相近的 §1.8 缺陷收容被 worktree／commit 兩節隔開，但對 Agent 讀取無實質影響。
 

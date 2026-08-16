@@ -33,6 +33,7 @@
 | [DN-001](design_notes/DN-001_design_note_mechanism.md) | Design Note 機制本身的設計 | 🔍 Exploring |
 | [DN-002](design_notes/DN-002_discord_notification_layer.md) | Discord 作為通知與批准層 | 🌱 Seed |
 | [DN-003](design_notes/DN-003_git_workflow_and_pr_gate.md) | Git 流程與 PR 閘門 | 🎓 Graduated |
+| [DN-004](design_notes/DN-004_skill_system_realignment.md) | Skill 體系與現行流程的重新對齊 | 🌱 Seed |
 
 > ⚠️ **DN 不在 `team_protocol.md` §1.11 的權威階序內**：`Exploring` 的 DN 尚未定案，
 > 不得作為實作依據；`Graduated`／`Dropped` 的 DN 比照已結案工單，是歷史紀錄。
