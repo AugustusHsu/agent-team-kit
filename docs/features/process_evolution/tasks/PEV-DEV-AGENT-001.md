@@ -33,8 +33,11 @@ DN 不在第 1 層，agent 讀規範時看不到它——**裁定必須落到出
   - `kit/.agent/resources/team_protocol.md` —— 要改寫的對象，**共四處**：
     §1 狀態表（`Done` 的定義）、§1 狀態轉換表、§1.9、§1.10、§2.2
   - `kit/.agent/resources/task_template.md` —— 回填欄位要改
-  - `kit/.agent/skills/{backend,frontend,devops,qa-automation}-developer/SKILL.md`、
-    `code-reviewer/SKILL.md`、`scrum-master/SKILL.md` —— **六份**，非五份
+  - 四份 dev skill —— `kit/.agent/skills/` 底下的
+    `backend-developer/`、`frontend-developer/`、
+    **`devops-engineer/`**、**`qa-automation-engineer/`**
+    （⚠️ 後兩份的後綴是 `-engineer` 不是 `-developer`，寫錯會找不到檔案）
+  - 加上 `code-reviewer/SKILL.md`、`scrum-master/SKILL.md`，合計**六份**，非五份
   - `kit/.agent/workflows/commit-message.md` —— 第 105 行「要等審查 APPROVED
     之後才執行第 6 步」與新流程矛盾
   - `kit/docs/standards/documentation_conventions.md` —— 新文件要遵守的撰寫慣例
