@@ -8,7 +8,14 @@
 uv run pytest                                    # 全套件測試，離線執行
 ./install.sh <目標專案路徑>                       # 首次安裝
 ./install.sh <目標專案路徑> --upgrade --dry-run   # 升級既有安裝，先看會動到什麼
+
+# 重新生成 BACKLOG（改完工單狀態一定要跑）
+uv run python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md
 ```
+
+⚠️ `scan_backlog.py` **預設是 `--format json` 且只印到 stdout**。不加
+`--format backlog --output` 就不會寫入 `BACKLOG.md`——直接跑它看起來成功，
+BACKLOG 卻完全沒更新。
 
 ## 架構
 

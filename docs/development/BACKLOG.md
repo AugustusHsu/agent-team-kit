@@ -2,7 +2,7 @@
 
 > **最後更新時間**：2026-08-16
 > **工單來源目錄**：`docs/features/*/tasks/`
-> **工單總數**：2 張
+> **工單總數**：4 張
 
 ---
 
@@ -10,7 +10,11 @@
 
 > 包含狀態為 `In Progress` 或 `Ready` 的工單。
 
-*(無)*
+| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
+|---|---------|------|------|-------------------|---------------|
+| 1 | PEV-DEV-AGENT-001 | 建立 git_workflow.md 並把 DN-003 的裁定落到出貨規範 | process_evolution | devops-engineer | 🟢 Ready |
+
+**小計**：1 張（In Progress: 0 / Ready: 1）
 
 ---
 
@@ -30,7 +34,11 @@
 
 > 包含狀態為 `Pending` 的工單，等待前置條件完成或人為確認後方可開始。
 
-*(無)*
+| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
+|---|---------|------|------|-------------------|---------------|
+| 1 | PEV-DEV-AGENT-002 | README 補上 git 流程能力對照表，讓換 git server 的人一眼看懂 | process_evolution | devops-engineer | ⏳ Pending |
+
+**小計**：1 張
 
 ---
 
@@ -59,7 +67,9 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| **總計** | **0** | **100%** |
+| 🟢 Ready | 1 | 50.0% |
+| ⏳ Pending | 1 | 50.0% |
+| **總計** | **2** | **100%** |
 
 ### worktree_guard
 
@@ -86,7 +96,7 @@
 |---|---|---|
 | [DN-001 Design Note 機制本身](../design_notes/DN-001_design_note_mechanism.md) | 🔍 Exploring | 範本欄位、索引生成腳本形狀，要實跑才知道 |
 | [DN-002 Discord 通知與批准層](../design_notes/DN-002_discord_notification_layer.md) | 🌱 Seed | 尚未比方案；先等 CI 閘門定案 |
-| [DN-003 Git 流程與 PR 閘門](../design_notes/DN-003_git_workflow_and_pr_gate.md) | 🔍 Exploring | ⬅ **最優先**。兩個直接衝突待你裁定：commit 時點、push 授權（DN-003 §3） |
+
 | 負向對照自動化 | 待開 DN | 要跑在 CI 上，依賴 DN-003 先定案。design_note §3.2 |
 | 工單瘦身 | 待開 DN | 審查輪次與 HITL 問答移出工單檔案，落點未定。design_note §3.5 |
 | worktree 重新設計 | 待開 DN | kit 內容已於 2026-08-16 整份移除、分支規則搬回 team_protocol §1.9。**必須排在 DN-003 之後**：導入 PR 後 worktree 的必要性會重估 |
@@ -95,5 +105,6 @@
 | precheck 腳本 | 可直接開工單 | 審查清單三分法，做法單一。design_note §3.4 |
 | 生成檔不得含時間相依值 | 可直接開工單 | 立規＋`scan_backlog.py --stale` 只輸出 stdout。理由見 DN-001 §5 |
 | `DOCS_MAP.md` 是否列為種子檔 | 待你決定 | yes/no 一句話。牽涉「專案自填表 vs kit 維護的規範表」的取捨 |
+| `scan_backlog.py` 的 Closed 欄位 regex 跨行誤配 | 可直接開工單 | `\s*` 會吃掉換行，Closed 留空時抓到下一行的 `## 1. 任務描述` 當值。實測 PEV-DEV-AGENT-001 |
 | headroom 壓縮工具輸出 | 待調查 | code-reviewer 讀 diff 可能讀到壓縮版；本次對話已三度實地遇到。開 spike 工單 |
 | 背景任務 worktree 隔離守衛 | 可直接開工單 | `.claude/settings.json` 的 `worktree.bgIsolation` 與本專案停用 worktree 相衝突 |
