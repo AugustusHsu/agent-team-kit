@@ -33,6 +33,13 @@ PATTERNS = {
     "closed": re.compile(r"\*\*✅\s*完成時間\s*\(Closed\):\*\*\s*(.+)$", re.MULTILINE),
 }
 
+# Design Note (DN) 的 header 正則表達式
+DN_ID_RE = re.compile(r"DN-(\d+)")
+DN_TITLE_RE = re.compile(r"^#\s*\[(DN-\d+)\]\s*(.+?)\s*$", re.MULTILINE)
+DN_STATUS_RE = re.compile(r"^\*\*🚥\s*狀態\s*\(Status\):\*\*\s*(.+?)\s*$", re.MULTILINE)
+DN_DEPENDS_RE = re.compile(r"^\*\*🔗\s*依賴\s*\(Depends on\):\*\*\s*(.+?)\s*$", re.MULTILINE)
+MD_LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]*\)")
+
 # 狀態圖示對照
 STATUS_ICONS = {
     "In Progress": "🔵",
@@ -298,8 +305,9 @@ def extract_existing_icebox(root, output_path=None):
         "| 項目 | 描述 | 備註 |",
         "|---|---|---|",
         "| *(此區塊需手動維護，腳本不會覆寫)* | — | — |",
-        "",
     ]
+    # ⚠️ 這份預設值刻意**不以空字串結尾**：讀回既有內容那條路徑會 .strip()，
+    # 兩邊尾端不一致的話，「首次建檔 → 重跑」就會生出一行空白 diff。
     if not backlog_path.exists():
         return default_icebox
 
@@ -321,6 +329,95 @@ def extract_existing_icebox(root, output_path=None):
         pass
 
     return default_icebox
+
+
+def parse_design_note(filepath):
+    """
+    解析單一 DN 檔案的 header，回傳 None 表示這不是一份 DN
+    """
+    try:
+        content = filepath.read_text(encoding="utf-8")
+    except OSError:
+        return None
+
+    title_match = DN_TITLE_RE.search(content)
+    if not title_match:
+        return None
+
+    status_match = DN_STATUS_RE.search(content)
+    depends_match = DN_DEPENDS_RE.search(content)
+    depends_raw = depends_match.group(1).strip() if depends_match else "—"
+    # 依賴欄位裡的連結是相對於 design_notes/ 寫的，貼進 BACKLOG.md 會指到不存在的路徑，
+    # 所以只留連結文字。順便跳脫 `|`，否則會把表格切斷。
+    depends_text = MD_LINK_RE.sub(r"\1", depends_raw).replace("|", r"\|")
+
+    return {
+        "id": title_match.group(1),
+        "title": title_match.group(2).replace("|", r"\|"),
+        "status": status_match.group(1).strip() if status_match else "❓ 未標狀態",
+        "depends": depends_text,
+        "depends_ids": sorted({f"DN-{n}" for n in DN_ID_RE.findall(depends_raw)}),
+        "filename": filepath.name,
+    }
+
+
+def scan_design_notes(root):
+    """
+    掃描 docs/design_notes/DN-*.md。目錄不存在（裝了 kit 但還沒開過 DN）時回傳空 list
+    """
+    dn_dir = root / "docs" / "design_notes"
+    if not dn_dir.is_dir():
+        return []
+
+    notes = []
+    for path in sorted(dn_dir.glob("DN-*.md")):
+        note = parse_design_note(path)
+        if note:
+            notes.append(note)
+
+    notes.sort(key=lambda n: int(DN_ID_RE.search(n["id"]).group(1)))
+    return notes
+
+
+def format_design_notes_section(notes):
+    """
+    DN 索引區塊
+
+    刻意**不印任何時間相依值**（開了幾天、距今多久）：這份檔案納入版控，
+    內容必須是輸入的純函數，否則每天重跑都會生出一份沒有語意的 diff。
+    """
+    if not notes:
+        return []
+
+    known = {note["id"] for note in notes}
+    lines = [
+        "---",
+        "",
+        "## 🧪 設計筆記 (Design Notes)",
+        "",
+        "> 開單前置關卡：AC 寫不出來時先開 DN，寫得出來就直接開工單。",
+        "> **本節由 `scan_backlog.py` 生成，不要手動編輯。**",
+        "",
+        "| DN | 狀態 | 標題 | 依賴 |",
+        "|---|---|---|---|",
+    ]
+
+    dangling = []
+    for note in notes:
+        link = f"[{note['id']}](../design_notes/{note['filename']})"
+        lines.append(f"| {link} | {note['status']} | {note['title']} | {note['depends']} |")
+        for dep in note["depends_ids"]:
+            if dep not in known:
+                dangling.append((note["id"], dep))
+
+    lines.append("")
+    if dangling:
+        lines.append("> ⚠️ **懸空依賴**——依賴欄位指向的 DN 檔案不存在：")
+        for source, dep in dangling:
+            lines.append(f"> - {source} → `{dep}`")
+        lines.append("")
+
+    return lines
 
 
 def format_summary(all_project_tasks):
@@ -501,6 +598,9 @@ def format_backlog_markdown(root, all_project_tasks, recent_days, recent_limit, 
             lines.append(f"| {icon} {status} | {count} | {pct} |")
         lines.append(f"| **總計** | **{proj_total}** | **100%** |")
         lines.append("")
+
+    # 設計筆記索引（開單前置關卡）——排在冰箱之前，因為它是「還沒變成工單」的東西
+    lines.extend(format_design_notes_section(scan_design_notes(root)))
 
     # 冰箱區塊（保留既有內容的提示）
     lines.append("---")
