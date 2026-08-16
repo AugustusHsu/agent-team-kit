@@ -67,6 +67,11 @@ commit 前必須把訊息原文給我複查，取得當次同意才執行；上�
 但它**不是**種子檔，升級時會被判定為「使用者改過」而產生 `.new` 衝突。
 本 repo 已經填了 `PEV`/`KIT`/`WTG` 三列，等於明知故犯。是否列為種子檔見 BACKLOG Icebox。
 
-**本專案不使用 worktree**，單一工作目錄開發。kit 的 worktree 規範已於 2026-08-16
-整份移除（見 [DN-003](docs/design_notes/DN-003_git_workflow_and_pr_gate.md)），
-日後另開 DN 重新設計。
+**worktree 可以用**（2026-08-17 裁定，解除原本的禁用），但有三條硬性要求：
+**用完一定要 `git worktree remove`**、**worktree 內的 commit 必須合併回分支**、
+收尾後 `git worktree list` 只剩主工作目錄。
+
+kit 出貨的 worktree 規範仍是空的——已於 2026-08-16 整份移除
+（見 [DN-003](docs/design_notes/DN-003_git_workflow_and_pr_gate.md)）。
+要不要寫回出貨規範由 [DN-006](docs/design_notes/DN-006_branch_topology_and_isolation.md) §4.1 決定：
+worktree 只提供工作區隔離、**不解決檔案所有權**，回來時必須連所有權規則一起設計。
