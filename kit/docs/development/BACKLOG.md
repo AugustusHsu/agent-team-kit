@@ -21,7 +21,7 @@
   - 🏃‍♂️ 當前衝刺：Status 為 Ready / In Progress
   - ⏳ 審查中：Status 為 In Review
   - 🧊 產品待辦：Status 為 Pending
-  - ✅ 近期結案：Status 為 Done / Canceled（最近 7 天內，上限 10 筆）
+  - ✅ 近期結案：Status 為 Done / Canceled（最近結案的 10 張）
 
   排序規則（當前衝刺區塊內）：
   - 先依狀態優先級排序：In Progress → Ready
@@ -41,7 +41,6 @@
   - 產出的 BACKLOG.md 應放置於 `docs/development/BACKLOG.md`。
 -->
 
-> **最後更新時間**：{YYYY-MM-DD}
 > **工單來源目錄**：`docs/features/{功能模組名}/tasks/`
 > **工單總數**：{N} 張
 
@@ -86,7 +85,7 @@
 
 ## ✅ 近期結案 (Closed)
 
-> 最近 7 天內完成的工單（上限 10 筆）。更早的結案工單可透過 `scan_backlog.py --format json` 查詢。
+> 最近結案的 10 張工單（依完成時間排序）。更早的結案工單可透過 `scan_backlog.py --format json` 查詢。
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) | 完成時間 |
 |---|---------|------|------|-------------------|---------------|----------|

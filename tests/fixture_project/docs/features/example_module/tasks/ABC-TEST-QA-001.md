@@ -5,7 +5,7 @@
 **👤 負責人 (Assignee):** qa-automation-engineer
 **🚥 任務狀態 (Status):** Canceled (改由 ABC-TEST-QA-002 統一涵蓋)
 **📅 建立時間 (Created):** 2026-01-08T09:00+08:00
-**✅ 完成時間 (Closed):** {{CLOSED_OLD}}
+**✅ 完成時間 (Closed):** 2025-06-15T18:30+08:00
 
 ## 1. 任務描述 (Description)
 本工單用於釘住 Status 正規化行為：括號中的說明文字應被剝除，只留 `Canceled`。

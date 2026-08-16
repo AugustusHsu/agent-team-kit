@@ -1,6 +1,7 @@
 """scan_backlog.py 的解析與分類行為。"""
 
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -54,21 +55,33 @@ def test_四大區塊分類正確(scanned):
     assert ids["product_backlog"] == ["ABC-DEV-FE-002"]
 
 
-def test_近期結案依_closed_時間切分(scanned):
-    """1 天前結案的進近期結案，400 天前的落到已封存。"""
+def test_近期結案不看今天是哪一天(scanned):
+    """400 天前結案的工單照樣進「近期結案」——分類只由工單內容決定。
+
+    以前這裡是「最近 N 天」的時間窗，已結案工單會隨日期流逝自己消失，
+    生成檔因此不是輸入的純函數（documentation_conventions.md §5）。
+    """
     assert [t["task_id"] for t in scanned["another_module"]["classified"]["recent_closed"]] == [
         "XYZ-DEV-MANUAL-001"
     ]
-    archived = [t["task_id"] for t in scanned["example_module"]["classified"]["archived"]]
-    assert set(archived) == {"ABC-DOC-EPIC-001", "ABC-TEST-QA-001"}
-    assert scanned["example_module"]["classified"]["recent_closed"] == []
-
-
-def test_recent_days_可調整分界(project: Path):
-    result = run_script(project, "scan_backlog.py", "--format", "json", "--recent-days", "500")
-    data = json.loads(result.stdout)
-    recent = [t["task_id"] for t in data["example_module"]["classified"]["recent_closed"]]
+    recent = [t["task_id"] for t in scanned["example_module"]["classified"]["recent_closed"]]
     assert set(recent) == {"ABC-DOC-EPIC-001", "ABC-TEST-QA-001"}
+    assert scanned["example_module"]["classified"]["archived"] == []
+
+
+def test_近期結案超出上限才移入封存(project: Path):
+    """上限是唯一的分界；被擠出去的才進封存。"""
+    result = run_script(project, "scan_backlog.py", "--format", "json", "--recent-limit", "1")
+    data = json.loads(result.stdout)["example_module"]["classified"]
+    assert [t["task_id"] for t in data["recent_closed"]] == ["ABC-TEST-QA-001"]
+    assert [t["task_id"] for t in data["archived"]] == ["ABC-DOC-EPIC-001"]
+
+
+def test_recent_days_旗標已移除(project: Path):
+    """時間窗連同旗標一起下架，留著會讓人以為還能調分界。"""
+    result = run_script(project, "scan_backlog.py", "--format", "json", "--recent-days", "500")
+    assert result.returncode != 0
+    assert "--recent-days" in result.stderr
 
 
 def test_project_可篩選單一模組(project: Path):
@@ -105,6 +118,55 @@ def test_backlog_保留既有冰箱內容(project: Path, tmp_path: Path):
 
     run_script(project, "scan_backlog.py", "--format", "backlog", "--output", str(out))
     assert marker in out.read_text(encoding="utf-8")
+
+
+def test_backlog_不含生成時間(project: Path, tmp_path: Path):
+    """生成檔必須是輸入的純函數：嵌了生成時間，換一天重跑就有 diff，
+    「重跑看有沒有 diff ＝ 判斷是否過期」這條檢查會永遠回答「過期」。"""
+    out = tmp_path / "BACKLOG_pure.md"
+    run_script(project, "scan_backlog.py", "--format", "backlog", "--output", str(out))
+    assert "最後更新時間" not in out.read_text(encoding="utf-8")
+
+
+def test_stale_不得寫入檔案(project: Path, tmp_path: Path):
+    """時間相依的視圖只能走 stdout，腳本要自己擋，不是靠人記得。"""
+    out = tmp_path / "stale.md"
+    result = run_script(project, "scan_backlog.py", "--stale", "30", "--output", str(out))
+    assert result.returncode != 0
+    assert "stdout" in result.stderr
+    assert not out.exists()
+
+
+def test_stale_列出建立過久仍未結案的工單(有模組的專案: Path):
+    很久以前 = (datetime.now(timezone(timedelta(hours=8))) - timedelta(days=100)).isoformat(
+        timespec="minutes"
+    )
+    (有模組的專案 / "docs/features/my_module/tasks/MOD-DEV-BE-002.md").write_text(
+        f"# [Task ID: MOD-DEV-BE-002] 放很久的工單\n\n"
+        f"**🚥 任務狀態 (Status):** In Progress\n"
+        f"**📅 建立時間 (Created):** {很久以前}\n"
+        f"**✅ 完成時間 (Closed):**\n",
+        encoding="utf-8",
+    )
+    result = run_script(有模組的專案, "scan_backlog.py", "--stale", "30")
+    assert result.returncode == 0, result.stderr
+    assert "MOD-DEV-BE-002" in result.stdout
+    assert "100" in result.stdout
+
+
+def test_stale_不列入已結案工單(有模組的專案: Path):
+    很久以前 = (datetime.now(timezone(timedelta(hours=8))) - timedelta(days=100)).isoformat(
+        timespec="minutes"
+    )
+    (有模組的專案 / "docs/features/my_module/tasks/MOD-DEV-BE-003.md").write_text(
+        f"# [Task ID: MOD-DEV-BE-003] 早就結案了\n\n"
+        f"**🚥 任務狀態 (Status):** Done\n"
+        f"**📅 建立時間 (Created):** {很久以前}\n"
+        f"**✅ 完成時間 (Closed):** {很久以前}\n",
+        encoding="utf-8",
+    )
+    result = run_script(有模組的專案, "scan_backlog.py", "--stale", "30")
+    assert "MOD-DEV-BE-003" not in result.stdout
 
 
 def test_剛安裝完還沒建模組時以非零狀態碼結束(bare_install: Path):

@@ -5,7 +5,7 @@
 **👤 負責人 (Assignee):** manual_user
 **🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-01-09T11:00+08:00
-**✅ 完成時間 (Closed):** {{CLOSED_RECENT}}
+**✅ 完成時間 (Closed):** 2026-04-22T16:04+08:00
 
 ## 1. 任務描述 (Description)
 需由使用者親自向 IT 部門申請，Agent 無法代勞。

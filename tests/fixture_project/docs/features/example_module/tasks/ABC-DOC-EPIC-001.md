@@ -5,7 +5,7 @@
 **👤 負責人 (Assignee):** scrum-master
 **🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-01-05T09:30+08:00
-**✅ 完成時間 (Closed):** {{CLOSED_OLD}}
+**✅ 完成時間 (Closed):** 2025-03-01T09:00+08:00
 
 ## 1. 任務描述 (Description)
 彙整權限管理模組的 HLD 與拆單結果，作為所有子工單的追溯來源。

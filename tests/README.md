@@ -34,15 +34,16 @@ uv run pytest -k install   # 只跑 install.sh 相關
 | `tasks/_INDEX.md` | 底線開頭的檔案必須被當成索引跳過，不算工單 |
 | `ABC-DEV-BE-003.md` | H1 標題故意不合格式，釘住「回退為以檔名當 Task ID」 |
 | `ABC-TEST-QA-001.md` | Status 寫成 `Canceled (改由 ... 統一涵蓋)`，釘住狀態正規化 |
-| `ABC-DOC-EPIC-001.md` | 400 天前結案 → 應落到「已封存」 |
-| `XYZ-DEV-MANUAL-001.md` | 1 天前結案 → 應落到「近期結案」；另涵蓋 `manual_user` 類型 |
+| `ABC-DOC-EPIC-001.md` | 2025-03-01 結案 → 與 QA-001 一起釘住「近期結案」的排序與上限 |
+| `XYZ-DEV-MANUAL-001.md` | 2026-04-22 結案 → 另涵蓋 `manual_user` 類型 |
 | `third_party_versions*.yaml` | 三種情境：通過、宣告與實體檔案不符、關聯項目版本不一致 |
 
 底線開頭的**目錄**（kit 自己帶的 `_TEMPLATE/`）不該被當成功能模組，這條是直接對安裝結果驗證的，
 不放在 fixture 裡：全新安裝掃不到任何模組應以非零狀態碼結束，從骨架複製出模組後則應立刻被掃到。
 
-工單裡的 `{{CLOSED_RECENT}}` / `{{CLOSED_OLD}}` 由 `conftest.py` 在複製時換成相對於
-「現在」的時間。寫死日期的話，`--recent-days` 的測試會隨時間流逝自己壞掉。
+工單的結案日期一律**寫死**。「近期結案」不再有「N 天內」的時間窗（依
+`documentation_conventions.md` §5，生成檔必須是輸入的純函數），分類只看工單內容，
+fixture 日期因此不需要跟著「現在」浮動——`conftest.py` 原本的佔位符改寫機制已移除。
 
 版本宣告 fixture 的 `source_type` 一律是 `local`——它不屬於任何已知上游來源，
 `check_versions.py` 的階段二會直接回 `UNSUPPORTED SOURCE`，因此不發任何網路請求。
