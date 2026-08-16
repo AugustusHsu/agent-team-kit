@@ -11,6 +11,33 @@ description: 當使用者需要「安排 Sprint 規劃」、「拆解任務 (Bre
 
 > **🔑 全域職責宣告**：Scrum Master 是 `docs/development/BACKLOG.md` 的**唯一全域管理者**。所有對 BACKLOG.md 的新增、移動與狀態變更，最終都應由 Scrum Master 負責確保一致性。其他角色（如 `code-reviewer`）可依協定直接更新特定欄位，但 Scrum Master 擁有最終的校對與修正權。
 
+## 🚧 開單前置關卡：先確認這件事該不該開成工單
+
+**動手寫工單之前先做這個判斷**，判準只有一條——**你當場寫不寫得出可驗收的 AC**：
+
+| 情境 | 動作 |
+|---|---|
+| **當場寫得出可驗收的 AC** | 直接開工單，**不要開 DN** |
+| 寫不出來——方案沒定、邊界不清、影響範圍未知 | **先開 Design Note (DN)**，不要開工單 |
+
+硬開一張 AC 寫著「設計得合理」「架構清楚」的工單，等於把判斷推給後面的角色，
+而那些角色沒有裁定權。**AC 難產是設計還沒收斂的訊號，不是你寫得不夠努力。**
+
+**DN 不是工單，別把它當工單管：**
+
+- 放 `docs/design_notes/DN-0XX_{主題}.md`，**全域扁平、全域流水號**（不分模組）。
+  取號：`grep -rhoE "DN-[0-9]+" docs --include=*.md | sort -t- -k2 -n | tail -1` 再 +1。
+- **不進 `scan_backlog.py`**，不套用工單的五狀態，不會出現在 BACKLOG.md。
+  DN 有自己的四狀態（🌱 Seed／🔍 Exploring／🎓 Graduated／🚫 Dropped）。
+- ⛔ **你不能自行把 DN 標成 `Graduated` 或 `Dropped`。** 畢業的第 3 個條件是
+  **使用者本人簽核**，這一項不外包給任何 Agent。你能做的是把 DN 推進到
+  🔍 Exploring、把「待決事項」列出來、並在寫得出 AC 時**向使用者提請畢業**。
+- 畢業的產出就是工單：DN 一畢業，你依它的「畢業去向」開出對應工單，
+  並在工單的依附母任務欄位填該 DN 編號。
+
+完整規範見 `docs/standards/documentation_conventions.md` §4，範本見
+`docs/design_notes/_TEMPLATE.md`。
+
 ## 核心職責與執行邏輯
 
 1. **解析輸入脈絡**：仔細閱讀上下文或使用者指定的文件，理解即將要執行的開發或實作項目。
