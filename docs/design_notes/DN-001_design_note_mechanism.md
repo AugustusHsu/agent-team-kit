@@ -1,10 +1,12 @@
 # [DN-001] Design Note 機制本身的設計
 
-**🚥 狀態 (Status):** 🔍 Exploring
+> 🎓 已畢業（2026-08-17）→ PEV-DEV-AGENT-004 ～ 009。本檔凍結，不再更新。
+
+**🚥 狀態 (Status):** 🎓 Graduated
 **📅 建立 (Created):** 2026-08-16
 **🔗 依賴 (Depends on):** —
 **📌 來源 (Origin):** 使用者指令（2026-08-16，針對 Icebox 的 design_note 重新規劃）
-**🎓 畢業去向 (Landing):** D（改流程／基礎建設）→ 見 §6，待簽核
+**🎓 畢業去向 (Landing):** D（改流程／基礎建設）→ PEV-DEV-AGENT-004 ～ 009，見 §6
 
 > ⚠️ **DN 不得寫實作步驟。** 開始寫「第一步做什麼、第二步做什麼」＝這份 DN 該畢業了。
 > 本檔用自己定義的格式記錄自己的設計，是這套機制的第一次實跑。
@@ -244,7 +246,8 @@ Icebox 只是來源之一，使用者直接下指令同樣可以觸發。
 
 **反方**：`scan_backlog.py` 已經 579 行，再塞一個 formatter 只會更肥；
 獨立腳本責任單一，也不必讓「掃工單」的腳本被迫認識 DN 的格式。
-**要裁定的就是這一刀**：單一入口 vs 乾淨的責任邊界。
+
+> ✅ **裁定（2026-08-17）：照建議，併進 `scan_backlog.py`。** → PEV-DEV-AGENT-008
 
 ### 4.3 ⭐ `DOCS_MAP.md` 表頭要不要改字（順帶：要不要列為種子檔）
 
@@ -269,7 +272,11 @@ kit 出貨的表頭是 `## 功能模組 (features/)`，欄位「前綴｜模組�
 
 折衷第三案：**維持非種子檔，把會變動的模組表抽成獨立檔**
 （例如 `docs/features/README.md`——本 repo 已經自發長出這個檔，而且安裝從不碰它）。
-骨架仍可升級，會變動的那張表歸專案所有。**要裁定的是這三選一。**
+骨架仍可升級，會變動的那張表歸專案所有。
+
+> ✅ **裁定（2026-08-17）：第三案。** 不列為種子檔，模組表抽成獨立檔——
+> DOCS_MAP 的骨架仍可隨 kit 升級，會變動的那張表歸專案所有，`.new` 衝突同時消失。
+> → PEV-DEV-AGENT-009
 
 ### 4.4 ⭐ 是否出貨到 `kit/`
 
@@ -285,8 +292,8 @@ kit 出貨的表頭是 `## 功能模組 (features/)`，欄位「前綴｜模組�
 一般專案裝了 kit 之後可能一份 DN 都不會開，只多出一個空目錄與一份沒人讀的範本。
 更根本的是 §3.4 條件 3 要求「使用者本人簽核」——這預設了使用者願意參與流程設計，
 不是每個專案的使用者都想扮這個角色。
-**要裁定的是出貨到哪一步**：完整機制（目錄＋範本＋規範）／
-只在 scrum-master 寫一段「AC 難產時可先開 DN」但不給目錄／完全不出貨。
+> ✅ **裁定（2026-08-17）：完整出貨**——目錄＋範本＋規範三者都給。
+> → PEV-DEV-AGENT-004（規範）、006（scrum-master）、007（目錄與範本）
 
 ### 4.5 基礎建設模組的固定前綴
 
@@ -319,14 +326,14 @@ kit 出貨的表頭是 `## 功能模組 (features/)`，欄位「前綴｜模組�
   第 1 層權威在 `docs/standards/`，**不需要 PRD**。
 - **落點與預計工單**（實際張數以 §4.2／4.3／4.4 的裁定為準）：
 
-| # | 落點 | 內容 | 依賴哪項裁定 |
+| 工單 | 落點 | 內容 | 出自 |
 |---|---|---|---|
-| T1 | `kit/docs/standards/documentation_conventions.md` | 新增「Design Note 機制」一節：進場規則（§3.2）、狀態機（§3.3）、畢業條件（§3.4）、去向表（§3.5）、不折併（§3.6） | — |
-| T2 | `kit/.agent/resources/team_protocol.md` §1.11／§3.1 | §1.11 加 DN 的權威效力（§3.8）；§3.1 前綴表加「類型」欄與基礎建設模組的文件差異（§3.7） | 4.5 |
-| T3 | `kit/.agent/skills/scrum-master/SKILL.md` | 開單前置關卡：AC 當場寫得出 → 開工單；寫不出 → 開 DN | 4.4 |
-| T4 | `kit/docs/design_notes/`（新目錄） | `_TEMPLATE.md` ＋ `README.md`，欄位依 4.1 | 4.1、4.4 |
-| T5 | `.agent/scripts/scan_backlog.py` | DN 索引生成 ＋ 懸空依賴檢查 | 4.2 |
-| T6 | `docs/DOCS_MAP.md` 表頭／`install.sh` 種子檔清單 | 依 4.3 的裁定 | 4.3 |
+| **PEV-DEV-AGENT-004** | `kit/docs/standards/documentation_conventions.md` | 新增「Design Note 機制」一節：進場規則（§3.2）、狀態機（§3.3）、畢業條件（§3.4）、去向表（§3.5）、不折併（§3.6） | 4.4 |
+| **PEV-DEV-AGENT-005** | `kit/.agent/resources/team_protocol.md` §1.11／§3.1 | §1.11 加 DN 的權威效力（§3.8）；§3.1 前綴表加「類型」欄與基礎建設模組的文件差異（§3.7），列 `INF` 為建議值 | 4.5 |
+| **PEV-DEV-AGENT-006** | `kit/.agent/skills/scrum-master/SKILL.md` | 開單前置關卡：AC 當場寫得出 → 開工單；寫不出 → 開 DN | 4.4 |
+| **PEV-DEV-AGENT-007** | `kit/docs/design_notes/`（新目錄） | `_TEMPLATE.md` ＋ `README.md`，header 欄位依 4.1（刪畢業去向、來源必填、加姊妹篇） | 4.1、4.4 |
+| **PEV-DEV-AGENT-008** | `kit/.agent/scripts/scan_backlog.py` | 新增「🧪 設計筆記」一節取代冰箱裡的手抄索引 ＋ 懸空依賴檢查 | 4.2 |
+| **PEV-DEV-AGENT-009** | `kit/docs/DOCS_MAP.md`、`kit/docs/features/README.md`（新） | 模組表抽成獨立檔，DOCS_MAP 只留指路；表頭「功能模組」→「模組」並加類型欄 | 4.3 |
 
 > ⚠️ T2 動到 `team_protocol.md` 的章節結構時，必須同步指路檔
 > `kit/docs/standards/team_protocol.md` 的章節索引，否則
@@ -337,7 +344,8 @@ kit 出貨的表頭是 `## 功能模組 (features/)`，欄位「前綴｜模組�
   「`./install.sh` 裝到空目錄後 `docs/design_notes/_TEMPLATE.md` 存在」、
   「`kit/docs/DOCS_MAP.md` 有 `design_notes/` 一列」、「`uv run pytest` 全綠」。
   **條件 2 通過。**
-- **簽核（§3.4 條件 3）**：待使用者。狀態在簽核前維持 🔍 Exploring。
+- **簽核（§3.4 條件 3）**：✅ 使用者於 2026-08-17 簽核畢業。
+  §4.1 與 §4.5 未另行裁定，依「無異議即照建議走」定案。
 - **§3.9 軟上限自查**：本檔 384 行，遠超 250 行的軟上限。依該規則自查兩題——
   (1) 裝了不只一個待決問題？**否**，五項全部服務於「DN 機制本身怎麼設計」這一個問題。
   (2) 已經夠寫 AC 了？**是**，見上一條。兩題的組合指向畢業，不是拆（去向 F）。
