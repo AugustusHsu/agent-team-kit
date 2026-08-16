@@ -97,7 +97,8 @@
 它只存在於工作目錄與暫存區。任何 `git checkout`／`git reset`／清理動作
 都會使它**永久消失**。commit 並推送之後，這個風險自然消失。
 
-- 一張工單在分支上可以有多顆 commit；主線上仍是一顆（§6.1 的 squash）。
+- 一張工單在分支上可以有多顆 commit；主線上**讀起來**仍是一張工單一行
+  （實際怎麼合併依平台而定，見 §6.1）。
 - **commit message 的 HITL 複查閘門依然成立**，見
   [`.agent/resources/team_protocol.md`](../../.agent/resources/team_protocol.md) §1.10。
   改變的只是複查對象：從「即將寫下的訊息」變成
@@ -132,6 +133,15 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
   - 無遠端 → **`--no-ff`**。沒有載體接住時，§2 裁定 5 的前提不成立，
     改由主線歷史保存過程 commit；讀取時用 `--first-parent`，
     一樣是一張工單一行。見 §8.3。
+- **合併 commit 的訊息第一行必須含 Task ID**，形如
+  `<類型>: [{TaskID}] <主旨>`。分支名就是 Task ID（§3.1），而
+  **分支名不會自動進入 commit 物件**——自訂合併訊息會蓋掉 git 預設的
+  `Merge branch '{TaskID}'`，於是 `--no-ff` 保住的只剩拓撲，
+  `git log --graph` 上是一條**無名側支**；squash 連拓撲都沒有。
+  - **不能只靠 reflog 補救。** reflog 是純本機檔案，`git clone` 與 `git push`
+    都不會帶走，且預設 90 天過期（`gc.reflogExpire`）。分支名沒寫進訊息，
+    等於換一台機器、或過了三個月，就再也查不出這顆 commit 屬於哪張工單。
+  - 這條**與平台無關**，兩種合併方式都適用。
 - **阻擋未通過的合併 `[平台相關]`**：審查未通過或自動檢查紅燈時，
   合併動作必須在**機制上**被擋住，不能只靠自律。
 - **合併的執行方式 `[平台相關]`**：由平台的合併動作完成，
@@ -152,7 +162,7 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 |---|---|---|
 | 1 | Code Reviewer | 審查通過——**工單此時仍是 `In Review`** |
 | 2 | Developer | 在 `{TaskID}` 分支做**結案 commit**：Status → `Done`、填 Closed（PR 編號早在開 PR 當下就填好了，見 §6.3） |
-| 3 | Developer | squash 合併 |
+| 3 | Developer | 依 §6.1 合併——方式看平台，訊息第一行帶 Task ID |
 | 4 | — | 主線上工單即為 `Done`，刪除分支 |
 
 第 2 步看似「預告」，但**它不會說謊**：結案 commit 只有在合併成功時才會出現在
@@ -202,7 +212,8 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 > `--no-ff` 讓分支尖端成為合併 commit 的第二個 parent，上面兩個問題都不存在：
 >
 > ```bash
-> git branch -d <分支>   # 成功即為「已合併」的證明
+> git merge --no-ff <分支> -F <經複查的訊息檔>   # 第一行含 Task ID，見 §6.1
+> git branch -d <分支>                          # 成功即為「已合併」的證明
 > ```
 >
 > **不必比對樹，也永遠不該動用 `-D`。** `git branch -d` 本身就是驗證——
@@ -272,9 +283,10 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 
 ```bash
 git switch main
+# 訊息第一行必須含 Task ID（§6.1）——例：✨ feat: [ABC-DEV-BE-001] 加入匯出端點
 git merge --no-ff <工單分支> -F <經複查的訊息檔>
 git branch -d <工單分支>            # 成功 = 已合併，這就是 Done 的訊號
-git log --oneline --first-parent    # 主線一張工單一行
+git log --oneline --first-parent    # 主線一張工單一行，且每行都看得到 Task ID
 ```
 
 ## 9. 換平台檢查清單
