@@ -61,7 +61,7 @@ Code Reviewer 同樣肩負著「最終防線」的矛盾偵測責任：
    - `[ ✅ APPROVED ]` → **Status 維持 `In Review`，不要改成 `Done`**。
      **APPROVED 只是放行訊號，不等於結案**——`Done` 的定義是**已合併進主線**，
      而合併還可能失敗（衝突、CI 紅燈）。改 Status 的是 Developer：由他做結案
-     commit（Status → `Done`、填 Closed、填審查載體編號）再合併，
+     commit（Status → `Done`、填 Closed）再合併，
      合併完成之後工單才是 `Done`
      （見 `team_protocol.md` §1.9 / §1.10 與 `docs/standards/git_workflow.md` §6.2）。
    - `[ ❌ CHANGES REQUESTED ]` → 將 Status 改為 `In Progress`

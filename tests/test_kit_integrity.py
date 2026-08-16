@@ -20,7 +20,13 @@ LINK_PLACEHOLDERS = {"路徑", "relative/path"}
     (r"APPROVED[^\n]{0,8}改為\s*[`「]?Done", "Done 已改為「已合併進主線」，APPROVED 只是放行訊號"),
     (r"APPROVED\s*時[^\n]{0,10}填寫[^\n]{0,20}Closed", "Closed 改由 Developer 在結案 commit 填"),
     (r"審查通過後才[^\n]{0,6}commit", "commit 時點已改為開發期間即可 commit"),
-    (r"此時不要\s*commit", "同上"),
+    (r"此時不要\s*commit", "commit 時點已改為開發期間即可 commit"),
+    # 抓的是形狀不是措辭：缺陷長成「填 Closed」後面用頓號直接並列編號。
+    # 正確的三種寫法（編號移出結案 commit 的括號、或加「早在…已回填」）都不會命中。
+    (
+        r"填 Closed[、，][^\n]{0,8}編號",
+        "審查載體編號在開 PR／MR 當下就回填，結案 commit 只改 Status 與 Closed",
+    ),
 ]
 
 
@@ -137,8 +143,18 @@ def test_kit_不得殘留已廢除的流程規則(kit_root: Path):
     靠人工 grep 收工已經失守過一次：PEV-DEV-AGENT-001 改了四份 SKILL.md，
     漏掉 code-reviewer 的 evals.json，而當時的測試全綠照樣放行。
 
-    邊界：這是回顧性防護，只擋「已知被廢除」的說法，擋不了新產生的不一致。
-    維護方式就是每次推翻一條規則，回來加一列。
+    邊界一（漏抓）：這是回顧性防護，只擋「已知被廢除」的說法，擋不了新產生的不一致。
+    維護方式就是每次推翻一條規則，回來加一列——漏加一列等於那條規則沒有防線，
+    PEV-DEV-AGENT-001 二輪審查抓到的就是這個：它廢除了「結案 commit 填 PR 編號」，
+    卻沒為自己加那一列，殘留於是在 98 passed 底下隱形。
+
+    邊界二（誤判）：表達不出「教舊規則」與「**禁止**舊規則」的差別。
+    「審查者不得將 Status 由 APPROVED 改為 Done」這種語意正確的句子會被命中。
+    處置是改寫措辭（例如避開字面組合）或為該列加豁免，不是刪測試——
+    它會帶著 `檔案:行號` 大聲失敗，不會安靜地錯。
+
+    只掃 kit/：`docs/design_notes/` 底下的 🎓 Graduated DN 依 DN-001 是凍結的歷史
+    紀錄、不得作為規格依據，掃進去只會對「當時的設計」產生設計上的必然誤判。
     """
     命中 = []
     for path in sorted(kit_root.rglob("*")):

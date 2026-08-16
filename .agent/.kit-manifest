@@ -11,7 +11,7 @@ c31a45b3fe21f94311ea0343dfa09bbb5cd9d5294b4d396e8fc72a9538bd8eaa  .agent/scripts
 cac40ea50cd39dcb6e95d0f4c9c6665cf267a5c0668e3cd61f466bb626385606  .agent/skills/business-analyst/SKILL.md
 12ff15fa96d00152aa97d68774c99d25d002ff3be568a3780af99acc28a78388  .agent/skills/business-analyst/assets/brd_template.md
 8c2d6d72a8ee5ed7c1c7fe604769c524cb7a8612b690b6ad86ba2adec432e18c  .agent/skills/business-analyst/evals/evals.json
-90f7890bd59b479b5d8fce6fe3cb39e438a637b0431a2c828c42502263f727c3  .agent/skills/code-reviewer/SKILL.md
+05acc517455a3512e5cb0681009a33a56eb2129553284b83a5edbe1389587f82  .agent/skills/code-reviewer/SKILL.md
 b2e80d6b68454bc57e0f0681388a5c6ca206cec6c414f6409444e8ac9ea5a080  .agent/skills/code-reviewer/evals/evals.json
 e616ef4939d0860007f225ff0b4d65daa21ce4c7eea64d804f3402ad9f33afdf  .agent/skills/devops-engineer/SKILL.md
 4df2c8bf0a9d607214d641a3b68b0523d8adea4274e41c3ff51c462efe3f69b5  .agent/skills/devops-engineer/evals/evals.json
