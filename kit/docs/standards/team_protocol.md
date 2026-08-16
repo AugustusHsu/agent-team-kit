@@ -39,6 +39,7 @@
 
 ## 相關
 
+- Git 流程正版（§1.9／§1.10 的操作手冊面）：[git_workflow.md](git_workflow.md)
 - 工單模板：[`.agent/resources/task_template.md`](../../.agent/resources/task_template.md)
 - 文件分檔與交叉引用守則：[documentation_conventions.md](documentation_conventions.md)
 - Commit message 正版：[`.agent/workflows/commit-message.md`](../../.agent/workflows/commit-message.md)

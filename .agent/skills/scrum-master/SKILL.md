@@ -56,7 +56,7 @@ description: 當使用者需要「安排 Sprint 規劃」、「拆解任務 (Bre
 其中 `N` 為該 Epic 預計產出的子工單總數（不含已取消的工單）。此規則的目的在於：
 - 提供 Epic 層級的明確完工定義
 - 讓 BACKLOG 掃描工具可依據此 AC 自動判斷 Epic 是否應該關閉
-- 當 Code Reviewer APPROVED 最後一張子工單時，可連帶勾選此 AC 並推進 Epic Status 至 `Done`
+- 當最後一張子工單**合併完成**（Status 成為 `Done`）時，可連帶勾選此 AC 並推進 Epic Status 至 `Done`——**APPROVED 不算**，`Done` 的定義是已合併進主線（`team_protocol.md` §1.9）
 
 8. **預留人為介入空間 (Human-in-the-loop)**：
    - Scrum Master 在拆解任務時若發現邊界條件模糊、API 參數不明等狀況，**切勿自行捏造或腦補**。這是系統防護的重要一環。請將疑問事項列入任務單中的「人為補充與確認 (Human-in-the-loop)」區塊，等待使用者回答或確認。
@@ -106,7 +106,7 @@ Scrum Master 負責工單初始狀態的設定與 Pending → Ready 的推進：
    - 母工單僅在以下條件**全部滿足**時，才可結束 `In Progress` 狀態：
      - ✅ 所有子工單的 Status 皆為 `Done` 或 `Canceled`
      - ✅ 母工單的驗收標準（如 Epic 的「所有 N 張子工單皆完成並通過 Code Review」AC）已全數勾選
-   - 當最後一張子工單被 Code Reviewer APPROVED 或被標記 `Canceled` 後，負責的角色（Code Reviewer 或 Scrum Master）應同步將母工單的 Status 推進至 `Done`。
+   - 當最後一張子工單**合併完成**（Status 成為 `Done`）或被標記 `Canceled` 後，負責的角色（Code Reviewer 或 Scrum Master）應同步將母工單的 Status 推進至 `Done`。
 
 3. **BACKLOG 同步**：母工單狀態因拆分而變更為 `In Progress` 時，必須同步更新 `BACKLOG.md`，將母工單從原區塊移至「🏃‍♂️ 當前衝刺 (Current Sprint)」區塊。
 

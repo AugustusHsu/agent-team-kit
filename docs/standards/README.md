@@ -9,6 +9,7 @@
 | 文件 | 說明 |
 |---|---|
 | [team_protocol.md](team_protocol.md) | **指路檔**（不含內容）→ 正版在 `.agent/resources/team_protocol.md`；含章節索引與不做 symlink 的理由 |
+| [git_workflow.md](git_workflow.md) | **Git 流程正版**：分支、commit 時點、PR 閘門、合併與收尾；平台相關規則另附換平台檢查清單 |
 | [documentation_conventions.md](documentation_conventions.md) | 文件分檔與交叉引用守則、ADR 全域編號慣例 |
 | [qa_testing_spec.md](qa_testing_spec.md) | 測試規範與分層策略 |
 | [security_audit.md](security_audit.md) | 資安查核表（§1~§2 後端與基礎設施 OWASP Checklist、§3 前端客戶端） |

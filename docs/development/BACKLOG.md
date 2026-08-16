@@ -10,11 +10,7 @@
 
 > 包含狀態為 `In Progress` 或 `Ready` 的工單。
 
-| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
-|---|---------|------|------|-------------------|---------------|
-| 1 | PEV-DEV-AGENT-001 | 建立 git_workflow.md 並把 DN-003 的裁定落到出貨規範 | process_evolution | devops-engineer | 🟢 Ready |
-
-**小計**：1 張（In Progress: 0 / Ready: 1）
+*(無)*
 
 ---
 
@@ -25,8 +21,9 @@
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
 |---|---------|------|------|-------------------|---------------|
 | 1 | KIT-DEV-AGENT-001 | 回收 my_workstation 的文檔權威階序與指路檔，並建立 install.sh 升級路徑 | kit_sync | devops-engineer | In Review |
+| 2 | PEV-DEV-AGENT-001 | 建立 git_workflow.md 並把 DN-003 的裁定落到出貨規範 | process_evolution | devops-engineer | In Review |
 
-**小計**：1 張
+**小計**：2 張
 
 ---
 
@@ -67,7 +64,7 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟢 Ready | 1 | 50.0% |
+| 🟡 In Review | 1 | 50.0% |
 | ⏳ Pending | 1 | 50.0% |
 | **總計** | **2** | **100%** |
 

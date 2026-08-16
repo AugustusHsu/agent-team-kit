@@ -3,9 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** Independent
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** devops-engineer
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** In Review
 **📅 建立時間 (Created):** 2026-08-16T14:06+08:00
 **✅ 完成時間 (Closed):**
+**🔀 審查載體編號 (PR/MR):** — （本次依使用者裁定不推送，審查載體為本機分支 `PEV-DEV-AGENT-001`）
 
 ## 1. 任務描述 (Description)
 
@@ -60,22 +61,22 @@ DN 不在第 1 層，agent 讀規範時看不到它——**裁定必須落到出
 
 ### 3.1 新文件 `kit/docs/standards/git_workflow.md`
 
-- [ ] 章節依**主題**切，順序為：核心原則 → 工單 × git 狀態對映 → 分支 →
+- [x] 章節依**主題**切，順序為：核心原則 → 工單 × git 狀態對映 → 分支 →
       commit → PR → 合併與收尾 → 平台適配 → 換平台檢查清單（§4 裁定一）
-- [ ] **只有平台相關的規則帶 `[平台相關]` 標記**，L1／L2 不標
-- [ ] 末章「換平台檢查清單」列出全部 `[平台相關]` 標記處，
+- [x] **只有平台相關的規則帶 `[平台相關]` 標記**，L1／L2 不標
+- [x] 末章「換平台檢查清單」列出全部 `[平台相關]` 標記處，
       且**與正文的標記數量一致**（可 `grep -c` 驗證）
-- [ ] 含 DN-003 §5 能力對照表六列，並保留
+- [x] 含 DN-003 §5 能力對照表六列，並保留
       「只要一個平台能填滿這六列，就能套用本流程」的結論
-- [ ] 寫出五條裁定：`Done` = merged、工單 `In Review` 保留、
+- [x] 寫出五條裁定：`Done` = merged、工單 `In Review` 保留、
       Draft PR 於首次 push 時開、CI 紅燈硬擋 merge、合併用 squash
-- [ ] 寫出回填 **PR 編號**（非 commit SHA）及其理由（squash 後 SHA 必變）
-- [ ] 寫出「寫入時點 ≠ 生效時點」的推導（DN-003 §3.4.1）
-- [ ] 寫出 GitHub 設定要求，含**必須關閉** "Dismiss stale pull request approvals"，
+- [x] 寫出回填 **PR 編號**（非 commit SHA）及其理由（squash 後 SHA 必變）
+- [x] 寫出「寫入時點 ≠ 生效時點」的推導（DN-003 §3.4.1）
+- [x] 寫出 GitHub 設定要求，含**必須關閉** "Dismiss stale pull request approvals"，
       並說明不關會造成結案 commit 讓 approve 失效的死循環
-- [ ] 收錄 `git branch -d` 誤報「未合併」的陷阱與
+- [x] 收錄 `git branch -d` 誤報「未合併」的陷阱與
       `git merge-base --is-ancestor` 的客觀驗證法（自 §1.9 搬入）
-- [ ] **預留「並行擴充」一節**（位置在「平台適配」之前），內容目前只需
+- [x] **預留「並行擴充」一節**（位置在「平台適配」之前），內容目前只需
       一句 placeholder 指向 [DN-005](../../../design_notes/DN-005_parallel_task_decomposition.md)
       與 [DN-006](../../../design_notes/DN-006_branch_topology_and_isolation.md)，
       並寫明「本節為空時，前面各節即完整可用」。理由見 §4 另註二——
@@ -86,48 +87,48 @@ DN 不在第 1 層，agent 讀規範時看不到它——**裁定必須落到出
 判準：**`team_protocol.md` 回答「工單走到這一步該做什麼」（狀態機）；
 `git_workflow.md` 回答「git 這件事該怎麼做」（操作手冊）。**
 
-- [ ] §1 狀態表的 `Done` 定義由「Code Reviewer 標記 APPROVED，工單正式完結」
+- [x] §1 狀態表的 `Done` 定義由「Code Reviewer 標記 APPROVED，工單正式完結」
       改為 **merged**，並明確 APPROVED 只是放行訊號
-- [ ] §1 狀態轉換表「Code Reviewer 判定 APPROVED → `Done`」同步修正
-- [ ] §1.9 **保留**：一張工單 = 一個分支、分支名 = Task ID、
+- [x] §1 狀態轉換表「Code Reviewer 判定 APPROVED → `Done`」同步修正
+- [x] §1.9 **保留**：一張工單 = 一個分支、分支名 = Task ID、
       工單狀態 ↔ 分支／PR 動作對映表、`Done` 的前置條件
-- [ ] §1.9 **搬出**：squash 理由、PR 編號 vs SHA、`git branch -d` 陷阱、
+- [x] §1.9 **搬出**：squash 理由、PR 編號 vs SHA、`git branch -d` 陷阱、
       平台設定、三層結構、「寫入 ≠ 生效」的推導過程（只留結論）
-- [ ] §1.9 移除「本節是最小保底規範……待專案自行約定」的免責語
+- [x] §1.9 移除「本節是最小保底規範……待專案自行約定」的免責語
       （流程已定案，保底定位消失），改為指向 `git_workflow.md`
-- [ ] §1.10 **保留**且改寫為「先 commit 再審，複查對象是已寫下、
+- [x] §1.10 **保留**且改寫為「先 commit 再審，複查對象是已寫下、
       可 `--amend` 修改的訊息」；HITL 性質不變
-- [ ] §2.2 交付回報「此時尚未 commit」改為新流程
-- [ ] **§1.9／§1.10 的章節編號未變**——各有 7 處交叉引用（跨 7 個檔）不得斷
+- [x] §2.2 交付回報「此時尚未 commit」改為新流程
+- [x] **§1.9／§1.10 的章節編號未變**——各有 7 處交叉引用（跨 7 個檔）不得斷
 
 ### 3.3 交付回報與回填時點（§4 裁定三）
 
-- [ ] 規範以**平台中立**方式表述：交付回報**第一行須指出審查載體的位置**
+- [x] 規範以**平台中立**方式表述：交付回報**第一行須指出審查載體的位置**
       （GitHub = PR 連結／GitLab = MR／無遠端 = 分支名），不寫死 "PR 連結"
-- [ ] **PR 編號的回填時點提前到「開 PR 當下」**（`In Progress` 階段），
+- [x] **PR 編號的回填時點提前到「開 PR 當下」**（`In Progress` 階段），
       不再等結案 commit；結案 commit 只負責改 `Status` 與 `Closed`
-- [ ] `task_template.md` 的回填欄位為 PR 編號，且**未使用 PR 時有明確預設值**
+- [x] `task_template.md` 的回填欄位為 PR 編號，且**未使用 PR 時有明確預設值**
       （例如 `—`），不是留空——留空無法區分「沒有 PR」與「忘了填」
 
 ### 3.4 六份 skill ＋ workflow
 
-- [ ] 四份 dev skill：「**此時不要 commit**」與「通過後才執行 commit
+- [x] 四份 dev skill：「**此時不要 commit**」與「通過後才執行 commit
       並收尾分支」皆改為新流程
-- [ ] `code-reviewer/SKILL.md`：「回填 commit SHA」改為 PR 編號；
+- [x] `code-reviewer/SKILL.md`：「回填 commit SHA」改為 PR 編號；
       「APPROVED 只是放行訊號」段落與新的 `Done` = merged 定義一致；
       `Done` 的標記時點改為 merged 之後
-- [ ] `scrum-master/SKILL.md`：Epic 推進至 `Done` 的條件由
+- [x] `scrum-master/SKILL.md`：Epic 推進至 `Done` 的條件由
       「最後一張子工單 APPROVED」改為「最後一張子工單 merged」（第 59、109 行）
-- [ ] `commit-message.md` 第 105 行「要等審查 APPROVED 之後才執行第 6 步」改寫
-- [ ] `task_template.md` 與 `_EXAMPLE-DEV-BE-001.md` 第 27 行
+- [x] `commit-message.md` 第 105 行「要等審查 APPROVED 之後才執行第 6 步」改寫
+- [x] `task_template.md` 與 `_EXAMPLE-DEV-BE-001.md` 第 27 行
       「在最後一張子工單 APPROVED 時勾選」同步修正
 
 ### 3.5 一致性與驗證
 
-- [ ] **矛盾敘述清零**，以下 grep 全部零命中（開單時的 pattern 只抓得到 4 處，
+- [x] **矛盾敘述清零**，以下 grep 全部零命中（開單時的 pattern 只抓得到 4 處，
       已擴充）：
       `grep -rn "此時不要 commit\|通過後才執行 commit\|APPROVED 之後才執行\|commit 發生在 APPROVED 之後\|尚未 commit\|回填 commit SHA" kit/`
-- [ ] `grep -rn "APPROVED" kit/` 的每一處都經人工確認語意仍成立
+- [x] `grep -rn "APPROVED" kit/` 的每一處都經人工確認語意仍成立
       （APPROVED 本身沒有被廢除，只是不再等於 `Done`）
 
 > ⚠️ **grep 清零 ≠ 改完。** 上面那條 pattern 目前命中 13 處，但**抓不到**
@@ -135,12 +136,37 @@ DN 不在第 1 層，agent 讀規範時看不到它——**裁定必須落到出
 > `scrum-master/SKILL.md` 的 Epic 完成條件——因為它們的措辭是
 > 「判定 APPROVED → `Done`」「APPROVED 時勾選」，不含上列關鍵字。
 > 那三處由 §3.2 與 §3.4 的逐條 AC 指名覆蓋，**不可只靠 grep 收工**。
-- [ ] `kit/docs/DOCS_MAP.md` 與 `kit/docs/standards/README.md` 已登記 `git_workflow.md`
-- [ ] 指路檔 `kit/docs/standards/team_protocol.md` 的章節索引與正版一致
-- [ ] `uv run pytest` 全綠（含 `test_安裝後檔案與_kit_完全一致`、
+- [x] `kit/docs/DOCS_MAP.md` 與 `kit/docs/standards/README.md` 已登記 `git_workflow.md`
+- [x] 指路檔 `kit/docs/standards/team_protocol.md` 的章節索引與正版一致
+- [x] `uv run pytest` 全綠（含 `test_安裝後檔案與_kit_完全一致`、
       `test_指路檔章節索引與正版同步`、死連結檢查）
-- [ ] `./install.sh . --upgrade` 後根目錄安裝實例同步，**除已知的
+- [x] `./install.sh . --upgrade` 後根目錄安裝實例同步，**除已知的
       `docs/DOCS_MAP.md.new` 外無其他 `.new` 衝突**
+
+## 📝 執行紀錄 (Implementation Notes)
+
+> 2026-08-16 交付。以下是 **AC 沒有指名、但不改就會留下矛盾**的連帶修正，
+> 一併列出供審查判斷是否越界。
+
+1. **`team_protocol.md` 實際改了七處，不是 §2 Inputs 所列的五處。**
+   多出的兩處是 §1.3 Epic 關閉條件（原文「最後一張子工單被 APPROVED 後推進 Epic
+   至 `Done`」）與 §1.6 日期欄位表（原文 `Closed` 由 Code Reviewer 填）。
+   兩處都直接違反 `Done` = merged，而且都**不含 §3.5 grep pattern 的關鍵字**——
+   與開單時漏掉的那三處同一類型。
+
+2. **`Closed` 與 `Done` 的填寫者由 Code Reviewer 改為 Developer。**
+   這是 DN-003 §3.4.1 結案 commit 表的直接推論（第 2 步「Developer：Status → `Done`、
+   填 Closed、填 PR 編號」）。連帶改到 `team_protocol.md` §1.5／§1.6 與
+   `code-reviewer/SKILL.md` 第 1、4 點——**審查者從此不再自行把 Status 改成 `Done`**。
+
+3. **`commit-message.md` 第 5 步的警語一併改寫。** 原文「嚴禁未經複查即 commit」
+   在「先 commit 再審」之下不成立，改為「未經複查的訊息不得進入主線」，
+   並補上「以 `--amend` 改完須重新呈現」。AC 只指名第 105 行，
+   但只改那一行會讓同一份文件內部自相矛盾。
+
+**已知偏離**：`git_workflow.md` §7 指向 DN-005／DN-006 時**用的是 GitHub URL，
+不是相對路徑**——kit 不出貨 `docs/design_notes/`，寫相對連結會被
+`test_kit_內沒有死連結` 抓到，且安裝到別的專案後必然是死連結。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 

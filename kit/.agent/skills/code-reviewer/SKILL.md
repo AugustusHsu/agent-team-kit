@@ -58,10 +58,12 @@ Code Reviewer 同樣肩負著「最終防線」的矛盾偵測責任：
 ### 📌 Status 與工單欄位更新
 審查完成後，**必須**透過工具修改原始工單 `.md` 檔案：
 1. **更新 Status**：
-   - `[ ✅ APPROVED ]` → 將 Status 改為 `Done`。
-     **APPROVED 只是放行訊號，不等於結案**：須待 Developer 以複查通過的
-     commit message 提交、合併、刪除分支之後，才可標記 `Done`
-     並回填 commit SHA（見 `team_protocol.md` §1.9 / §1.10）。
+   - `[ ✅ APPROVED ]` → **Status 維持 `In Review`，不要改成 `Done`**。
+     **APPROVED 只是放行訊號，不等於結案**——`Done` 的定義是**已合併進主線**，
+     而合併還可能失敗（衝突、CI 紅燈）。改 Status 的是 Developer：由他做結案
+     commit（Status → `Done`、填 Closed、填審查載體編號）再合併，
+     合併完成之後工單才是 `Done`
+     （見 `team_protocol.md` §1.9 / §1.10 與 `docs/standards/git_workflow.md` §6.2）。
    - `[ ❌ CHANGES REQUESTED ]` → 將 Status 改為 `In Progress`
 2. **勾選驗收標準 (Checklist)**：若審查判定該項次已滿足，你必須直接修改該 `.md` 檔案的內容，將 `3. 驗收標準 (Acceptance Criteria)` 下方的 `- [ ]` 變更為 `- [x]` 以留存證據。
 3. **回寫審查結果至工單 (Write-back Review Findings)**：
@@ -85,11 +87,14 @@ Code Reviewer 同樣肩負著「最終防線」的矛盾偵測責任：
    **當結論為 `[ ✅ APPROVED ]` 時**：
    - 確認所有 `3. 驗收標準 (Acceptance Criteria)` 的 `- [ ]` 皆已變更為 `- [x]`。
    - 若工單存在「📝 Code Review 備註」章節（代表先前曾被退回），在該章節末尾追加一行：`> ✅ {YYYY-MM-DD}：所有問題已修正，審查通過。`
-   - **提醒 Developer 執行收尾**：APPROVED 後由 Developer 以先前複查通過的 commit message
-     執行 commit，再依 `team_protocol.md` §1.9 收尾分支。**審查者不代為 commit。**
+   - **提醒 Developer 執行收尾**：APPROVED 後由 Developer 做結案 commit
+     （Status → `Done`、填 Closed、回填**審查載體編號**——不是 commit SHA，
+     因為 squash 合併會產生全新的 SHA），再合併、刪除分支。
+     **審查者不代為 commit、不代為合併，也不自行把 Status 改成 `Done`。**
 
-4. **填寫完成時間 (Closed Date)**：
-   - 當結論為 `[ ✅ APPROVED ]`（Status → `Done`）時，**必須**同時填寫工單的 `**✅ 完成時間 (Closed):**` 欄位，格式為 ISO 8601（例如 `2026-04-22T16:04+08:00`）。
+4. **完成時間 (Closed Date)**：
+   - 此欄位**由 Developer 在結案 commit 時填寫**（與 Status → `Done` 同一次寫入），**不由審查者填**——`Done` 的時點在合併之後，那時審查已經結束。
+   - 審查者的責任是**在 APPROVED 的回報中提醒它**：格式為 ISO 8601（例如 `2026-04-22T16:04+08:00`）。
    - 此欄位用於「近期結案」區塊的時間篩選（7 天 + 上限 10 筆），未填寫將導致工單無法正確顯示在近期結案中。
 
 （詳見 `team_protocol.md` §1.5）

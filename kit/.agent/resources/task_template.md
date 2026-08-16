@@ -6,6 +6,7 @@
 **🚥 任務狀態 (Status):** Pending / Ready / In Progress / In Review / Done
 **📅 建立時間 (Created):** {YYYY-MM-DDTHH:MM+08:00}
 **✅ 完成時間 (Closed):** —
+**🔀 審查載體編號 (PR/MR):** — [開 PR／MR 的當下回填編號（例如 #42）；未使用 PR 平台的專案保持 —。留空無法區分「沒有 PR」與「忘了填」]
 
 ## 1. 任務描述 (Description)
 [簡潔明瞭地描述這張工單要達成什麼目的、為何要做這件事]
@@ -23,8 +24,8 @@
   若本工單為 Epic (DOC-EPIC-*) 且會產出子工單，
   **第一條 AC 必須為**：
   - [ ] 所有 N 張子工單皆完成並通過 Code Review
-  其中 N 為預計產出的子工單數量。此條 AC 由 Code Reviewer
-  在最後一張子工單 APPROVED 時勾選。
+  其中 N 為預計產出的子工單數量。此條 AC 由 Code Reviewer 或 Scrum Master
+  在最後一張子工單**合併完成**（Status 成為 Done）時勾選。
 -->
 - [ ] [條件 A：例如 API 成功回傳 200 並包含特定的 JSON 結構]
 - [ ] [條件 B：例如出現特定的錯誤時，前端跳出 Toast 警告]
