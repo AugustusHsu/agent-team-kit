@@ -89,11 +89,15 @@ commit message **只描述這個專案本身的變更**。以下一律不寫：
    - 上傳寫入：以 `_ensure_manifest_item`（Find-or-Create）取代舊的 upsert 方法，確保冪等。
    ```
 
-5. **交付使用者複查（強制閘門）**
+5. **交付使用者複查（強制閘門：在進入主線前，不在每一顆 commit）**
 
    > ⚠️ **未經複查的訊息不得進入主線。** 必須把**完整 commit message 原文**呈現給使用者，
    > 取得**當次**明確同意。**前一次的同意不延用到下一則訊息。**
    > 已經寫下的訊息同樣適用——以 `git commit --amend` 改完後須重新呈現。
+   >
+   > ✅ **`{TaskID}` 分支上的中間 commit 不必事前詢問，直接 commit。** 閘門在
+   > **離開工單分支**的那一刻：合併回主線或整合分支的那則訊息才需要當次同意。
+   > 直接在主線／整合分支上 commit **不適用**這項豁免。
 
    呈現後詢問：
 
@@ -102,13 +106,15 @@ commit message **只描述這個專案本身的變更**。以下一律不寫：
    使用者要求修改時，改完必須**重新呈現完整訊息**再取得一次同意，
    不可只回覆「已修正」就逕自提交。
 
-   > **工單流程下的時點**：開發過程中即可 commit，**不必等 Code Review 通過**。
-   > 因此複查對象是**已經寫下、可用 `git commit --amend` 修改的訊息**——
-   > 它隨交付回報一併呈交（`In Progress` → `In Review`）。閘門把關的是
-   > **最終進入主線的那則訊息**。詳見 `.agent/resources/team_protocol.md` §1.10
-   > 與 `docs/standards/git_workflow.md` §4。
+   > **工單流程下的時點**：開發過程中即可 commit，**不必等 Code Review 通過**、
+   > 也**不必逐顆事先詢問**。因此複查對象是**已經寫下、可用 `git commit --amend`
+   > 修改的訊息**——它隨交付回報一併呈交（`In Progress` → `In Review`）。
+   > 閘門把關的是**最終進入主線的那則訊息**。詳見
+   > `.agent/resources/team_protocol.md` §1.10 與 `docs/standards/git_workflow.md` §4。
 
-6. **執行 Commit（待使用者確認後）**
+6. **執行 Commit**
+
+   在 `{TaskID}` 分支上直接執行；**進入主線的那一則**必須先完成步驟 5。
 
    ```bash
    git commit -m "<subject>" -m "<body>"
