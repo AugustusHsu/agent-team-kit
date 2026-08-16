@@ -191,7 +191,7 @@ def test_升級不覆蓋使用者改過的檔案而是另存_new(tmp_path: Path)
 
 
 def test_升級保留種子檔(tmp_path: Path):
-    """CLAUDE.md／.gitignore／BACKLOG.md 安裝後由專案接手，升級不得動它們。"""
+    """CLAUDE.md／.gitignore／BACKLOG.md／模組登記表安裝後由專案接手，升級不得動它們。"""
     target = tmp_path / "proj"
     target.mkdir()
     _安裝(target)
@@ -200,6 +200,7 @@ def test_升級保留種子檔(tmp_path: Path):
         "CLAUDE.md": "# 我的專案\n",
         ".gitignore": "node_modules/\n",
         "docs/development/BACKLOG.md": "# 我的 BACKLOG\n",
+        "docs/features/README.md": "# 我的模組登記表\n",
     }
     for rel, 內容 in 種子.items():
         (target / rel).write_text(內容, encoding="utf-8")

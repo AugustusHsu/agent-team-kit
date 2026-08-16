@@ -40,8 +40,9 @@ BACKLOG 卻完全沒更新。
   漏改不會有任何執行期錯誤——`test_kit_不得殘留已廢除的流程規則` 就是為此而存在。
 - **安裝會多產生一個 `kit/` 裡沒有的檔案：`.agent/.kit-manifest`**（升級用的 sha256 基準線）。
   `test_安裝後檔案與_kit_完全一致` 的預期清單因此是「kit 檔案 + manifest」，不是純 kit 檔案。
-- **`install.sh` 的種子檔清單**（`is_seed_file()`：`CLAUDE.md`、`.gitignore`、`BACKLOG.md`）
-  決定升級時哪些檔案永不覆蓋。改這份清單要同步改 `tests/test_install.py::test_升級保留種子檔`。
+- **`install.sh` 的種子檔清單**（`is_seed_file()`：`CLAUDE.md`、`.gitignore`、`BACKLOG.md`、
+  `docs/features/README.md`）決定升級時哪些檔案永不覆蓋。改這份清單要同步改
+  `tests/test_install.py::test_升級保留種子檔`。
 - `kit/.agent/resources/team_protocol.md` 改章節結構時，要同步 `kit/docs/standards/team_protocol.md`
   指路檔的章節索引，否則 `test_指路檔章節索引與正版同步` 會失敗。
 
@@ -61,13 +62,12 @@ BACKLOG 卻完全沒更新。
 裝出來的**安裝實例，視為唯讀**——要改流程規範請改 `kit/` 再重跑安裝，
 直接改根目錄那份會在下次升級被 `.new` 衝突淹掉。
 
-例外一（`is_seed_file()` 認定的種子檔，升級不覆蓋）：
-`CLAUDE.md`、`.gitignore`、`docs/development/BACKLOG.md`。
-`docs/features/README.md` 不在 kit 內，是本 repo 自有檔案，安裝從不碰它。
+例外（`is_seed_file()` 認定的種子檔，升級不覆蓋）：`CLAUDE.md`、`.gitignore`、
+`docs/development/BACKLOG.md`、`docs/features/README.md`。
 
-例外二（**已知缺陷**）：`docs/DOCS_MAP.md` 的「功能模組」表 kit 出貨時就要求專案自行填寫，
-但它**不是**種子檔，升級時會被判定為「使用者改過」而產生 `.new` 衝突。
-本 repo 已經填了 `PEV`/`KIT`/`WTG` 三列，等於明知故犯。是否列為種子檔見 BACKLOG Icebox。
+模組登記表 2026-08-17 依 PEV-DEV-AGENT-009 從 `docs/DOCS_MAP.md` 抽到
+`docs/features/README.md` 並列為種子檔：**要專案自己填的表才是種子檔，骨架不是**。
+DOCS_MAP 因此重新變回純骨架，升級推得動，也不再產生 `.new`。
 
 **worktree 可以用**（2026-08-17 裁定，解除原本的禁用），但有三條硬性要求：
 **用完一定要 `git worktree remove`**、**worktree 內的 commit 必須合併回分支**、

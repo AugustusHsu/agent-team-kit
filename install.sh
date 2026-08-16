@@ -76,7 +76,7 @@ fi
 # 升級時一律不動它們，否則會洗掉專案的模組登記、自訂忽略規則與 BACKLOG 產出。
 is_seed_file() {
   case "$1" in
-    CLAUDE.md | .gitignore | docs/development/BACKLOG.md) return 0 ;;
+    CLAUDE.md | .gitignore | docs/development/BACKLOG.md | docs/features/README.md) return 0 ;;
     *) return 1 ;;
   esac
 }
