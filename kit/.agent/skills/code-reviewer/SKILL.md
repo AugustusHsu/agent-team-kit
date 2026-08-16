@@ -90,7 +90,8 @@ Code Reviewer 同樣肩負著「最終防線」的矛盾偵測責任：
    - **提醒 Developer 執行收尾**：APPROVED 後由 Developer 做結案 commit
      （Status → `Done`、填 Closed），再合併、刪除分支。**審查載體編號**在開 PR／MR
      的當下就該回填了，此時只需確認它不是空的——該欄位填的不是 commit SHA，
-     因為 squash 合併會產生全新的 SHA。
+     因為回填的當下合併還沒發生，那顆 commit 物理上還不存在
+     （squash 與 `--no-ff` 皆然）。
      **審查者不代為 commit、不代為合併，也不自行把 Status 改成 `Done`。**
    - **無遠端專案**：沒有 PR／MR 可當載體時，APPROVED **也必須**新增「📝 Code Review 備註」
      章節寫入審查報告——它是此情境下唯一的審查載體，工單的編號欄位填 `—`

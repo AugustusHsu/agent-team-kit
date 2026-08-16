@@ -2,7 +2,7 @@
 
 > **最後更新時間**：2026-08-16
 > **工單來源目錄**：`docs/features/*/tasks/`
-> **工單總數**：4 張
+> **工單總數**：5 張
 
 ---
 
@@ -10,7 +10,11 @@
 
 > 包含狀態為 `In Progress` 或 `Ready` 的工單。
 
-*(無)*
+| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
+|---|---------|------|------|-------------------|---------------|
+| 1 | PEV-DEV-AGENT-003 | 無遠端專案的合併方式降級為 `--no-ff`，補上 squash 前提不成立時的缺口 | process_evolution | devops-engineer | 🔵 In Progress |
+
+**小計**：1 張（In Progress: 1 / Ready: 0）
 
 ---
 
@@ -64,9 +68,10 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| ⏳ Pending | 1 | 50.0% |
-| ✅ Done | 1 | 50.0% |
-| **總計** | **2** | **100%** |
+| 🔵 In Progress | 1 | 33.3% |
+| ⏳ Pending | 1 | 33.3% |
+| ✅ Done | 1 | 33.3% |
+| **總計** | **3** | **100%** |
 
 ### worktree_guard
 
@@ -96,7 +101,7 @@
 
 | 負向對照自動化 | 待開 DN | 要跑在 CI 上，依賴 DN-003 先定案。design_note §3.2 |
 | 工單瘦身 | 待開 DN | 審查輪次與 HITL 問答移出工單檔案，落點未定。design_note §3.5 |
-| worktree 重新設計 | 待開 DN | kit 內容已於 2026-08-16 整份移除、分支規則搬回 team_protocol §1.9。**必須排在 DN-003 之後**：導入 PR 後 worktree 的必要性會重估 |
+| [DN-006 分支拓撲與隔離](../design_notes/DN-006_branch_topology_and_isolation.md) | 🌱 Seed | kit 內容已於 2026-08-16 整份移除、分支規則搬回 team_protocol §1.9。DN-006 §4.1：worktree 要回來**必須連同所有權規則一起設計**，只加回 worktree 等於沒加 |
 | 展示層生成 | 待開 DN | 100% 從 source of truth 生成，Mermaid + 靜態站台。排最後。design_note §3.8 |
 | 審查與開發拆 context | 待判定 | 若只有一種做法就直接開工單；若有 subagent／獨立 session／換模型之分則需 DN。design_note §3.3 |
 | precheck 腳本 | 可直接開工單 | 審查清單三分法，做法單一。design_note §3.4 |

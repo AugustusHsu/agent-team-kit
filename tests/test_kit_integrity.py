@@ -30,7 +30,12 @@ LINK_PLACEHOLDERS = {"路徑", "relative/path"}
     # squash 下 --is-ancestor 永遠回非 0，拿它當「已合併」判準等於分支永遠刪不掉。
     (
         r"merge-base --is-ancestor[^\n]*#[^\n]*已合併",
-        "§6.1 一律 squash，已合併的判準改為比對樹（§6.4）",
+        "squash 路徑的已合併判準改為比對樹，--no-ff 路徑用 git branch -d（§6.4）",
+    ),
+    # squash 的理由建立在「PR 保存過程 commit」上，無遠端時前提不成立（§8.3）。
+    (
+        r"一律[^\n]{0,6}squash",
+        "squash 只在有 PR／MR 平台時成立，無遠端改用 --no-ff（§6.1／§8.3）",
     ),
     (r"訊號.{0,6}主線含該 commit", "squash 後過程 commit 不在主線，判準是樹相同（§6.4）"),
 ]
