@@ -17,8 +17,8 @@ Pending → Ready → In Progress → In Review → Done
 | **Pending** | 工單被**未完成的前置工單（硬依賴）**擋住，尚不可開工。 | 前置工單全數 `Done`/`In Review`、依賴解除後，由 Scrum Master 或執行者標記為 Ready。 |
 | **Ready** | 工單**無未完成的前置依賴**，可交由 Developer 開始執行。工單內「❓ 需要確認的事項」（即使附建議值）**不阻擋 Ready**，改於**執行前**強制詢問（見 §1.7）。 | Developer (Frontend/Backend/DevOps) 領取後標記為 In Progress。 |
 | **In Progress** | Developer 正在開發中。 | Developer 完成開發並提交交付回報後，標記為 In Review。 |
-| **In Review** | Code Reviewer 正在審查程式碼。 | Code Reviewer 產出審查報告後，決定結果。 |
-| **Done** | Code Reviewer 標記 `[ ✅ APPROVED ]`，工單正式完結。 | — |
+| **In Review** | Code Reviewer 正在審查程式碼。 | Code Reviewer 產出審查報告後，決定結果；APPROVED 後由 Developer 收尾合併。 |
+| **Done** | 變更**已合併進主線**，工單正式完結。`[ ✅ APPROVED ]` 只是**放行訊號**，不等於 `Done`——合併還可能失敗（衝突、CI 紅燈）。 | — |
 
 ### 1.1 退回機制 (Rejection Flow)
 - 若 Code Reviewer 標記 `[ ❌ CHANGES REQUESTED ]`，工單狀態**退回至 `In Progress`**。
@@ -32,7 +32,7 @@ Pending → Ready → In Progress → In Review → Done
 
 ### 1.3 Epic 關閉條件 (Epic Closure)
 - Epic (`DOC-EPIC-*`) 工單的關閉條件為：其所有子工單皆達到 `Done` 或 `Canceled` 狀態。
-- 當最後一張子工單被 Code Reviewer APPROVED 後，審查者或 Scrum Master 應同步將 Epic 的 Status 推進至 `Done`，並勾選「所有 N 張子工單皆完成並通過 Code Review」AC。
+- 當最後一張子工單**合併完成**（即該子工單的 Status 已成為 `Done`）後，審查者或 Scrum Master 應同步將 Epic 的 Status 推進至 `Done`，並勾選「所有 N 張子工單皆完成並通過 Code Review」AC。
 - 若部分子工單為 `Canceled`，N 的計算應排除已取消的工單。
 
 ### 1.4 母子工單狀態連動 (Parent-Child Status Linkage)
@@ -51,7 +51,8 @@ Pending → Ready → In Progress → In Review → Done
 | 母工單完成子工單拆分 | Scrum Master | `In Progress` |
 | Developer 開始執行工單 | Developer | `In Progress` |
 | Developer 完成開發並提交交付回報 | Developer | `In Review` |
-| Code Reviewer 判定 `[ ✅ APPROVED ]` | Code Reviewer | `Done` |
+| Code Reviewer 判定 `[ ✅ APPROVED ]` | Code Reviewer | **維持 `In Review`**（放行訊號，不是結案；見 §1.9） |
+| 結案 commit 已合併進主線 | Developer | `Done` |
 | Code Reviewer 判定 `[ ❌ CHANGES REQUESTED ]` | Code Reviewer | `In Progress` |
 | Scrum Master 取消工單 | Scrum Master | `Canceled` |
 
@@ -61,7 +62,7 @@ Pending → Ready → In Progress → In Review → Done
 | 欄位 | 填寫時機 | 執行者 |
 |---|---|---|
 | `**📅 建立時間 (Created):**` | 工單首次建立時 | Scrum Master |
-| `**✅ 完成時間 (Closed):**` | Status 改為 `Done` 時 | Code Reviewer |
+| `**✅ 完成時間 (Closed):**` | Status 改為 `Done` 時——隨**結案 commit** 一併寫入（§1.9） | Developer |
 | `**✅ 完成時間 (Closed):**` | Status 改為 `Canceled` 時 | Scrum Master |
 
 - 未完成的工單，`Closed` 欄位保持 `—`（em dash）。
@@ -127,57 +128,61 @@ Pending → Ready → In Progress → In Review → Done
 `docs/features/{模組}/tasks/{TaskID}.md`。
 **沒有工單的臨時工作，一律先開一張最小工單再開分支。**
 
-**分支生命週期對映工單狀態：**
+**分支與審查載體的生命週期對映工單狀態：**
 
-| 狀態轉換 | 分支動作 |
-|---|---|
-| `Ready` → `In Progress` | **建立分支**，分支名 = Task ID |
-| `In Progress` → `In Review` | 交付回報＋commit message 草案一併呈交（§2.2）→ **凍結** |
-| `In Review` | **凍結**：Developer 不得再寫入——任何寫入都會讓審查對象漂移 |
-| `In Review` → `In Progress` | **解凍**，同一分支繼續修正 |
-| `In Review` → `Done` | APPROVED → 依 §1.10 commit → 合併 → 刪除分支 → **收尾完成才可標 `Done`** |
-| → `Canceled` | 分支內有 commit 時**必須詢問使用者**保留或丟棄，不可逕自刪除 |
+| 工單狀態 | 分支 | 審查載體（PR／MR／工單審查報告） |
+|---|---|---|
+| `Ready` | — | — |
+| `In Progress` | **建立分支**，分支名 = Task ID | 首次推送後開**草稿**，並把編號回填工單 |
+| `In Progress` → `In Review` | **停止寫入**——任何寫入都會讓審查對象漂移 | 草稿 → **正式請求審查** |
+| `In Review` → `In Progress` | **恢復寫入**，同一分支繼續修正 | 轉回草稿 |
+| `In Review` → `Done` | 結案 commit → 合併 → 刪除分支 | **已合併** |
+| → `Canceled` | 分支內有 commit 時**必須詢問使用者**保留或丟棄，不可逕自刪除 | 關閉 |
 
 - **不存在 `In Progress` → `Done` 的捷徑**，故每張工單必然經歷 `In Review`。
-- **commit 發生在 APPROVED 之後，不是交付時。** 一張工單產出一個 commit，
-  用的是通過審查的那則訊息原文。
-- 由此推出：**`In Review` 期間變更沒有任何 ref 指著它**，只存在工作目錄與暫存區。
-  任何 `git checkout`／`git reset`／清理動作都會使它**永久消失**。
-- **`Done` 的前置條件**：分支已收尾，由 Code Reviewer 在 APPROVED 時一併檢查；
-  commit 產生的 SHA 於此時回填工單。
+- **開發過程中隨時可以 commit，不必等審查通過。** 反過來做會讓 `In Review` 期間
+  沒有任何 ref 指著變更，一次 `git checkout`／`git reset` 就永久消失。
+- **`Done` = 已合併，不是 APPROVED。** APPROVED 只是放行訊號；合併還可能失敗。
+- **`Done` 的前置條件**：結案 commit 已合併進主線，且分支已刪除。
+- **結案 commit 在合併前寫入、於合併後生效。** 合併失敗它就不在主線，
+  工單自動維持 `In Review`，不需要任何回滾動作。
+- **回填的是審查載體的編號，不是 commit SHA**（合併會產生全新的 SHA），
+  且在**開 PR 當下**就回填，不等結案。
 
-> ⚠️ 刪分支時 `git branch -d` 的「未合併」警告**在「已合併到非當前分支」時同樣會出現**。
-> **禁止**看到失敗就改用 `-D`，必須先以
-> `git merge-base --is-ancestor <分支> <合併目標>` 客觀驗證。
-
-> 📌 **本節是最小保底規範。** 合併策略、遠端同步、PR／MR 等平台上的審查流程
-> 尚未定案，待專案自行約定。
+> 📌 **本節只定義「工單走到這一步該做什麼」。** 分支怎麼開、commit 怎麼打、
+> 推送授權、合併與刪分支怎麼做、換平台要對應哪些能力，一律見
+> [`docs/standards/git_workflow.md`](../../docs/standards/git_workflow.md)。
 
 ### 1.10 Commit 閘門 (🔒 HITL Gate before Commit)
 
 **任何 commit 之前，都必須把 commit message 原文交付使用者複查並取得當次明確同意。**
 性質同 §1.7，差別在 §1.7 把關「開工前」，本節把關「提交前」。
 
-閘門的兩個時點分開：**訊息在交付時（`In Progress` → `In Review`）隨交付回報一併呈交，
-commit 則在取得 APPROVED 之後才執行**（見 §1.9）。
+**複查對象是已經寫下、可用 `git commit --amend` 修改的訊息**，不是一份「即將寫下」
+的草稿。因為開發過程中即可 commit（§1.9），交付審查時訊息已經存在於分支上。
 
-- **嚴禁未經複查即 commit**，即使變更微小、即使訊息看起來顯而易見。
-- **執行時必須使用經確認的那則訊息原文**，不得在同意後再自行增刪。
-- **上一次的同意不延用到下一個 commit。** 每個 commit 各自取得一次同意。
+**閘門把關的是「進入主線的那則訊息」**：沒有任何一則未經使用者當次同意的訊息
+可以留在主線上。
+
+- **交付時（`In Progress` → `In Review`）呈交分支上實際的 commit 訊息原文**，
+  隨交付回報一併表態（§2.2）。
+- **執行時必須使用經確認的那則訊息原文**，不得在同意後再自行增刪；
+  需要改就用 `git commit --amend`（單顆）或合併時的訊息（多顆）改寫。
+- **上一次的同意不延用到下一次。** 每次交付各自取得一次同意。
 - 使用者要求修改訊息時，改完須**重新呈現完整訊息**再確認，不可只回覆「已修正」。
 - 審查退回（CHANGES REQUESTED）後重新交付時，**訊息須重新呈現、重新取得同意**。
-- **合併產生的 merge commit 同樣適用。** 收尾時 `git merge` 若非 fast-forward，
-  git 會自動寫一則 `Merge branch '...'` 訊息——它從未經過使用者過目，是本閘門最容易
-  漏掉的路徑。非 fast-forward 的合併，必須先呈現 merge commit 訊息再執行。
-  fast-forward 不產生新 commit，不適用。
+- **合併時產生的訊息同樣適用，而且它才是最終進入主線的那一則。** 無論是 squash
+  合併的訊息，還是非 fast-forward 合併自動寫的 `Merge branch '...'`，都從未經過
+  使用者過目——這是本閘門最容易漏掉的路徑，合併前必須先呈現。
 
 commit message 的格式、Emoji 對照與**禁止寫入的內容**（AI 署名 trailer、對話脈絡、
 工具／session 內部狀態），一律以
 [`.agent/workflows/commit-message.md`](../workflows/commit-message.md) 為**正版**，本節不重述。
 
-> 此閘門的成立前提是**工單狀態機不允許自動提交**：Developer 的交付回報止於「訊息已備妥」，
-> 提交動作屬於使用者的決定。Agent 代為執行 `git commit` 只是省下貼指令的工，
-> 不改變決定權歸屬。
+> 此閘門的成立前提是**工單狀態機不允許自動併入主線**：什麼訊息能代表這張工單
+> 留在歷史裡，屬於使用者的決定。Agent 代為執行 `git commit` 或合併只是省下貼指令的工，
+> 不改變決定權歸屬。commit 時點與推送授權見
+> [`docs/standards/git_workflow.md`](../../docs/standards/git_workflow.md) §3.1／§4。
 
 ### 1.11 文檔權威階序 (📚 Source of Truth Hierarchy)
 
@@ -211,19 +216,22 @@ commit message 的格式、Emoji 對照與**禁止寫入的內容**（AI 署名 
 - 工單的 `Ready`/`Pending` 以**前置工單依賴**是否解除為準，**不**以 Human-in-the-loop 是否回覆為準。工單內「❓ 需要確認的事項」即使附建議值，仍須於**執行前**由執行者強制向使用者確認（見 §1.7），不得逕自採用建議值。
 
 ### 2.2 Developer → Code Reviewer
+- **交付回報的第一行必須指出審查載體的位置**——使用 PR 的專案填 PR 連結、
+  使用 MR 的填 MR 連結、無遠端的填分支名。審查者要能只憑這一行就找到要審的東西。
 - Developer 完成開發後，必須提交一份統一的**三段式交付回報**：
   - **✅ 執行項目追蹤**: 逐條對應工單的 Acceptance Criteria，標示通過或未通過。
   - **🚨 矛盾與風險警告**: 列出開發過程中發現的任何風險或架構衝突（無則填「無」）。
   - **🧪 驗證/測試建議**: 提供具體的驗證方法（`curl` 指令、`pytest` 指令、或瀏覽器頁面路徑）。
 - 交付回報連同工單原文一併提交給 Code Reviewer。
-- **交付回報須附上 commit message 草案**（依 `.agent/workflows/commit-message.md` 產出），
-  與報告**一併呈交、一次表態**。此時**尚未 commit**——commit 在 APPROVED 之後才執行（§1.10）。
+- **交付回報須附上分支上實際的 commit message 原文**（依
+  `.agent/workflows/commit-message.md` 產出），與報告**一併呈交、一次表態**。
+  變更**此時已經 commit 並推送**，訊息可用 `--amend` 修改（§1.10）。
 - 審查者可只針對報告表態退回；退回時訊息一併作廢，重新交付須重新呈現。
-  通過後由 Developer 執行 commit，並依 §1.9 收尾分支。
+  通過後由 Developer 依 §1.9 做結案 commit、合併、刪除分支。
 
 ### 2.3 Code Reviewer → Done / 退回
 - Code Reviewer 審查後產出標準化審查報告（含 Verdict: APPROVED 或 CHANGES REQUESTED）。
-- 若 APPROVED，**Developer 隨即以複查通過的訊息執行 commit**，再標記工單 `Done`。**必須先確認分支收尾完成（commit、合併、分支刪除）才可標 `Done`**，並把產生的 SHA 回填工單——見 §1.9。
+- 若 APPROVED，**工單狀態維持 `In Review`**——APPROVED 是放行訊號，不是結案。接著由 Developer 做**結案 commit**（Status → `Done`、填 Closed；審查載體編號早在開 PR／MR 當下就已回填）、合併、刪除分支；**合併完成之後工單才是 `Done`**——見 §1.9。
 - 若 CHANGES REQUESTED，工單退回 `In Progress`，Developer 根據報告修正。
 - **回寫機制 (Write-back)**：Code Reviewer 審查完成後，**必須**將審查結果直接寫入對應工單的 `.md` 檔案（可更新驗收標準、規格區塊，或新增「📝 Code Review 備註」章節），確保 Developer 重新開工時無需額外查找審查報告。詳細寫入格式請參照 `code-reviewer` SKILL.md 中的「回寫審查結果至工單」條款。
 

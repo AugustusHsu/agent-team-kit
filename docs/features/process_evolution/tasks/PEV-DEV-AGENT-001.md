@@ -3,9 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** Independent
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** devops-engineer
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-16T14:06+08:00
-**✅ 完成時間 (Closed):**
+**✅ 完成時間 (Closed):** 2026-08-16
+**🔀 審查載體編號 (PR/MR):** — （依使用者裁定不推送，無 PR；依 `docs/standards/git_workflow.md` §8.3，審查載體為本工單的「📝 Code Review 備註」章節）
 
 ## 1. 任務描述 (Description)
 
@@ -60,22 +61,24 @@ DN 不在第 1 層，agent 讀規範時看不到它——**裁定必須落到出
 
 ### 3.1 新文件 `kit/docs/standards/git_workflow.md`
 
-- [ ] 章節依**主題**切，順序為：核心原則 → 工單 × git 狀態對映 → 分支 →
+- [x] 章節依**主題**切，順序為：核心原則 → 工單 × git 狀態對映 → 分支 →
       commit → PR → 合併與收尾 → 平台適配 → 換平台檢查清單（§4 裁定一）
-- [ ] **只有平台相關的規則帶 `[平台相關]` 標記**，L1／L2 不標
-- [ ] 末章「換平台檢查清單」列出全部 `[平台相關]` 標記處，
+- [x] **只有平台相關的規則帶 `[平台相關]` 標記**，L1／L2 不標
+- [x] 末章「換平台檢查清單」列出全部 `[平台相關]` 標記處，
       且**與正文的標記數量一致**（可 `grep -c` 驗證）
-- [ ] 含 DN-003 §5 能力對照表六列，並保留
+      〔首輪審查判未達成：§1 的說明散文自身含 `[平台相關]` 方括號而被一併命中，
+      `grep -c` 回傳 10 ≠ 清單 9 列；2026-08-16 移除該字面值後修正〕
+- [x] 含 DN-003 §5 能力對照表六列，並保留
       「只要一個平台能填滿這六列，就能套用本流程」的結論
-- [ ] 寫出五條裁定：`Done` = merged、工單 `In Review` 保留、
+- [x] 寫出五條裁定：`Done` = merged、工單 `In Review` 保留、
       Draft PR 於首次 push 時開、CI 紅燈硬擋 merge、合併用 squash
-- [ ] 寫出回填 **PR 編號**（非 commit SHA）及其理由（squash 後 SHA 必變）
-- [ ] 寫出「寫入時點 ≠ 生效時點」的推導（DN-003 §3.4.1）
-- [ ] 寫出 GitHub 設定要求，含**必須關閉** "Dismiss stale pull request approvals"，
+- [x] 寫出回填 **PR 編號**（非 commit SHA）及其理由（squash 後 SHA 必變）
+- [x] 寫出「寫入時點 ≠ 生效時點」的推導（DN-003 §3.4.1）
+- [x] 寫出 GitHub 設定要求，含**必須關閉** "Dismiss stale pull request approvals"，
       並說明不關會造成結案 commit 讓 approve 失效的死循環
-- [ ] 收錄 `git branch -d` 誤報「未合併」的陷阱與
+- [x] 收錄 `git branch -d` 誤報「未合併」的陷阱與
       `git merge-base --is-ancestor` 的客觀驗證法（自 §1.9 搬入）
-- [ ] **預留「並行擴充」一節**（位置在「平台適配」之前），內容目前只需
+- [x] **預留「並行擴充」一節**（位置在「平台適配」之前），內容目前只需
       一句 placeholder 指向 [DN-005](../../../design_notes/DN-005_parallel_task_decomposition.md)
       與 [DN-006](../../../design_notes/DN-006_branch_topology_and_isolation.md)，
       並寫明「本節為空時，前面各節即完整可用」。理由見 §4 另註二——
@@ -86,61 +89,315 @@ DN 不在第 1 層，agent 讀規範時看不到它——**裁定必須落到出
 判準：**`team_protocol.md` 回答「工單走到這一步該做什麼」（狀態機）；
 `git_workflow.md` 回答「git 這件事該怎麼做」（操作手冊）。**
 
-- [ ] §1 狀態表的 `Done` 定義由「Code Reviewer 標記 APPROVED，工單正式完結」
+- [x] §1 狀態表的 `Done` 定義由「Code Reviewer 標記 APPROVED，工單正式完結」
       改為 **merged**，並明確 APPROVED 只是放行訊號
-- [ ] §1 狀態轉換表「Code Reviewer 判定 APPROVED → `Done`」同步修正
-- [ ] §1.9 **保留**：一張工單 = 一個分支、分支名 = Task ID、
+- [x] §1 狀態轉換表「Code Reviewer 判定 APPROVED → `Done`」同步修正
+- [x] §1.9 **保留**：一張工單 = 一個分支、分支名 = Task ID、
       工單狀態 ↔ 分支／PR 動作對映表、`Done` 的前置條件
-- [ ] §1.9 **搬出**：squash 理由、PR 編號 vs SHA、`git branch -d` 陷阱、
+- [x] §1.9 **搬出**：squash 理由、PR 編號 vs SHA、`git branch -d` 陷阱、
       平台設定、三層結構、「寫入 ≠ 生效」的推導過程（只留結論）
-- [ ] §1.9 移除「本節是最小保底規範……待專案自行約定」的免責語
+- [x] §1.9 移除「本節是最小保底規範……待專案自行約定」的免責語
       （流程已定案，保底定位消失），改為指向 `git_workflow.md`
-- [ ] §1.10 **保留**且改寫為「先 commit 再審，複查對象是已寫下、
+- [x] §1.10 **保留**且改寫為「先 commit 再審，複查對象是已寫下、
       可 `--amend` 修改的訊息」；HITL 性質不變
-- [ ] §2.2 交付回報「此時尚未 commit」改為新流程
-- [ ] **§1.9／§1.10 的章節編號未變**——各有 7 處交叉引用（跨 7 個檔）不得斷
+- [x] §2.2 交付回報「此時尚未 commit」改為新流程
+- [x] **§1.9／§1.10 的章節編號未變**——各有 7 處交叉引用（跨 7 個檔）不得斷
 
 ### 3.3 交付回報與回填時點（§4 裁定三）
 
-- [ ] 規範以**平台中立**方式表述：交付回報**第一行須指出審查載體的位置**
+- [x] 規範以**平台中立**方式表述：交付回報**第一行須指出審查載體的位置**
       （GitHub = PR 連結／GitLab = MR／無遠端 = 分支名），不寫死 "PR 連結"
-- [ ] **PR 編號的回填時點提前到「開 PR 當下」**（`In Progress` 階段），
+- [x] **PR 編號的回填時點提前到「開 PR 當下」**（`In Progress` 階段），
       不再等結案 commit；結案 commit 只負責改 `Status` 與 `Closed`
-- [ ] `task_template.md` 的回填欄位為 PR 編號，且**未使用 PR 時有明確預設值**
+      〔首輪審查判未達成：`git_workflow.md` §6.2、`team_protocol.md`、
+      `code-reviewer/SKILL.md` 三處仍把「填 PR 編號」列在結案 commit，
+      與本條對撞；2026-08-16 修正〕
+      〔**二輪審查再次判未達成**：修正把「三處」當成三個檔案，但
+      `code-reviewer/SKILL.md` 內有**兩處**，只改了 `:91`，`:64` 仍寫著
+      結案 commit「填審查載體編號」，與同檔 `:91-93` 及本條直接對撞。
+      依 §1.8 第 2 條退回勾選；2026-08-16 三輪修正 `:64` 並補上對應禁語列，
+      四處敘述（`SKILL.md:64`／`:91`、`team_protocol:234`、`git_workflow:144`）現已一致〕
+- [x] `task_template.md` 的回填欄位為 PR 編號，且**未使用 PR 時有明確預設值**
       （例如 `—`），不是留空——留空無法區分「沒有 PR」與「忘了填」
 
 ### 3.4 六份 skill ＋ workflow
 
-- [ ] 四份 dev skill：「**此時不要 commit**」與「通過後才執行 commit
+- [x] 四份 dev skill：「**此時不要 commit**」與「通過後才執行 commit
       並收尾分支」皆改為新流程
-- [ ] `code-reviewer/SKILL.md`：「回填 commit SHA」改為 PR 編號；
+- [x] `code-reviewer/SKILL.md`：「回填 commit SHA」改為 PR 編號；
       「APPROVED 只是放行訊號」段落與新的 `Done` = merged 定義一致；
       `Done` 的標記時點改為 merged 之後
-- [ ] `scrum-master/SKILL.md`：Epic 推進至 `Done` 的條件由
+- [x] `scrum-master/SKILL.md`：Epic 推進至 `Done` 的條件由
       「最後一張子工單 APPROVED」改為「最後一張子工單 merged」（第 59、109 行）
-- [ ] `commit-message.md` 第 105 行「要等審查 APPROVED 之後才執行第 6 步」改寫
-- [ ] `task_template.md` 與 `_EXAMPLE-DEV-BE-001.md` 第 27 行
+- [x] `commit-message.md` 第 105 行「要等審查 APPROVED 之後才執行第 6 步」改寫
+- [x] `task_template.md` 與 `_EXAMPLE-DEV-BE-001.md` 第 27 行
       「在最後一張子工單 APPROVED 時勾選」同步修正
 
 ### 3.5 一致性與驗證
 
-- [ ] **矛盾敘述清零**，以下 grep 全部零命中（開單時的 pattern 只抓得到 4 處，
+- [x] **矛盾敘述清零**，以下 grep 全部零命中（開單時的 pattern 只抓得到 4 處，
       已擴充）：
       `grep -rn "此時不要 commit\|通過後才執行 commit\|APPROVED 之後才執行\|commit 發生在 APPROVED 之後\|尚未 commit\|回填 commit SHA" kit/`
-- [ ] `grep -rn "APPROVED" kit/` 的每一處都經人工確認語意仍成立
+- [x] `grep -rn "APPROVED" kit/` 的每一處都經人工確認語意仍成立
       （APPROVED 本身沒有被廢除，只是不再等於 `Done`）
+      〔首輪審查判未達成：`code-reviewer/evals/evals.json:15-16` 兩條 expectation
+      仍在教已廢除的舊規則，`evals/` 整批漏看；2026-08-16 修正，
+      並依 §1.8 第 3 條補上下方兩條回歸測試 AC〕
 
 > ⚠️ **grep 清零 ≠ 改完。** 上面那條 pattern 目前命中 13 處，但**抓不到**
 > 最關鍵的三處——`team_protocol.md` §1 狀態表與狀態轉換表的 `Done` 定義、
 > `scrum-master/SKILL.md` 的 Epic 完成條件——因為它們的措辭是
 > 「判定 APPROVED → `Done`」「APPROVED 時勾選」，不含上列關鍵字。
 > 那三處由 §3.2 與 §3.4 的逐條 AC 指名覆蓋，**不可只靠 grep 收工**。
-- [ ] `kit/docs/DOCS_MAP.md` 與 `kit/docs/standards/README.md` 已登記 `git_workflow.md`
-- [ ] 指路檔 `kit/docs/standards/team_protocol.md` 的章節索引與正版一致
-- [ ] `uv run pytest` 全綠（含 `test_安裝後檔案與_kit_完全一致`、
+- [x] `kit/docs/DOCS_MAP.md` 與 `kit/docs/standards/README.md` 已登記 `git_workflow.md`
+- [x] 指路檔 `kit/docs/standards/team_protocol.md` 的章節索引與正版一致
+- [x] `uv run pytest` 全綠（含 `test_安裝後檔案與_kit_完全一致`、
       `test_指路檔章節索引與正版同步`、死連結檢查）
-- [ ] `./install.sh . --upgrade` 後根目錄安裝實例同步，**除已知的
+- [x] `./install.sh . --upgrade` 後根目錄安裝實例同步，**除已知的
       `docs/DOCS_MAP.md.new` 外無其他 `.new` 衝突**
+
+> 🔁 **以下三條為首輪審查後依 §1.8 第 3 條補入**——缺陷暴露的是「規則散在
+> 十三份 SKILL.md 與 evals.json 裡，反轉規範時只靠人工 grep 收工」這個面向，
+> 原工單完全沒涵蓋。全綠的測試套件放行了對撞的 evals，等於沒有防線。
+
+- [x] `tests/test_kit_integrity.py` 新增 `test_kit_不得殘留已廢除的流程規則`：
+      以模組層級的「已廢除規則禁語表」掃 `kit/` 全樹的 `.md`／`.json`，
+      至少涵蓋「APPROVED 改為 Done」與「APPROVED 時填 Closed」兩條，
+      失敗訊息要指出 `檔案:行號` 與該規則被廢除的原因。
+      **必須反證它會紅**：把同一套判準套在修正前的 `74aed5c` 內容上要命中
+      `code-reviewer/evals/evals.json`，否則只是加了一條永遠綠的假測試
+- [x] `tests/test_kit_integrity.py` 新增 `test_standards_文件都登記在_DOCS_MAP`：
+      `kit/docs/standards/*.md`（排除目錄自身索引 `README.md`）都必須出現在
+      `kit/docs/DOCS_MAP.md`。同時修正 `CLAUDE.md` 原本聲稱「連結測試會抓到
+      孤兒文件」的不實敘述——補上這條之前，那個保護根本不存在
+- [x] 上述兩條測試的維護義務寫進 `CLAUDE.md` 的「陷阱」段
+      （日後推翻流程規範時要回來加禁語表；新增 standards 檔要登記 DOCS_MAP）
+
+> 🔁 **以下一條為二輪審查後依 §1.8 第 3 條補入**——本工單廢除了「結案 commit
+> 填 PR 編號」這條規則，卻沒有在自己新增的禁語表裡為它留一列，導致
+> `code-reviewer/SKILL.md:64` 的殘留在 98 passed 底下完全隱形。
+
+- [x] `已廢除的流程規則` 表補上「結案 commit 填審查載體編號／PR 編號」該列，
+      並反證它會紅：對修正前的 `39813b7` 內容套用要命中
+      `kit/.agent/skills/code-reviewer/SKILL.md:64`，對修正後要 0 命中
+
+> 🔁 **以下一條為結案時發現、依 §1.8 第 1 條就地修正**——§6.1 規定一律 squash，
+> 但 §6.4／§8.1／§8.3 給的「已合併」判準（`--is-ancestor`、「主線含該 commit」）
+> 在 squash 下**恆為假**，而 §6.4 又禁止改用 `-D`：照字面走，squash 合併的分支
+> 永遠刪不掉。這是實際執行本工單的結案動作時撞到的，不是推論。
+
+- [x] §6.4 的驗證改為**比對樹**（`git rev-parse <分支>^{tree}` 與合併目標相同），
+      並註明 `--is-ancestor` 在 squash 下不可用、以及該比對只在主線未再前進時成立；
+      §8.1 表格與 §8.3 的無遠端訊號同步改為「主線的樹含該分支內容」。
+      `[平台相關]` 標記數維持 **9**，不得因此改動而失衡
+- [x] 禁語表補上這兩條舊判準，並反證會紅：對修正前的 `120565c` 命中
+      `git_workflow.md:177` 與 `:231`，對修正後 0 命中
+
+## 📝 執行紀錄 (Implementation Notes)
+
+> 2026-08-16 交付。以下是 **AC 沒有指名、但不改就會留下矛盾**的連帶修正，
+> 一併列出供審查判斷是否越界。
+
+1. **`team_protocol.md` 實際改了七處，不是 §2 Inputs 所列的五處。**
+   多出的兩處是 §1.3 Epic 關閉條件（原文「最後一張子工單被 APPROVED 後推進 Epic
+   至 `Done`」）與 §1.6 日期欄位表（原文 `Closed` 由 Code Reviewer 填）。
+   兩處都直接違反 `Done` = merged，而且都**不含 §3.5 grep pattern 的關鍵字**——
+   與開單時漏掉的那三處同一類型。
+
+2. **`Closed` 與 `Done` 的填寫者由 Code Reviewer 改為 Developer。**
+   這是 DN-003 §3.4.1 結案 commit 表的直接推論（第 2 步「Developer：Status → `Done`、
+   填 Closed、填 PR 編號」）。連帶改到 `team_protocol.md` §1.5／§1.6 與
+   `code-reviewer/SKILL.md` 第 1、4 點——**審查者從此不再自行把 Status 改成 `Done`**。
+
+3. **`commit-message.md` 第 5 步的警語一併改寫。** 原文「嚴禁未經複查即 commit」
+   在「先 commit 再審」之下不成立，改為「未經複查的訊息不得進入主線」，
+   並補上「以 `--amend` 改完須重新呈現」。AC 只指名第 105 行，
+   但只改那一行會讓同一份文件內部自相矛盾。
+
+**已知偏離**：`git_workflow.md` §7 指向 DN-005／DN-006 時**用的是 GitHub URL，
+不是相對路徑**——kit 不出貨 `docs/design_notes/`，寫相對連結會被
+`test_kit_內沒有死連結` 抓到，且安裝到別的專案後必然是死連結。
+
+## 📝 Code Review 備註 (Review Notes)
+
+> 審查日期：2026-08-16 | 審查結論：❌ CHANGES REQUESTED
+> 審查方式：兩名獨立審查員平行核對（作者不自審）＋作者自查。
+> 依 `docs/standards/git_workflow.md` §8.3，本工單不推送、無 PR，
+> **本章節即為此次的審查載體**。
+
+第一輪核對 32 條 AC：**29 條通過，3 條不通過**。六項一致性掃描
+（死連結 0、指路檔章節同步、kit↔根目錄一致、交叉引用未斷、模板逐字相同、
+`commit SHA` 殘留皆為合理否定語境）全數通過，`uv run pytest` 96 passed。
+
+### 待修正項目（第一輪）
+
+- 🚨 **[kit/.agent/skills/code-reviewer/evals/evals.json : 15-16]**（AC 3.5 FAIL）
+  兩條 expectation 仍在教被本次變更廢除的規則——「APPROVED 改為 Done」
+  「APPROVED 時同步填寫 Closed」，與同目錄 `SKILL.md:61-62,96` 直接對撞。
+  `git show --stat 74aed5c` 確認 `evals/` 整批漏改。evals 是該 skill 的行為驗收
+  基準，基準與規範相反等於出貨一份「官方版的錯誤答案」。
+- 🚨 **[kit/docs/standards/git_workflow.md : 144]**（AC 3.3 FAIL）
+  §6.2 把「填 PR 編號」列入結案 commit，與 20 行外的 §6.3「回填時點在開 PR 當下，
+  不等結案 commit」直接矛盾。`team_protocol.md:234`、
+  `code-reviewer/SKILL.md:90-92` 有同一處錯誤。
+- 🚨 **[kit/docs/standards/git_workflow.md : 235-239]**（AC 3.1 FAIL）
+  §9 寫死「共九處，數量對不上就是有一處漏改」，但 `grep -c` 實際回傳 10，
+  註解又自承「應為 10」。同一節兩個數字並存，AC 要求的自動驗證形同虛設。
+  根因是第 12 行的說明散文本身含 `[平台相關]` 方括號而被一併命中。
+- 🚨 **[kit/docs/standards/git_workflow.md : 201,204,229]**（作者自查）
+  §8.1／§8.3 指涉「工單內的審查報告」章節，但 kit 內定義的章節名是
+  「📝 Code Review 備註」，且該章節現行只在 CHANGES REQUESTED 時新增——
+  無遠端 ＋ APPROVED 時載體是空的，降級路徑走不通。本次審查即踩到。
+- 💡 **[kit/docs/standards/git_workflow.md : 71,95,124,219,220]**
+  `§2 裁定 4／5` 是從 DN-003 抄來的殘留（五條裁定實際在 DN-003 §3.4），
+  而 **kit 不出貨 DN-003**，裝到別的專案後是找不到的引用；
+  `:71` 的「（§6）」指向自己所屬的整章，等於沒指。
+
+### 修正紀錄
+
+> ✅ 2026-08-16：上述四項 🚨 與一項 💡 全數修正，驗證通過——
+> `grep "APPROVED 改為 Done"` 0 筆、結案 commit 步驟不再提回填編號、
+> `grep -c '[平台相關]'` 回到乾淨的 **9**（等於 §9 的 9 列）、
+> 未定義章節名 0 筆、`§2 裁定` 0 筆。根目錄安裝實例以
+> `./install.sh . --upgrade` 同步，四個檔案 `diff` 無差異。
+> Status 推回 `In Review`，待二輪審查。
+>
+> ✅ 2026-08-16（續）：依 §1.8 第 3 條補入兩條回歸測試（見 §3.5 末尾），
+> `uv run pytest` **98 passed**。兩條測試都經反證：禁語表對修正前的 `74aed5c`
+> 命中 evals.json 兩行、對反轉前的 `f2d1b10` 全樹命中 6 筆（涵蓋本次反轉的
+> 全部落點）、對現況 0 筆；DOCS_MAP 測試抽掉 `git_workflow` 那列即轉紅。
+> **若當初就有這條測試，`74aed5c` 提交當下就會直接紅燈指向 evals.json。**
+
+> ✅ 2026-08-16（三輪修正）：二輪的 2 項 🚨 與 3 項 💡 全數修正。
+> `SKILL.md:64` 刪去「填審查載體編號」，四處敘述（`:64`／`:91`、
+> `team_protocol:234`、`git_workflow:144`）現已一致。禁語表補上該規則的對應列，
+> **並反證會紅**：對修正前的 `39813b7` 命中 `SKILL.md:64`、對修正後 `kit/` 0 命中。
+> docstring 補上誤判方向的邊界與「只掃 `kit/`」的理由，第 4 列理由改為完整句子，
+> §3.5 的 🔁 引言「兩條」更正為「三條」。
+> `uv run pytest` **98 passed**、`./install.sh . --upgrade` 更新 1 檔後
+> kit 與安裝實例 `diff` 無差異、已知的 `DOCS_MAP.md.new` 比對後刪除。
+> Status 推回 `In Review`，待三輪審查。
+>
+> 📌 **`docs/design_notes/DN-003:188` 經確認為「不得修正」**：該表格仍寫
+> 「結案 commit：Status → `Done`、填 Closed、填 PR 編號」，但 DN-001 規定
+> 🎓 Graduated 的 DN「凍結唯讀」「歷史紀錄，**不得作為規格依據**」「不改舊 DN，
+> 要改就開新 DN」。DN-003 記錄的是當時的設計，回填時點提前是後來 §4 裁定三的細化。
+> 這也是禁語表**只掃 `kit/`** 的理由——掃進 `design_notes/` 會對凍結的歷史紀錄
+> 產生設計上的必然誤判。
+
+### 第三輪審查
+
+> 審查日期：2026-08-16 | 審查結論：✅ **APPROVED**
+> AC 核對：**36 條全數達成、0 條未勾**。
+
+二輪的 2 項 🚨 與 3 項 💡 全部關閉，且首輪四項缺陷無回退（逐項重跑驗證，非閱讀印象）：
+
+| 項目 | 驗證方式 | 結果 |
+|---|---|---|
+| 🚨 `SKILL.md:64` 殘留 | `grep -rnP "填 Closed[、，][^\n]{0,8}編號" kit/ .agent/` | 0 命中 |
+| 🚨 禁語表漏該規則 | 表由 4 列增為 5 列，新列反證對 `39813b7` 命中 `:64`、對現況 0 | 通過 |
+| 💡 第 4 列理由「同上」 | `grep -c '"同上"'` | 0 |
+| 💡 docstring 誤判邊界 | 已補「邊界二（誤判）」與只掃 `kit/` 的理由 | 通過 |
+| 💡 🔁 引言「兩條」 | 已更正為「三條」 | 通過 |
+| D1／D4／N2 回歸 | 三組 grep | 全 0 |
+| D3 回歸 | `[平台相關]` 標記 9 ＝ §9 清單 9 列 | 一致 |
+
+**誤判邊界實測**：新列對缺陷句命中，對三處語意正確的敘述
+（`SKILL.md:91`、`team_protocol:234`、`git_workflow:144`）全部放行——
+判準取「`填 Closed` 後以頓號並列編號」這個形狀，不是列舉措辭。
+
+`uv run pytest` **98 passed**、kit 與安裝實例 `diff` 無差異、無殘留 `.new`。
+
+> ✅ 2026-08-16：所有問題已修正，審查通過。
+> Status 維持 `In Review`——APPROVED 是放行訊號，不是結案。
+> 依 §1.9，`Done` 與 `Closed` 由 Developer 在結案 commit 填、合併後才生效。
+> 本工單依使用者裁定不推送、無 PR，審查載體即本章節。
+
+### 第四輪：結案時發現的規範缺陷（依 §1.8 第 1 條就地修正）
+
+> 發現日期：2026-08-16 | 觸發情境：實際執行本工單的結案合併
+
+**§6.1 與 §6.4／§8.1／§8.3 對撞。** §6.1 規定「一律 squash」，但驗證「已合併」的
+判準寫的是 `git merge-base --is-ancestor`（§6.4）與「主線含該 commit」（§8.1／§8.3）
+——squash 產生的是全新 commit，分支上的過程 commit 都不是它的祖先，兩個判準**恆為假**。
+§6.4 同時又禁止在驗證失敗時改用 `-D`。**淨結果：照規範字面走，squash 合併的分支永遠刪不掉。**
+
+隔離 repo 實測（非推論）：squash 合併後 `--is-ancestor` 結束碼 **1**、兩顆過程 commit
+皆判定「不在主線」、`git branch -d` 報 `not fully merged`；而 `main^{tree}` 與
+分支的 tree **完全相同**——squash 保證的是內容進主線，不是 commit 進主線。
+
+修正：§6.4 改以比對樹為判準並註明 `--is-ancestor` 在 squash 下不可用、
+§8.1 表格與 §8.3 同步改口徑、禁語表補兩列並反證會紅（對 `120565c` 命中
+`:177` 與 `:231`，對現況 0）。`[平台相關]` 標記數維持 9，`uv run pytest` 98 passed。
+
+> 📌 這是本工單第三次「規範反轉後的殘留」，但**前兩次靠審查抓到，這次靠實際執行撞到**。
+> 差別在於前兩次是文字對撞（讀得出來），這次要真的去跑那個動作才會現形。
+
+### 移交給後續工單的建議（不阻擋本工單）
+
+- ~~CI 抓不到這類漂移~~、~~沒有 DOCS_MAP 登記完整性測試~~：
+  **這兩項已依 §1.8 第 3 條收容進本工單**，見 §3.5 末尾新增的兩條 AC。
+  成因工單（本單）尚未結案，依 §1.8 第 1 條不另開新工單。
+- `scrum-master` 的 evals 列舉工單欄位時未含新的審查載體編號欄位（有「等」字，
+  不構成矛盾）。**這項仍為移交項**——屬敘述完整性，非矛盾。
+- **禁語表是逐條列舉，漏列＝沒防線**——本工單二輪退回就是實例：它廢除了一條規則，
+  卻沒為那條規則加列，殘留因此在 `98 passed` 底下隱形。更根本的解是改寫成**不變式**
+  測試（例如「結案 commit 的職責清單在 kit 全樹必須一致」），不再依賴人記得加列。
+  屬另一張工單的範圍。
+- `docs/design_notes/DN-003` 缺 DN-001 §134 要求的畢業凍結標記行
+  （`> 🎓 已畢業（YYYY-MM-DD）→ {工單號}。本檔凍結，不再更新。`）。
+  屬 DN 自身的格式衛生，與本工單的出貨內容無關。
+
+### 待修正項目（第二輪）
+
+> 審查日期：2026-08-16 | 審查對象：`39813b7` | 審查結論：❌ CHANGES REQUESTED
+> AC 核對：35 條中 **34 過、1 退**（AC 3.3 第 2 條）。
+
+- 🚨 **[`kit/.agent/skills/code-reviewer/SKILL.md` : 64]**：首輪 D2 沒收乾淨。
+  該行仍寫「由他做結案 commit（Status → `Done`、填 Closed、**填審查載體編號**）再合併」，
+  與**同一份檔案** `:91-93`「**審查載體編號**在開 PR／MR 的當下就該回填了，
+  此時只需確認它不是空的」直接對撞，也推翻 AC 3.3 第 2 條「結案 commit
+  **只**負責改 `Status` 與 `Closed`」。
+  成因：修正紀錄把「三處」理解為 `git_workflow.md`／`team_protocol.md`／
+  `code-reviewer/SKILL.md` 三個**檔案**，但最後那個檔案裡有**兩處**，只改了 `:91`。
+  同一處也存在於安裝實例 `.agent/skills/code-reviewer/SKILL.md:64`，
+  改完 kit 後需重跑 `./install.sh . --upgrade` 同步。
+
+- 🚨 **[`tests/test_kit_integrity.py` : `已廢除的流程規則`]**：禁語表**沒有為本工單
+  自己廢除的那條規則加一列**。四列全屬 D1 那一類（APPROVED→Done、APPROVED 時填
+  Closed、commit 時點），而 D2 廢除的「結案 commit 填 PR 編號」完全沒有對應列——
+  這正是上面那個活生生的殘留能在 `98 passed` 底下隱形的原因。
+  §1.8 第 3 條要求新面向「**含對應的回歸測試要求**」，這一列就是本工單自己的那條。
+  已依該條追加為 §3.5 的新 AC。
+
+- 💡 **[`tests/test_kit_integrity.py` : `已廢除的流程規則`]**：禁語表無法區分
+  「教舊規則」與「**禁止**舊規則」。實測四句語意正確的禁止句全被判命中，例如
+  「審查者不得將 Status 由 APPROVED 改為 Done」「禁止在 APPROVED 時填寫 Closed 欄位」。
+  docstring 目前只寫了漏抓方向的邊界（「擋不了新產生的不一致」），沒交代誤判方向。
+  不阻擋出貨——它會帶著 `檔案:行號` 大聲失敗、改寫措辭即可解除——但建議在
+  docstring 補一句處置指引，否則下一個踩到的人會先懷疑是測試壞了。
+
+- 💡 **[`tests/test_kit_integrity.py` : 禁語表第 4 列]**：理由欄寫「同上」，
+  但失敗訊息的格式是 `檔案:行號 → 理由`，離開表格脈絡後「同上」無法自解釋。
+  建議寫成完整句子。
+
+- 💡 **[`docs/features/process_evolution/tasks/PEV-DEV-AGENT-001.md` : 154]**：
+  🔁 引言寫「以下**兩條**為首輪審查後依 §1.8 第 3 條補入」，底下實際有**三條** AC
+  （第三條是 `CLAUDE.md` 維護義務）。數字對不上。
+
+**通過的部分（已逐項驗證，非閱讀印象）**：首輪四項缺陷中 D1、D3、D4 與 N2 全數修實——
+`grep -rn "APPROVED 改為 Done\|APPROVED 時同步填寫" kit/` 歸零、`[平台相關]` 標記
+`grep -c` 回到 9 且與 §9 清單列數相符、未定義章節名歸零、`§2 裁定` 殘留引用歸零。
+兩條新測試經反證確實會紅（禁語表對 `74aed5c` 命中 evals.json、對 `f2d1b10` 全樹命中 6 筆；
+DOCS_MAP 測試抽掉 `git_workflow` 那列即轉紅），不是永遠綠的假測試。
+`uv run pytest` 98 passed、`./install.sh . --upgrade --dry-run` 除已知的
+`docs/DOCS_MAP.md.new` 外無其他衝突、commit `39813b7` 無 AI 署名 trailer、
+diff 內無任何密鑰或憑證字樣（資安面向無發現，本次變更全為文件與測試）。
+
+**§1.8 第 2 條的既有偏離（沿用首輪裁定，非本輪新發現）**：AC 3.1／3.5 那兩條
+首輪判未達成的項目維持 `- [x]` 並以〔〕註明退回原因，未改回 `- [ ]`——理由是
+它們現已實質達成，保住歷程即可。本輪的 AC 3.3 第 2 條**確實仍未達成**，
+因此依原文改回 `- [ ]`。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
