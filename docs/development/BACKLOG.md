@@ -21,9 +21,8 @@
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
 |---|---------|------|------|-------------------|---------------|
 | 1 | KIT-DEV-AGENT-001 | 回收 my_workstation 的文檔權威階序與指路檔，並建立 install.sh 升級路徑 | kit_sync | devops-engineer | In Review |
-| 2 | PEV-DEV-AGENT-001 | 建立 git_workflow.md 並把 DN-003 的裁定落到出貨規範 | process_evolution | devops-engineer | In Review |
 
-**小計**：2 張
+**小計**：1 張
 
 ---
 
@@ -46,8 +45,9 @@
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) | 完成時間 |
 |---|---------|------|------|-------------------|---------------|----------|
 | 1 | WTG-DEV-BE-001 | 補齊 worktree 防孤兒機制的登記欄位與對帳邏輯 | worktree_guard | backend-developer | 🚫 Canceled | 2026-08-16T01:03+08:00 |
+| 2 | PEV-DEV-AGENT-001 | 建立 git_workflow.md 並把 DN-003 的裁定落到出貨規範 | process_evolution | devops-engineer | ✅ Done | 2026-08-16 |
 
-**小計**：1 張（Done: 0 / Canceled: 1）
+**小計**：2 張（Done: 1 / Canceled: 1）
 
 ---
 
@@ -64,8 +64,8 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟡 In Review | 1 | 50.0% |
 | ⏳ Pending | 1 | 50.0% |
+| ✅ Done | 1 | 50.0% |
 | **總計** | **2** | **100%** |
 
 ### worktree_guard
