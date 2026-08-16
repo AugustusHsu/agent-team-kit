@@ -26,34 +26,20 @@
 
 ## 設計筆記 (design_notes/)
 
-**開單前置關卡**：把「寫不出驗收標準的東西」變成「寫得出驗收標準的東西」。
-規格見 [DN-001](design_notes/DN-001_design_note_mechanism.md)。
+**開單前置關卡**：AC 寫不出來時先開一份 DN，寫得出來就直接開工單。
 
-| 編號 | 主題 | 狀態 |
-|---|---|---|
-| [DN-001](design_notes/DN-001_design_note_mechanism.md) | Design Note 機制本身的設計 | 🔍 Exploring |
-| [DN-002](design_notes/DN-002_discord_notification_layer.md) | Discord 作為通知與批准層 | 🌱 Seed |
-| [DN-003](design_notes/DN-003_git_workflow_and_pr_gate.md) | Git 流程與 PR 閘門 | 🎓 Graduated |
-| [DN-004](design_notes/DN-004_skill_system_realignment.md) | Skill 體系與現行流程的重新對齊 | 🌱 Seed |
-| [DN-005](design_notes/DN-005_parallel_task_decomposition.md) | 並行開發的任務拆解與變更傳播 | 🌱 Seed |
-| [DN-006](design_notes/DN-006_branch_topology_and_isolation.md) | 分支拓撲與並行隔離 | 🌱 Seed |
+| 文件 | 用途 |
+|---|---|
+| [design_notes/README.md](design_notes/README.md) | 什麼時候該開 DN、取號方式、目錄約定 |
+| [design_notes/_TEMPLATE.md](design_notes/_TEMPLATE.md) | 新 DN 的範本（含狀態機與畢業條件） |
 
-> ⚠️ **DN 不在 `team_protocol.md` §1.11 的權威階序內**：`Exploring` 的 DN 尚未定案，
-> 不得作為實作依據；`Graduated`／`Dropped` 的 DN 比照已結案工單，是歷史紀錄。
-> 上表日後改由腳本生成（見 DN-001 §3.9），屆時不再手動維護。
+個別 DN 以全域流水號直接放在該目錄下，**不在這裡逐份登記**——索引由 `scan_backlog.py`
+生成在 [development/BACKLOG.md](development/BACKLOG.md) 的「🧪 設計筆記」區塊。
 
-## 功能模組 (features/)
+## 模組 (features/)
 
-複製 [features/_TEMPLATE/](features/_TEMPLATE/) 建立新模組後，在下表登記：
-
-> ⚠️ **本 repo 特例**：這裡登記的是 agent-team-kit **自己**的模組。出貨樣板在
-> `kit/docs/features/`，前綴權威表在 [features/README.md](features/README.md)。
-
-| 前綴 | 模組 | 文件 | 工單 |
-|---|---|---|---|
-| `PEV` | 開發流程演進 | [features/process_evolution/design_note.md](features/process_evolution/design_note.md) | `features/process_evolution/tasks/` |
-| `KIT` | 出貨內容同步與安裝／升級 | *（無 PRD，規格在工單內）* | `features/kit_sync/tasks/` |
-| `WTG` | worktree 防孤兒機制（已取消） | *（無）* | `features/worktree_guard/tasks/` |
+模組登記表在 [features/README.md](features/README.md)——**由專案自己維護**，
+刻意不內嵌在這裡：這份地圖的骨架要能隨 kit 升級推送，會變動的那張表歸專案所有。
 
 ## 流程指引 (development/)
 

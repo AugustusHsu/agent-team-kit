@@ -33,15 +33,13 @@
 | [design_notes/README.md](design_notes/README.md) | 什麼時候該開 DN、取號方式、目錄約定 |
 | [design_notes/_TEMPLATE.md](design_notes/_TEMPLATE.md) | 新 DN 的範本（含狀態機與畢業條件） |
 
-個別 DN 以全域流水號直接放在該目錄下，**不在這裡逐份登記**。
+個別 DN 以全域流水號直接放在該目錄下，**不在這裡逐份登記**——索引由 `scan_backlog.py`
+生成在 [development/BACKLOG.md](development/BACKLOG.md) 的「🧪 設計筆記」區塊。
 
-## 功能模組 (features/)
+## 模組 (features/)
 
-複製 [features/_TEMPLATE/](features/_TEMPLATE/) 建立新模組後，在下表登記：
-
-| 前綴 | 模組 | 文件 | 工單 |
-|---|---|---|---|
-| `XXX` | *（範例列，建立第一個模組後刪除）* | `features/example_module/` | `features/example_module/tasks/` |
+模組登記表在 [features/README.md](features/README.md)——**由專案自己維護**，
+刻意不內嵌在這裡：這份地圖的骨架要能隨 kit 升級推送，會變動的那張表歸專案所有。
 
 ## 流程指引 (development/)
 

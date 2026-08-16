@@ -10,11 +10,7 @@
 
 > 包含狀態為 `In Progress` 或 `Ready` 的工單。
 
-| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
-|---|---------|------|------|-------------------|---------------|
-| 1 | PEV-DEV-AGENT-009 | DOCS_MAP 的模組表抽成獨立檔，骨架恢復可升級 | process_evolution | devops-engineer | 🟢 Ready |
-
-**小計**：1 張（In Progress: 0 / Ready: 1）
+*(無)*
 
 ---
 
@@ -48,18 +44,20 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) | 完成時間 |
 |---|---------|------|------|-------------------|---------------|----------|
-| 1 | PEV-DEV-AGENT-008 | `scan_backlog.py` 生成 DN 索引，並檢查懸空依賴 | process_evolution | backend-developer | ✅ Done | 2026-08-17T18:20+08:00 |
-| 2 | PEV-DEV-AGENT-006 | scrum-master 加上「開單前置關卡」 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:40+08:00 |
-| 3 | PEV-DEV-AGENT-005 | `team_protocol.md`：DN 的權威效力與模組「類型」欄位 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:10+08:00 |
-| 4 | PEV-DEV-AGENT-011 | commit 閘門的範圍：把關「進入主線」，不是每一顆 commit | process_evolution | devops-engineer | ✅ Done | 2026-08-17T16:40+08:00 |
-| 5 | PEV-DEV-AGENT-004 | `documentation_conventions.md` 新增 Design Note 機制章節 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T15:45+08:00 |
-| 6 | PEV-DEV-AGENT-007 | 出貨 `kit/docs/design_notes/`：DN 範本與目錄說明 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T15:10+08:00 |
-| 7 | PEV-DEV-AGENT-010 | 合併方式的殘留寫死清乾淨，並要求合併訊息帶 Task ID | process_evolution | devops-engineer | ✅ Done | 2026-08-17T14:30+08:00 |
-| 8 | PEV-DEV-AGENT-003 | 無遠端專案的合併方式降級為 `--no-ff`，補上 squash 前提不成立時的缺口 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T00:15+08:00 |
-| 9 | WTG-DEV-BE-001 | 補齊 worktree 防孤兒機制的登記欄位與對帳邏輯 | worktree_guard | backend-developer | 🚫 Canceled | 2026-08-16T01:03+08:00 |
-| 10 | PEV-DEV-AGENT-001 | 建立 git_workflow.md 並把 DN-003 的裁定落到出貨規範 | process_evolution | devops-engineer | ✅ Done | 2026-08-16 |
+| 1 | PEV-DEV-AGENT-009 | DOCS_MAP 的模組表抽成獨立檔，骨架恢復可升級 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T19:00+08:00 |
+| 2 | PEV-DEV-AGENT-008 | `scan_backlog.py` 生成 DN 索引，並檢查懸空依賴 | process_evolution | backend-developer | ✅ Done | 2026-08-17T18:20+08:00 |
+| 3 | PEV-DEV-AGENT-006 | scrum-master 加上「開單前置關卡」 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:40+08:00 |
+| 4 | PEV-DEV-AGENT-005 | `team_protocol.md`：DN 的權威效力與模組「類型」欄位 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:10+08:00 |
+| 5 | PEV-DEV-AGENT-011 | commit 閘門的範圍：把關「進入主線」，不是每一顆 commit | process_evolution | devops-engineer | ✅ Done | 2026-08-17T16:40+08:00 |
+| 6 | PEV-DEV-AGENT-004 | `documentation_conventions.md` 新增 Design Note 機制章節 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T15:45+08:00 |
+| 7 | PEV-DEV-AGENT-007 | 出貨 `kit/docs/design_notes/`：DN 範本與目錄說明 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T15:10+08:00 |
+| 8 | PEV-DEV-AGENT-010 | 合併方式的殘留寫死清乾淨，並要求合併訊息帶 Task ID | process_evolution | devops-engineer | ✅ Done | 2026-08-17T14:30+08:00 |
+| 9 | PEV-DEV-AGENT-003 | 無遠端專案的合併方式降級為 `--no-ff`，補上 squash 前提不成立時的缺口 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T00:15+08:00 |
+| 10 | WTG-DEV-BE-001 | 補齊 worktree 防孤兒機制的登記欄位與對帳邏輯 | worktree_guard | backend-developer | 🚫 Canceled | 2026-08-16T01:03+08:00 |
 
 **小計**：10 張（Done: 9 / Canceled: 1）
+
+> 📦 另有 1 張已歸檔工單未顯示。
 
 ---
 
@@ -76,9 +74,8 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟢 Ready | 1 | 9.1% |
 | ⏳ Pending | 1 | 9.1% |
-| ✅ Done | 9 | 81.8% |
+| ✅ Done | 10 | 90.9% |
 | **總計** | **11** | **100%** |
 
 ### worktree_guard
@@ -128,7 +125,6 @@
 | 審查與開發拆 context | 待判定 | 若只有一種做法就直接開工單；若有 subagent／獨立 session／換模型之分則需 DN。design_note §3.3 |
 | precheck 腳本 | 可直接開工單 | 審查清單三分法，做法單一。design_note §3.4 |
 | 生成檔不得含時間相依值 | 可直接開工單 | 立規＋`scan_backlog.py --stale` 只輸出 stdout。理由見 DN-001 §5 |
-| `DOCS_MAP.md` 是否列為種子檔 | 待你決定 | yes/no 一句話。牽涉「專案自填表 vs kit 維護的規範表」的取捨 |
 | `scan_backlog.py` 的 Closed 欄位 regex 跨行誤配 | 可直接開工單 | `\s*` 會吃掉換行，Closed 留空時抓到下一行的 `## 1. 任務描述` 當值。實測 PEV-DEV-AGENT-001 |
 | headroom 壓縮工具輸出 | 待調查 | code-reviewer 讀 diff 可能讀到壓縮版；本次對話已三度實地遇到。開 spike 工單 |
 | 背景任務 worktree 隔離守衛 | 可直接開工單 | `.claude/settings.json` 的 `worktree.bgIsolation` 與本專案停用 worktree 相衝突 |
