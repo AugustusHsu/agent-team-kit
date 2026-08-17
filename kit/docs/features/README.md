@@ -22,8 +22,14 @@
 ```
 features/<模組>/
 ├── prd.md / hld.md / lld.md ...   # 功能模組才有；基礎建設模組可整組省略
-└── tasks/<TaskID>.md              # 工單，一律要有
+├── tasks/<TaskID>.md              # 工單，一律要有
+└── reviews/<TaskID>.md            # 審查檔，有審查才有
 ```
+
+工單與審查檔**一對一同名**：`tasks/ABC-DEV-BE-001.md` 的審查紀錄在
+`reviews/ABC-DEV-BE-001.md`。工單只留結論與客觀指標，完整審查報告在審查檔裡
+（見 `.agent/resources/team_protocol.md` §2.3）。`scan_backlog.py` 只掃 `tasks/*.md`，
+審查檔不會被誤認成工單。
 
 工單狀態以工單自己的 `**🚥 任務狀態 (Status):**` 為準，
 彙整報表由 `.agent/scripts/scan_backlog.py` 生成到 `docs/development/BACKLOG.md`。

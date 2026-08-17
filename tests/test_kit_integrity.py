@@ -52,6 +52,19 @@ LINK_PLACEHOLDERS = {"路徑", "relative/path"}
         r"任何 commit 之前|commit 前必須把訊息原文",
         "commit 閘門在進入主線那一刻；工單分支上的中間 commit 不需事前同意（§1.10）",
     ),
+    # 審查紀錄的落點改成 reviews/<TaskID>.md（PEV-DEV-AGENT-016）。工單仍留
+    # 「📝 Code Review 備註」章節，所以不能抓章節名，只能抓「完整報告塞進工單」的形狀。
+    (
+        r"審查結果直接寫入對應工單|審查載體改為工單的|記錄本次審查發現的具體問題",
+        "完整審查報告改放 docs/features/<模組>/reviews/<TaskID>.md，工單只留結論與客觀指標（§2.3）",
+    ),
+    # 近期結案的時間窗已移除（PEV-DEV-AGENT-013）：生成檔不得含時間相依值，
+    # 否則同一份輸入每天重跑會生出假 diff。
+    (
+        r"最近 7 天|7 天 \+ 上限|--recent-days",
+        "近期結案只按完成時間倒序取最新 N 筆，不看今天是哪一天"
+        "（documentation_conventions.md §5）",
+    ),
 ]
 
 

@@ -332,3 +332,35 @@ def test_backlog_重跑不改變設計筆記區塊(有_dn_的專案: Path, tmp_p
 
     run_script(有_dn_的專案, "scan_backlog.py", "--format", "backlog", "--output", str(out))
     assert out.read_text(encoding="utf-8") == 第一次
+
+
+def test_reviews_目錄不會被當成工單掃描(有模組的專案: Path):
+    """審查檔與工單同名、同格式，只差在目錄——掃描器一旦改用 rglob 就會多算一張。
+
+    PEV-DEV-AGENT-016 把完整審查報告從工單移到 `reviews/<TaskID>.md`，
+    「只掃 tasks/」從實作細節升格成規範前提，需要有測試釘住。
+    """
+    模組 = 有模組的專案 / "docs/features/my_module"
+    (模組 / "tasks/MOD-DEV-BE-004.md").write_text(
+        "# [Task ID: MOD-DEV-BE-004] 進行中的工單\n\n"
+        "**🚥 任務狀態 (Status):** In Progress\n"
+        "**📅 建立時間 (Created):** 2026-04-20T10:00+08:00\n"
+        "**✅ 完成時間 (Closed):**\n",
+        encoding="utf-8",
+    )
+    (模組 / "reviews/MOD-DEV-BE-004.md").write_text(
+        "# [Task ID: MOD-DEV-BE-004] 審查紀錄\n\n"
+        "**🚥 任務狀態 (Status):** Done\n"
+        "**📅 建立時間 (Created):** 2026-04-21T10:00+08:00\n"
+        "**✅ 完成時間 (Closed):** 2026-04-22T16:04+08:00\n",
+        encoding="utf-8",
+    )
+
+    result = run_script(有模組的專案, "scan_backlog.py", "--format", "json")
+    assert result.returncode == 0, result.stderr
+    tasks = _flatten(json.loads(result.stdout)["my_module"])
+
+    assert list(tasks) == ["MOD-DEV-BE-004"], "審查檔被當成第二張工單掃進來了"
+    assert tasks["MOD-DEV-BE-004"]["status"] == "In Progress", (
+        "工單狀態被審查檔的 Done 蓋掉"
+    )

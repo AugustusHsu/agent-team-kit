@@ -147,7 +147,7 @@ Scrum Master 身為 Backlog 的唯一全域管理者，必須確保 `docs/develo
    - 工單狀態變更（如 `Pending` → `Ready`、`Ready` → `In Progress`）→ 將工單從原區塊移至目標區塊。
    - `code-reviewer` 完成審查並更新工單 Status 後 → 確認 BACKLOG.md 中對應 Task ID 的位置正確（詳見 `code-reviewer` SKILL.md 中的「同步審查狀態至 Backlog」條款）。
    - 工單被取消 (`Canceled`) → 移至「✅ 近期結案」區塊，並填寫 `**✅ 完成時間 (Closed):**`。
-3. **近期結案篩選規則**：「✅ 近期結案」區塊僅顯示**最近 7 天**內完成的工單，**上限 10 筆**（按完成時間倒序排列）。超出範圍的已結案工單不顯示於 BACKLOG.md，但可透過 `scan_backlog.py` 腳本查詢。
+3. **近期結案篩選規則**：「✅ 近期結案」區塊按完成時間**倒序取最新 10 筆**，**不看今天是哪一天**——生成檔的內容必須是輸入的純函數（見 `docs/standards/documentation_conventions.md` §5）。被擠出的已結案工單歸檔（BACKLOG 只留一行張數提示），仍可用 `scan_backlog.py` 查詢。
 4. **統計摘要更新**：每次搬移工單後，必須同步更新底部「📊 統計摘要」。統計摘要**按專案分組**顯示，每個專案一張獨立的統計表。
 5. **自動化輔助腳本**：當使用者要求產出或刷新 Backlog 時，可使用 `.agent/scripts/scan_backlog.py` 腳本自動掃描所有工單並產出結構化資料：
    ```bash

@@ -35,7 +35,8 @@ Code Reviewer 同樣肩負著「最終防線」的矛盾偵測責任：
 - 給予修改建議時，必須明確標示出有問題的**檔案名稱**與**行數範圍 (Lines)**，解釋「為什麼這樣寫有潛在風險」，並用 Code Block 附上最佳實務範例。
 
 ## 4. 審查報告產出格式 (Review Report Format)
-每一次審查結束後，請嚴格按照以下 Markdown 格式輸出總結報告：
+每一次審查結束後，請嚴格按照以下 Markdown 格式輸出總結報告。
+**這份報告的落點是審查檔 `docs/features/<模組>/reviews/<TaskID>.md`，不是工單**——工單只留結論與客觀指標，正版規則見 `.agent/resources/team_protocol.md` §2.3：
 
 ### 🏁 審查結論 (Verdict)
 - 請明確標示：`[ ✅ APPROVED ]` (無瑕疵，可直接放行) 或是 `[ ❌ CHANGES REQUESTED ]` (有瑕疵或漏洞，退回要求工程師修改)。
@@ -78,41 +79,54 @@ Code Reviewer 同樣肩負著「最終防線」的矛盾偵測責任：
      （見 `team_protocol.md` §1.9 / §1.10 與 `docs/standards/git_workflow.md` §6.2）。
    - `[ ❌ CHANGES REQUESTED ]` → 將 Status 改為 `In Progress`
 2. **勾選驗收標準 (Checklist)**：若審查判定該項次已滿足，你必須直接修改該 `.md` 檔案的內容，將 `3. 驗收標準 (Acceptance Criteria)` 下方的 `- [ ]` 變更為 `- [x]` 以留存證據。
-3. **回寫審查結果至工單 (Write-back Review Findings)**：
-   審查結束後，Code Reviewer **必須**將審查結果直接寫入對應的工單 `.md` 檔案，確保 Developer 重新開工時能直接在工單中看到所有待修正項目：
+3. **回寫審查結果 (Write-back Review Findings)**：
+   審查結束後，**必須**產出兩份寫入，缺一不可：
 
-   **當結論為 `[ ❌ CHANGES REQUESTED ]` 時**：
-   - **寫入位置（擇一或並用）**：
-     - 🔹 **更新「2. 規格：輸入與輸出 (Inputs & Outputs)」**：若審查中發現缺漏的規格或驗收標準，可直接補充至該區塊。
-     - 🔹 **更新「3. 驗收標準 (Acceptance Criteria)」**：若需新增或修正驗收條件，可直接追加 `- [ ]` 項目至 AC 清單。
-     - 🔹 **新增「📝 Code Review 備註 (Review Notes)」章節**：在工單的「4. 人為補充與確認」之前新增此章節，記錄本次審查發現的具體問題與修正指引。格式如下：
-       ```markdown
-       ## 📝 Code Review 備註 (Review Notes)
-       > 審查日期：{YYYY-MM-DD} | 審查結論：❌ CHANGES REQUESTED
+   **（i）審查檔 `docs/features/<模組>/reviews/<TaskID>.md`**——放上面 §4 的完整報告。
+   - 一張工單一個檔。**多輪審查追加在同一檔內，新的放最前面**，保留完整審查歷程。
+   - 每一輪以一個二級標題起頭：`## {YYYY-MM-DD} ❌ CHANGES REQUESTED`
+     或 `## {YYYY-MM-DD} ✅ APPROVED`。
+   - 檔案不存在就建立；`reviews/` 目錄不存在就一併建立。
+     它不會被 `.agent/scripts/scan_backlog.py` 掃描（該腳本只讀 `tasks/*.md`）。
 
-       ### 待修正項目
-       - 🚨 **[檔案路徑 : 行數]**：問題描述與建議改法
-       - 🚨 ...
-       ```
-   - **多次退回的處理**：若工單已存在「📝 Code Review 備註」章節（代表先前已被退回過），新一輪的審查結果應**追加**在既有內容之下，以保留完整的審查歷程記錄。
+   **（ii）工單的「📝 Code Review 備註」章節**——放在**工單末尾**（「4. 人為補充與確認」之後），
+   **只准有三樣東西**，論述與程式碼片段一律留在審查檔：
 
-   **當結論為 `[ ✅ APPROVED ]` 時**：
-   - 確認所有 `3. 驗收標準 (Acceptance Criteria)` 的 `- [ ]` 皆已變更為 `- [x]`。
-   - 若工單存在「📝 Code Review 備註」章節（代表先前曾被退回），在該章節末尾追加一行：`> ✅ {YYYY-MM-DD}：所有問題已修正，審查通過。`
-   - **提醒 Developer 執行收尾**：APPROVED 後由 Developer 做結案 commit
-     （Status → `Done`、填 Closed），再合併、刪除分支。**審查載體編號**在開 PR／MR
-     的當下就該回填了，此時只需確認它不是空的——該欄位填的不是 commit SHA，
-     因為回填的當下合併還沒發生，那顆 commit 物理上還不存在
-     （squash 與 `--no-ff` 皆然）。
-     **審查者不代為 commit、不代為合併，也不自行把 Status 改成 `Done`。**
-   - **無遠端專案**：沒有 PR／MR 可當載體時，APPROVED **也必須**新增「📝 Code Review 備註」
-     章節寫入審查報告——它是此情境下唯一的審查載體，工單的編號欄位填 `—`
-     （見 `docs/standards/git_workflow.md` §8.3）。
+   ```markdown
+   ## 📝 Code Review 備註
+   > {YYYY-MM-DD} ❌ CHANGES REQUESTED — 完整報告見 ../reviews/{TaskID}.md
 
+   ### 📊 客觀指標
+   | 指標 | 變更前 | 變更後 |
+   |---|---|---|
+   | 測試數／失敗數 | | |
+
+   ### 待修正項目
+   - 🚨 `檔案路徑:行數` — 一句話講問題，改法見審查檔
+   ```
+
+   - 結論行裡的路徑請寫成 Markdown 相對連結（工單在 `tasks/` 底下，所以是 `../reviews/`）。
+   - **多輪的處理**：工單裡的結論行與指標表**覆蓋更新為最新一輪**（歷程在審查檔裡），
+     待修正清單同步刷新為當前仍未解的項目。
+   - **APPROVED 時**：待修正項目整段刪除，結論行改為
+     `> {YYYY-MM-DD} ✅ APPROVED — 完整報告見 ../reviews/{TaskID}.md`。
+
+   **另外，若審查暴露的是規格本身的缺漏**（而非實作瑕疵），要直接改工單的
+   「2. 規格：輸入與輸出」或「3. 驗收標準」——那是規格修正，不是審查紀錄，不受上面的三樣限制。
+
+   **APPROVED 後的收尾提醒**：由 Developer 做結案 commit
+   （Status → `Done`、填 Closed），再合併、刪除分支。**審查載體編號**在開 PR／MR
+   的當下就該回填了，此時只需確認它不是空的——該欄位填的不是 commit SHA，
+   因為回填的當下合併還沒發生，那顆 commit 物理上還不存在（squash 與 `--no-ff` 皆然）。
+   **審查者不代為 commit、不代為合併，也不自行把 Status 改成 `Done`。**
+
+   **無遠端專案**：沒有 PR／MR 可當載體時，**審查檔本身就是審查載體**，
+   因此 APPROVED 也必須寫；工單的編號欄位填 `—`
+   （見 `docs/standards/git_workflow.md` §8.3）。
 4. **完成時間 (Closed Date)**：
    - 此欄位**由 Developer 在結案 commit 時填寫**（與 Status → `Done` 同一次寫入），**不由審查者填**——`Done` 的時點在合併之後，那時審查已經結束。
    - 審查者的責任是**在 APPROVED 的回報中提醒它**：格式為 ISO 8601（例如 `2026-04-22T16:04+08:00`）。
-   - 此欄位用於「近期結案」區塊的時間篩選（7 天 + 上限 10 筆），未填寫將導致工單無法正確顯示在近期結案中。
+   - 此欄位決定「近期結案」區塊的**排序**（依完成時間倒序，取最新 10 筆），未填寫將導致工單排到最後、被擠出近期結案。
 
 （詳見 `team_protocol.md` §1.5）
 

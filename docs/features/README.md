@@ -1,7 +1,8 @@
 # 這個 repo 自己的工單
 
 這裡是 **agent-team-kit 本身的開發工單**，套用 `kit/` 出貨的那套慣例
-（`docs/features/{模組}/tasks/{TaskID}.md`），但**不會被 `install.sh` 安裝**。
+（工單 `docs/features/{模組}/tasks/{TaskID}.md`、審查檔
+`docs/features/{模組}/reviews/{TaskID}.md`），但**不會被 `install.sh` 安裝**。
 
 不要跟 `kit/docs/features/` 搞混——那是要複製到使用者專案的樣板。
 
