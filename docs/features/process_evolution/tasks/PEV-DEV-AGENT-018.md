@@ -3,9 +3,9 @@
 **🔗 依附母任務 (Parent Task ID):** —
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** devops-engineer
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-17T19:03+08:00
-**✅ 完成時間 (Closed):** —
+**✅ 完成時間 (Closed):** 2026-08-17T19:32+08:00
 **🔀 審查載體編號 (PR/MR):** —
 
 ## 1. 任務描述 (Description)
@@ -52,33 +52,33 @@
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：`kit/.agent/scripts/precheck.py` 存在，**只 import 標準函式庫**。
+- [x] AC-01：`kit/.agent/scripts/precheck.py` 存在，**只 import 標準函式庫**。
       驗證方式為現有 `stdlib-only` CI job 的同一條線——用系統 python（無 uv、無第三方套件）
       在 `install.sh` 裝出來的專案裡執行成功。
-- [ ] AC-02：四項檢查全部實作——① BACKLOG 過期（重跑 `scan_backlog.py` 的產出與現檔比對）、
+- [x] AC-02：四項檢查全部實作——① BACKLOG 過期（重跑 `scan_backlog.py` 的產出與現檔比對）、
       ② 工單 Status 值合法、③ `Created`／`Closed` 是 ISO 8601 且 `Closed` 不早於 `Created`、
       ④ 文件相對連結指向的檔案存在。
-- [ ] AC-03：全綠時 exit code 0；**任一項紅燈時 exit code 非 0**，且輸出指明是哪個檔案、
+- [x] AC-03：全綠時 exit code 0；**任一項紅燈時 exit code 非 0**，且輸出指明是哪個檔案、
       哪一項檢查、期望什麼。只印「失敗」而不說哪裡失敗不算通過。
-- [ ] AC-03a：**時間戳精度不同時降到日期粒度比較。** `PEV-DEV-AGENT-001` 的
+- [x] AC-03a：**時間戳精度不同時降到日期粒度比較。** `PEV-DEV-AGENT-001` 的
       `Closed` 是 `2026-08-16`（只有日期）、`Created` 是 `2026-08-16T14:06+08:00`；
       把日期當成午夜 00:00 去比會判成「Closed 早於 Created」，那是**假紅燈**。
       純日期本身就是合法 ISO 8601，精度較粗時推不出先後違規。
-- [ ] AC-03b：**死連結檢查必須先剝掉 fenced code block 與行內 code span。**
+- [x] AC-03b：**死連結檢查必須先剝掉 fenced code block 與行內 code span。**
       `PEV-DEV-AGENT-008.md:89` 的 `[DN-007](DN-007_ci_gate.md)` 包在反引號裡，
       是拿來說明「DN 檔的依賴欄位長什麼樣」的引用，不是真連結。
       （同一個盲點也是 `PEV-DEV-AGENT-016` 當初被迫把範例路徑寫成非連結語法的原因。）
-- [ ] AC-04：檢查之間**互不短路**——第一項紅燈時後三項仍然要跑完並一起回報。
+- [x] AC-04：檢查之間**互不短路**——第一項紅燈時後三項仍然要跑完並一起回報。
       跑一次只修一個問題會讓修復迴圈變成四趟。
-- [ ] AC-05：`tests/test_precheck.py` **每一項檢查都有負向對照**：造出過期的 BACKLOG、
+- [x] AC-05：`tests/test_precheck.py` **每一項檢查都有負向對照**：造出過期的 BACKLOG、
       非法 Status、`Closed` 早於 `Created`、指向不存在檔案的連結，各自確認腳本回非零；
       再確認乾淨專案回 0。**另加兩支防假紅燈的迴歸**：日期粒度混用（AC-03a 的形狀）
       要綠、行內程式碼裡的連結（AC-03b 的形狀）要綠。只證明「壞的會紅」不夠，
       還要證明「對的不會被誤判成壞的」。
-- [ ] AC-06：在本 repo 自己跑 `python3 .agent/scripts/precheck.py` 為綠。
+- [x] AC-06：在本 repo 自己跑 `python3 .agent/scripts/precheck.py` 為綠。
       ⚠️ 若因 `PEV-DEV-AGENT-012`～`015` 的時間戳而紅，**不得修改那些工單**（§1.11），
       應改為在工單描述裡記錄該紅燈的成因與處置，並在此 AC 註明實際結果。
-- [ ] AC-07：`uv run pytest` 全綠（基準 111），`./install.sh . --upgrade` 後
+- [x] AC-07：`uv run pytest` 全綠（基準 111），`./install.sh . --upgrade` 後
       `--dry-run` 顯示「待合併 0」。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
@@ -87,3 +87,18 @@
   - 無。四項清單、stdlib-only、落點皆由 DN-007 §4.1 #2 裁定。
 - **✍️ User 補充回覆 (User Input)**：
   - （2026-08-17）012–015 的 Closed 時間戳處置選「不修，改用檢查防未來」→ 成為本工單檢查 ③。
+
+## 5. 📝 Code Review 備註
+
+**2026-08-17 — ✅ APPROVED**（完整報告見 [reviews/PEV-DEV-AGENT-018.md](../reviews/PEV-DEV-AGENT-018.md)）
+
+### 📊 客觀指標
+
+| 指標 | 數值 | 怎麼重跑 |
+|---|---|---|
+| 全套件測試 | 123 passed / 0 failed（基準 111，本單 +12） | `uv run pytest` |
+| `precheck.py` 在本 repo | 4 項全綠，exit 0 | `python3 .agent/scripts/precheck.py; echo $?` |
+| 直譯器 | `/usr/bin/python3`，無 venv、無第三方套件 | `which python3` |
+| 升級待合併 | 0 | `./install.sh . --upgrade --dry-run` |
+| BACKLOG 冪等 | 重生後零 diff | `git diff --stat docs/development/BACKLOG.md` |
+| 破壞實作的負向對照 | 3 種改法皆讓對應測試轉紅 | 見審查檔 §3 |
