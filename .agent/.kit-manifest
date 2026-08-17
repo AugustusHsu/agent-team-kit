@@ -2,7 +2,7 @@
 # 升級靠它區分使用者改過與否，請納入版控，不要手改。
 6f830b803154b5e4c0920b1995878e781f2c3fd91e8afadf4fc6f4683ff3ee5d  .agent/resources/backlog_template.md
 2f5aacd1237220f783243303764b88739b2f7a8d4cf04b05ed24b19420ea4e61  .agent/resources/task_template.md
-9e84803e94cacf595ce885e6020f808e11a8bd3618ce1989c8eb7539cbe90888  .agent/resources/team_protocol.md
+7f9b84b9b69289ba62990b3308af3c8f496b1bbf92e5572f757b2735c6eaaf5f  .agent/resources/team_protocol.md
 3aab417637e954734a34903a1a0a6c10428e03c084f6fb50a41b3a05802bbdbd  .agent/scripts/check_versions.py
 c31a45b3fe21f94311ea0343dfa09bbb5cd9d5294b4d396e8fc72a9538bd8eaa  .agent/scripts/migrate_dates.py
 e36c1a771f23bc08c2662c0cabbf663fd7ef9d072c4370931c509eea75e29d90  .agent/scripts/scan_backlog.py
@@ -11,7 +11,7 @@ e36c1a771f23bc08c2662c0cabbf663fd7ef9d072c4370931c509eea75e29d90  .agent/scripts
 cac40ea50cd39dcb6e95d0f4c9c6665cf267a5c0668e3cd61f466bb626385606  .agent/skills/business-analyst/SKILL.md
 12ff15fa96d00152aa97d68774c99d25d002ff3be568a3780af99acc28a78388  .agent/skills/business-analyst/assets/brd_template.md
 8c2d6d72a8ee5ed7c1c7fe604769c524cb7a8612b690b6ad86ba2adec432e18c  .agent/skills/business-analyst/evals/evals.json
-b2568592713b33d025e62c30992ff33486e5c92f9a068c78e31e8a79d9ac63a5  .agent/skills/code-reviewer/SKILL.md
+e71528fea15065f9ecae84a5456af961e52385f4d083498af42a85703ebebc2b  .agent/skills/code-reviewer/SKILL.md
 d5a37d9b4d253696f1b2cbd4348c6b83cf5893504ca3ffd5b5bd2f7b7fc58ddc  .agent/skills/code-reviewer/evals/evals.json
 e616ef4939d0860007f225ff0b4d65daa21ce4c7eea64d804f3402ad9f33afdf  .agent/skills/devops-engineer/SKILL.md
 4df2c8bf0a9d607214d641a3b68b0523d8adea4274e41c3ff51c462efe3f69b5  .agent/skills/devops-engineer/evals/evals.json
