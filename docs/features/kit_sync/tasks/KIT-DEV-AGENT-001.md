@@ -3,9 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** Independent
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** devops-engineer
-**🚥 任務狀態 (Status):** In Review
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-15T16:45+08:00
-**✅ 完成時間 (Closed):** —
+**✅ 完成時間 (Closed):** 2026-08-16T15:05+08:00
+**🔀 審查載體編號 (PR/MR):** —
 
 ## 1. 任務描述 (Description)
 
@@ -80,3 +81,22 @@ kit 領先一整套 worktree／commit 閘門流程，而 my_workstation 領先�
   `docs/features/dataset_management_system/tasks/DMS-DEV-EPIC-021.md`、`CLAUDE.md`）需一併改號。
 - my_workstation 的 §1.9 內文引用 `documentation_conventions.md` §2.3「Done 後折併回主文件」，
   該處實為 §2.1；kit 已修正，my_workstation 端仍待修。
+
+## 7. 結案補記（`PEV-DEV-AGENT-020` 清帳，2026-08-18）
+
+本工單的 14 條 AC 早在 2026-08-16 就全部打勾、交付物也全部進了主線，
+但 Status 一直停在 `In Review` 沒有人收尾——**帳面落後現實兩天，而沒有任何機制會叫**。
+`PEV-DEV-AGENT-020` 清帳時發現，於此結案。
+
+- **`Closed` 填 `2026-08-16T15:05+08:00`**，取最後一次實質變更的 commit 時間（`cd0e1ff`），
+  **不是清帳當天**——填當天等於偽造完成時點。
+- **交付物實查**（不採信 AC 勾選，依 `PEV-DEV-AGENT-015` 的取證義務）：
+  `kit/.agent/resources/team_protocol.md` 有 §1.11、`kit/docs/standards/team_protocol.md`
+  指路檔存在、`install.sh` 具備 `--upgrade`／`--dry-run` 與 `.agent/.kit-manifest` 機制。
+- **不補 `reviews/KIT-DEV-AGENT-001.md`**：審查檔是 `PEV-DEV-AGENT-016` 之後才有的機制，
+  本工單建立於其前，不追溯適用。結案理由記在
+  [`reviews/PEV-DEV-AGENT-020.md`](../../process_evolution/reviews/PEV-DEV-AGENT-020.md)。
+- **§6 的 follow-up 不阻擋結案**：那兩條待修都在 `../my_workstation`，是另一個 repo 的事。
+
+這次漏帳催生了 `PEV-DEV-AGENT-022` 的其中一項檢查：
+**AC 全數打勾但 Status 不是 `Done`／`Canceled`**，讓同一種漏帳下次由 precheck 攔下。
