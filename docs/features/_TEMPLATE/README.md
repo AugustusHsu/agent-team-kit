@@ -19,6 +19,7 @@
 | `test_plan.md` | 測試策略與追溯矩陣 | `qa-test-planner` |
 | `wireframes/` | 線框圖與互動說明 | `uiux` |
 | `tasks/` | 工單，一張一個 `.md`，檔名即 Task ID | `scrum-master` |
+| `reviews/` | 審查檔，與工單同名一對一 | `code-reviewer` |
 
 > 不是每個模組都需要全套。純後端模組可略過 `wireframes/`；小型模組可把 `hld.md` 併入 `lld.md`。
 > 但 `prd.md` 與 `tasks/` 是最低配備——沒有 PRD 就沒有 AC 的來源，沒有 tasks 就進不了 BACKLOG。

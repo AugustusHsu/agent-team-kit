@@ -249,7 +249,7 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 | kit 要求的能力 | GitHub（預設） | GitLab | 無遠端／純本地 |
 |---|---|---|---|
 | 隔離變更 | branch | branch | branch |
-| 合併前審查的載體 | **Pull Request** | Merge Request | 工單的「📝 Code Review 備註」章節 |
+| 合併前審查的載體 | **Pull Request** | Merge Request | 審查檔 `docs/features/<模組>/reviews/<TaskID>.md` |
 | 自動檢查 | **Actions** | GitLab CI | 合併前手動跑測試 |
 | 阻擋未通過的合併 | Branch protection ＋ required checks | Protected branch ＋ pipeline | 人工紀律 |
 | 審查意見的落點 | PR review comment | MR discussion | 同上 |
@@ -278,9 +278,11 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 
 ### 8.3 無遠端專案的降級
 
-沒有遠端時，審查載體改為工單的「📝 Code Review 備註」章節——
-此情境下 **APPROVED 也必須寫**，否則工單裡不會留下任何審查紀錄，載體等於是空的。
-合併前手動跑完測試，工單的審查載體編號欄位填 `—`。**§1 三條核心原則不降級**。
+沒有遠端時，審查載體改為審查檔 `docs/features/<模組>/reviews/<TaskID>.md`——
+此情境下 **APPROVED 也必須寫**，否則 repo 裡不會留下任何審查紀錄，載體等於是空的。
+合併前手動跑完測試，工單的審查載體編號欄位填 `—`
+（審查檔與工單的分工見 `.agent/resources/team_protocol.md` §2.3）。
+**§1 三條核心原則不降級**。
 
 **合併方式降級為 `--no-ff`（§6.1）。** §2 裁定 5 是拿「過程 commit 留在 PR 內
 可追溯」換到 squash 的，沒有 PR 就付不出這個對價——squash 完再刪分支，過程 commit
