@@ -27,6 +27,7 @@
 | §1.9 | 程式碼隔離與分支 (🔀 Code Isolation) |
 | §1.10 | Commit 閘門 (🔒 HITL Gate before Commit) |
 | §1.11 | 文檔權威階序 (📚 Source of Truth Hierarchy) |
+| §1.12 | 取證通道保真 (🔬 Evidence Channel Fidelity) |
 | §2 | 角色交接規範 (Handoff Rules) |
 | §2.1 | Scrum Master → Developer |
 | §2.2 | Developer → Code Reviewer |

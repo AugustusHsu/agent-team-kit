@@ -25,6 +25,7 @@ description: 負責執行所有前端與 UI 相關的實作任務。當使用者
 
 ## 2. 防幻覺機制 (Anti-Hallucination)
 - **拒絕腦補**：引用任何現有的共用元件、CSS 變數、API 介面型別或 Router 設定前，必須先使用 `view_file` 或 `grep_search` 確認其確切名稱與用法，嚴禁憑空猜測。
+- **確認你查到的是原文**：查閱檔案或判讀測試輸出前，先依 `.agent/resources/team_protocol.md` §1.12 做通道保真自檢——輸出可能在抵達你之前被中間層改寫，最嚴重的那種失效不留任何提示。**查到被改寫過的內容，跟腦補一樣會壞。**
 
 ## 3. 獨立作戰與 Mocking (Mock-First Approach)
 前端開發絕不能因為後端 API 尚未完成而停滯：

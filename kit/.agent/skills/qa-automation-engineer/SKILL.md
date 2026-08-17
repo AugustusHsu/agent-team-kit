@@ -368,7 +368,8 @@ Cypress E2E 測試需要啟動完整的前後端服務。建議：
    - Integration Test → `make test-integration`
    - 特定模組 → `make test-auth` / `make test-workspace` / `make test-admin`
    - 全部 → `make test-all`
-6. **回報結果**：提供覆蓋率摘要與通過率。
+6. **確認你判讀的是原文**：判讀測試輸出前，先依 `.agent/resources/team_protocol.md` §1.12 做通道保真自檢——測試輸出結構規律、重複度高，是最容易被中間層改寫的一類，且最嚴重的那種失效不留任何提示。**通過數被靜默改寫時，你回報的通過率會是假的。**
+7. **回報結果**：提供覆蓋率摘要與通過率。
 
 ### 9.2 交付與回報格式 (Delivery Report)
 
