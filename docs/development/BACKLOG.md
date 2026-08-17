@@ -1,7 +1,7 @@
 # 📋 待辦總表 (Backlog)
 
 > **工單來源目錄**：`docs/features/*/tasks/`
-> **工單總數**：19 張
+> **工單總數**：22 張
 
 ---
 
@@ -9,7 +9,11 @@
 
 > 包含狀態為 `In Progress` 或 `Ready` 的工單。
 
-*(無)*
+| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
+|---|---------|------|------|-------------------|---------------|
+| 1 | PEV-DEV-AGENT-018 | precheck.py：出貨第 1 層流程檢查，機械性失敗不再靠人眼抓 | process_evolution | devops-engineer | 🟢 Ready |
+
+**小計**：1 張（In Progress: 0 / Ready: 1）
 
 ---
 
@@ -32,8 +36,10 @@
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
 |---|---------|------|------|-------------------|---------------|
 | 1 | PEV-DEV-AGENT-002 | README 補上 git 流程能力對照表，讓換 git server 的人一眼看懂 | process_evolution | devops-engineer | ⏳ Pending |
+| 2 | PEV-DEV-AGENT-019 | CI adapter：出貨薄 workflow，並讓本 repo 的 commit 第一次真的跑到 CI | process_evolution | devops-engineer | ⏳ Pending |
+| 3 | PEV-DEV-AGENT-020 | 清帳：冰箱卡點更新，舊 design_note 轉為歷史索引 | process_evolution | scrum-master | ⏳ Pending |
 
-**小計**：1 張
+**小計**：3 張
 
 ---
 
@@ -73,9 +79,10 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| ⏳ Pending | 1 | 5.9% |
-| ✅ Done | 16 | 94.1% |
-| **總計** | **17** | **100%** |
+| 🟢 Ready | 1 | 5.0% |
+| ⏳ Pending | 3 | 15.0% |
+| ✅ Done | 16 | 80.0% |
+| **總計** | **20** | **100%** |
 
 ### worktree_guard
 
@@ -99,7 +106,7 @@
 | [DN-004](../design_notes/DN-004_skill_system_realignment.md) | 🌱 Seed | Skill 體系與現行流程的重新對齊 | DN-001（本檔的格式）；DN-003（git 流程，其落地會先改動 6 份 skill）； |
 | [DN-005](../design_notes/DN-005_parallel_task_decomposition.md) | 🌱 Seed | 並行開發的任務拆解與變更傳播 | DN-001（本檔的格式）；DN-003（git 流程，本 DN 視其為「基本層」並在其上擴充） |
 | [DN-006](../design_notes/DN-006_branch_topology_and_isolation.md) | 🌱 Seed | 分支拓撲與並行隔離 | DN-001（本檔的格式）；DN-003（已畢業的單線 git 流程，本 DN 在其上擴充） |
-| [DN-007](../design_notes/DN-007_ci_gate.md) | 🔍 Exploring | CI 閘門：kit 要不要出貨自動檢查，以及檢查什麼 | DN-001（本檔的格式）；DN-003（已畢業，`git_workflow.md` 是本檔要補的那份規範） |
+| [DN-007](../design_notes/DN-007_ci_gate.md) | 🎓 Graduated | CI 閘門：kit 要不要出貨自動檢查，以及檢查什麼 | DN-001（本檔的格式）；DN-003（已畢業，`git_workflow.md` 是本檔要補的那份規範） |
 
 ---
 
