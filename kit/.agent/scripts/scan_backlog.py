@@ -9,7 +9,8 @@ BACKLOG 自動掃描腳本
   python3 .agent/scripts/scan_backlog.py                          # 全部專案 JSON
   python3 .agent/scripts/scan_backlog.py --project example_module
   python3 .agent/scripts/scan_backlog.py --format summary
-  python3 .agent/scripts/scan_backlog.py --format backlog --recent-days 7 --recent-limit 10
+  python3 .agent/scripts/scan_backlog.py --format backlog --recent-limit 10
+  python3 .agent/scripts/scan_backlog.py --stale 14                # 停滯清單，只印 stdout
 """
 
 import argparse
@@ -127,17 +128,17 @@ def parse_task_file(filepath):
     return result
 
 
-def parse_closed_datetime(closed_str):
+def parse_iso_datetime(value):
     """
-    嘗試將 Closed 欄位的字串解析為 datetime 物件
+    嘗試將日期欄位（Created／Closed）的字串解析為 datetime 物件
     支援 ISO 8601 格式（如 2026-04-22T16:04+08:00）
     回傳 datetime 或 None
     """
-    if not closed_str or closed_str in ("—", "-", "N/A", "null"):
+    if not value or value in ("—", "-", "N/A", "null"):
         return None
     try:
         # 嘗試帶時區的 ISO 格式
-        dt = datetime.fromisoformat(closed_str)
+        dt = datetime.fromisoformat(value)
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=TZ_TAIPEI)
         return dt
@@ -145,7 +146,7 @@ def parse_closed_datetime(closed_str):
         pass
     try:
         # 嘗試簡單日期格式
-        return datetime.strptime(closed_str, "%Y-%m-%d").replace(tzinfo=TZ_TAIPEI)
+        return datetime.strptime(value, "%Y-%m-%d").replace(tzinfo=TZ_TAIPEI)
     except (ValueError, TypeError):
         return None
 
@@ -193,20 +194,21 @@ def scan_all_tasks(root, project_filter=None):
     return results
 
 
-def classify_tasks(tasks, recent_days=7, recent_limit=10):
+def classify_tasks(tasks, recent_limit=10):
     """
     將工單依狀態分類為四大區塊
-    近期結案區塊僅顯示最近 N 天內的工單，上限 M 筆
+    近期結案區塊顯示最近結案的 N 張，其餘移入歸檔
+
+    **不看「今天」是哪一天**：分類結果只由工單內容決定。時間窗會讓已結案工單
+    自己從報表裡消失，使生成檔不再是輸入的純函數（見 documentation_conventions.md §5）。
     """
-    now = datetime.now(TZ_TAIPEI)
-    cutoff = now - timedelta(days=recent_days)
 
     classified = {
         "current_sprint": [],  # In Progress + Ready
         "in_review": [],  # In Review
         "product_backlog": [],  # Pending
         "recent_closed": [],  # 近期 Done/Canceled
-        "archived": [],  # 超出近期範圍的 Done/Canceled
+        "archived": [],  # 超出顯示筆數的 Done/Canceled
     }
 
     for task in tasks:
@@ -218,11 +220,7 @@ def classify_tasks(tasks, recent_days=7, recent_limit=10):
         elif status == "Pending":
             classified["product_backlog"].append(task)
         elif status in ("Done", "Canceled"):
-            closed_dt = parse_closed_datetime(task.get("closed"))
-            if closed_dt and closed_dt >= cutoff:
-                classified["recent_closed"].append(task)
-            else:
-                classified["archived"].append(task)
+            classified["recent_closed"].append(task)
 
     # 當前衝刺：In Progress 優先，其次 Ready，同狀態內按 Task ID 排序
     classified["current_sprint"].sort(
@@ -232,9 +230,9 @@ def classify_tasks(tasks, recent_days=7, recent_limit=10):
         )
     )
 
-    # 近期結案：按完成時間倒序排列，取前 N 筆
+    # 近期結案：按完成時間倒序排列，取前 N 筆（沒有完成時間的排最後）
     classified["recent_closed"].sort(
-        key=lambda t: parse_closed_datetime(t.get("closed"))
+        key=lambda t: parse_iso_datetime(t.get("closed"))
         or datetime.min.replace(tzinfo=TZ_TAIPEI),
         reverse=True,
     )
@@ -261,13 +259,13 @@ def compute_stats(all_project_tasks):
     return stats
 
 
-def format_json(all_project_tasks, recent_days, recent_limit):
+def format_json(all_project_tasks, recent_limit):
     """
     輸出完整 JSON 格式，包含分類與統計
     """
     output = {}
     for project, tasks in all_project_tasks.items():
-        classified = classify_tasks(tasks, recent_days, recent_limit)
+        classified = classify_tasks(tasks, recent_limit)
         output[project] = {
             "total": len(tasks),
             "classified": {
@@ -444,22 +442,20 @@ def format_summary(all_project_tasks):
     return "\n".join(lines)
 
 
-def format_backlog_markdown(root, all_project_tasks, recent_days, recent_limit, output_path=None):
+def format_backlog_markdown(root, all_project_tasks, recent_limit, output_path=None):
     """
     輸出符合 backlog_template 格式的完整 Markdown
     """
-    now = datetime.now(TZ_TAIPEI)
     all_tasks = []
     for tasks in all_project_tasks.values():
         all_tasks.extend(tasks)
 
-    classified = classify_tasks(all_tasks, recent_days, recent_limit)
+    classified = classify_tasks(all_tasks, recent_limit)
     total = len(all_tasks)
 
     lines = []
     lines.append("# 📋 待辦總表 (Backlog)")
     lines.append("")
-    lines.append(f"> **最後更新時間**：{now.strftime('%Y-%m-%d')}")
     lines.append("> **工單來源目錄**：`docs/features/*/tasks/`")
     lines.append(f"> **工單總數**：{total} 張")
     lines.append("")
@@ -549,7 +545,7 @@ def format_backlog_markdown(root, all_project_tasks, recent_days, recent_limit, 
     lines.append("## ✅ 近期結案 (Closed)")
     lines.append("")
     lines.append(
-        f"> 最近 {recent_days} 天內完成的工單（上限 {recent_limit} 筆）。"
+        f"> 最近結案的 {recent_limit} 張工單（依完成時間排序）。"
         f"更早的結案工單可透過 `scan_backlog.py --format json` 查詢。"
     )
     lines.append("")
@@ -619,6 +615,44 @@ def format_backlog_markdown(root, all_project_tasks, recent_days, recent_limit, 
     return "\n".join(lines)
 
 
+def format_stale(all_project_tasks, days):
+    """
+    列出建立超過 days 天仍未結案的工單（停滯清單）
+
+    **這份輸出依賴「今天是哪一天」，因此只能印到 stdout。** 把它寫進版控的檔案，
+    輸入沒變輸出卻天天變（見 docs/standards/documentation_conventions.md §5）。
+    """
+    now = datetime.now(TZ_TAIPEI)
+    cutoff = now - timedelta(days=days)
+
+    stale = []
+    for project, tasks in all_project_tasks.items():
+        for task in tasks:
+            if task.get("status") in ("Done", "Canceled"):
+                continue
+            created = parse_iso_datetime(task.get("created"))
+            if created and created < cutoff:
+                stale.append((project, task, (now - created).days))
+    stale.sort(key=lambda item: -item[2])
+
+    lines = [f"🕰️  停滯清單：建立超過 {days} 天仍未結案（判定基準 {now:%Y-%m-%d %H:%M %z}）", ""]
+    if not stale:
+        lines.append(f"✅ 沒有停滯超過 {days} 天的工單。")
+        return "\n".join(lines)
+
+    lines.append("| Task ID | 專案 | 狀態 | 建立時間 | 停滯天數 |")
+    lines.append("|---------|------|------|----------|----------|")
+    for project, task, age in stale:
+        icon = STATUS_ICONS.get(task.get("status", ""), "❓")
+        lines.append(
+            f"| {task.get('task_id')} | {project} | {icon} {task.get('status')} "
+            f"| {task.get('created')} | {age} |"
+        )
+    lines.append("")
+    lines.append(f"**小計**：{len(stale)} 張")
+    return "\n".join(lines)
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="BACKLOG 自動掃描腳本 — 解析工單 metadata 並輸出結構化資料"
@@ -637,16 +671,18 @@ def main():
         help="輸出格式: json (預設), summary (精簡摘要), backlog (完整 Markdown)",
     )
     parser.add_argument(
-        "--recent-days",
-        type=int,
-        default=7,
-        help="近期結案的天數範圍（預設: 7 天）",
-    )
-    parser.add_argument(
         "--recent-limit",
         type=int,
         default=10,
         help="近期結案的最大顯示筆數（預設: 10 筆）",
+    )
+
+    parser.add_argument(
+        "--stale",
+        type=int,
+        default=None,
+        metavar="DAYS",
+        help="列出建立超過 DAYS 天仍未結案的工單（只印 stdout，不可寫入檔案）",
     )
 
     parser.add_argument(
@@ -658,6 +694,12 @@ def main():
 
     args = parser.parse_args()
 
+    if args.stale is not None and args.output:
+        parser.error(
+            "--stale 是時間相依的視圖，只能印到 stdout：寫進版控的生成檔"
+            "必須是輸入的純函數（見 docs/standards/documentation_conventions.md §5）"
+        )
+
     root = find_project_root()
     all_tasks = scan_all_tasks(root, args.project)
 
@@ -665,13 +707,17 @@ def main():
         print("⚠️ 未找到任何工單。", file=sys.stderr)
         sys.exit(1)
 
+    if args.stale is not None:
+        print(format_stale(all_tasks, args.stale))
+        return
+
     if args.format == "json":
-        print(format_json(all_tasks, args.recent_days, args.recent_limit))
+        print(format_json(all_tasks, args.recent_limit))
     elif args.format == "summary":
         print(format_summary(all_tasks))
     elif args.format == "backlog":
         out_str = format_backlog_markdown(
-            root, all_tasks, args.recent_days, args.recent_limit, args.output
+            root, all_tasks, args.recent_limit, args.output
         )
         if args.output:
             Path(args.output).write_text(out_str, encoding="utf-8")

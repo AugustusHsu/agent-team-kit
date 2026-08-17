@@ -8,7 +8,6 @@
 import shutil
 import subprocess
 import sys
-from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -17,27 +16,6 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 KIT_ROOT = REPO_ROOT / "kit"
 INSTALL_SH = REPO_ROOT / "install.sh"
 FIXTURE_PROJECT = Path(__file__).resolve().parent / "fixture_project"
-
-TZ_TAIPEI = timezone(timedelta(hours=8))
-
-
-def _expand_date_placeholders(root: Path) -> None:
-    """把 fixture 工單裡的日期佔位符換成相對於「現在」的實際時間。
-
-    寫死日期的話，`--recent-days` 的近期結案測試會隨著時間流逝自己壞掉。
-    """
-    now = datetime.now(TZ_TAIPEI)
-    mapping = {
-        "{{CLOSED_RECENT}}": (now - timedelta(days=1)).isoformat(timespec="minutes"),
-        "{{CLOSED_OLD}}": (now - timedelta(days=400)).isoformat(timespec="minutes"),
-    }
-    for md in root.rglob("*.md"):
-        text = md.read_text(encoding="utf-8")
-        replaced = text
-        for key, value in mapping.items():
-            replaced = replaced.replace(key, value)
-        if replaced != text:
-            md.write_text(replaced, encoding="utf-8")
 
 
 def run_script(project: Path, script: str, *args, timeout: int = 60):
@@ -64,7 +42,6 @@ def project(tmp_path_factory) -> Path:
     """已安裝 kit + 已鋪好假工單的專案目錄。"""
     target = tmp_path_factory.mktemp("project")
     shutil.copytree(FIXTURE_PROJECT, target, dirs_exist_ok=True)
-    _expand_date_placeholders(target)
     subprocess.run([str(INSTALL_SH), str(target)], check=True, capture_output=True, text=True)
     return target
 
