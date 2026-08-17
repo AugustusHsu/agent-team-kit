@@ -9,11 +9,7 @@
 
 > 包含狀態為 `In Progress` 或 `Ready` 的工單。
 
-| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
-|---|---------|------|------|-------------------|---------------|
-| 1 | PEV-DEV-AGENT-022 | precheck 與 kit 自身測試收斂：同一個盲點兩份實作，再補兩項漏掉的檢查 | process_evolution | backend-developer | 🟢 Ready |
-
-**小計**：1 張（In Progress: 0 / Ready: 1）
+*(無)*
 
 ---
 
@@ -39,20 +35,20 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) | 完成時間 |
 |---|---------|------|------|-------------------|---------------|----------|
-| 1 | PEV-DEV-AGENT-021 | commit 規範送不到 Agent 手上：CLAUDE.md 只指路，沒帶格式 | process_evolution | devops-engineer | ✅ Done | 2026-08-18T06:05+08:00 |
-| 2 | PEV-DEV-AGENT-002 | README 補上 git 流程能力對照表，讓換 git server 的人一眼看懂 | process_evolution | devops-engineer | ✅ Done | 2026-08-18T05:45+08:00 |
-| 3 | PEV-DEV-AGENT-020 | 清帳：冰箱卡點更新，舊 design_note 轉為歷史索引 | process_evolution | scrum-master | ✅ Done | 2026-08-18T05:31+08:00 |
-| 4 | PEV-DEV-AGENT-019 | CI adapter：出貨薄 workflow，並讓本 repo 的 commit 第一次真的跑到 CI | process_evolution | devops-engineer | ✅ Done | 2026-08-18T05:00+08:00 |
-| 5 | PEV-DEV-AGENT-015 | 審查證據來源：交付回報是線索，不是證據 | process_evolution | code-reviewer | ✅ Done | 2026-08-17T22:35+08:00 |
-| 6 | PEV-DEV-AGENT-014 | 冰箱清帳：移除已落地與前提消失的項目 | process_evolution | scrum-master | ✅ Done | 2026-08-17T21:55+08:00 |
-| 7 | PEV-DEV-AGENT-013 | 立規：納入版控的生成檔必須是輸入的純函數 | process_evolution | backend-engineer | ✅ Done | 2026-08-17T21:30+08:00 |
-| 8 | PEV-DEV-AGENT-012 | scan_backlog 的 metadata 正則跨行誤配：欄位留空會抓到下一行 | process_evolution | backend-engineer | ✅ Done | 2026-08-17T20:40+08:00 |
-| 9 | PEV-DEV-AGENT-018 | precheck.py：出貨第 1 層流程檢查，機械性失敗不再靠人眼抓 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T19:32+08:00 |
-| 10 | PEV-DEV-AGENT-009 | DOCS_MAP 的模組表抽成獨立檔，骨架恢復可升級 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T19:00+08:00 |
+| 1 | PEV-DEV-AGENT-022 | precheck 與 kit 自身測試收斂：同一個盲點兩份實作，再補兩項漏掉的檢查 | process_evolution | backend-developer | ✅ Done | 2026-08-18T06:35+08:00 |
+| 2 | PEV-DEV-AGENT-021 | commit 規範送不到 Agent 手上：CLAUDE.md 只指路，沒帶格式 | process_evolution | devops-engineer | ✅ Done | 2026-08-18T06:05+08:00 |
+| 3 | PEV-DEV-AGENT-002 | README 補上 git 流程能力對照表，讓換 git server 的人一眼看懂 | process_evolution | devops-engineer | ✅ Done | 2026-08-18T05:45+08:00 |
+| 4 | PEV-DEV-AGENT-020 | 清帳：冰箱卡點更新，舊 design_note 轉為歷史索引 | process_evolution | scrum-master | ✅ Done | 2026-08-18T05:31+08:00 |
+| 5 | PEV-DEV-AGENT-019 | CI adapter：出貨薄 workflow，並讓本 repo 的 commit 第一次真的跑到 CI | process_evolution | devops-engineer | ✅ Done | 2026-08-18T05:00+08:00 |
+| 6 | PEV-DEV-AGENT-015 | 審查證據來源：交付回報是線索，不是證據 | process_evolution | code-reviewer | ✅ Done | 2026-08-17T22:35+08:00 |
+| 7 | PEV-DEV-AGENT-014 | 冰箱清帳：移除已落地與前提消失的項目 | process_evolution | scrum-master | ✅ Done | 2026-08-17T21:55+08:00 |
+| 8 | PEV-DEV-AGENT-013 | 立規：納入版控的生成檔必須是輸入的純函數 | process_evolution | backend-engineer | ✅ Done | 2026-08-17T21:30+08:00 |
+| 9 | PEV-DEV-AGENT-012 | scan_backlog 的 metadata 正則跨行誤配：欄位留空會抓到下一行 | process_evolution | backend-engineer | ✅ Done | 2026-08-17T20:40+08:00 |
+| 10 | PEV-DEV-AGENT-018 | precheck.py：出貨第 1 層流程檢查，機械性失敗不再靠人眼抓 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T19:32+08:00 |
 
 **小計**：10 張（Done: 10 / Canceled: 0）
 
-> 📦 另有 13 張已歸檔工單未顯示。
+> 📦 另有 14 張已歸檔工單未顯示。
 
 ---
 
@@ -69,8 +65,7 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟢 Ready | 1 | 4.5% |
-| ✅ Done | 21 | 95.5% |
+| ✅ Done | 22 | 100.0% |
 | **總計** | **22** | **100%** |
 
 ### worktree_guard

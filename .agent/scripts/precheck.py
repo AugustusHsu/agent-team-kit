@@ -5,17 +5,19 @@
 檢查「流程有沒有被遵守」，不跑專案自己的單元測試——後者是第 2 層，
 只有專案自己知道要跑什麼。本腳本的輸入全在 repo 內，跟技術棧無關。
 
-四項檢查（見 docs/standards/git_workflow.md §8）：
+六項檢查（見 docs/standards/git_workflow.md §8）：
   1. BACKLOG 是否過期——重跑產生器比對現檔
   2. 工單 Status 值是否合法
   3. Created / Closed 是否為 ISO 8601，且 Closed 不早於 Created
   4. 文件相對連結是否指向存在的檔案
+  5. Status 為 Done 卻沒填 Closed
+  6. AC 全數打勾卻還沒結案
 
 使用方式:
   python3 .agent/scripts/precheck.py            # 全部檢查
   python3 .agent/scripts/precheck.py --list     # 只列出檢查項目
 
-全部通過回傳 0，任一項失敗回傳 1。四項互不短路，一次跑完一起回報。
+全部通過回傳 0，任一項失敗回傳 1。各項互不短路，一次跑完一起回報。
 只用標準函式庫：裝了 kit 的專案不一定有 uv 或任何第三方套件。
 """
 
@@ -41,6 +43,13 @@ INLINE_CODE_RE = re.compile(r"`[^`]*`")
 # 樣板檔裡的佔位路徑不是真連結，例如 reviews/{TaskID}.md、<模組>/prd.md
 PLACEHOLDER_CHARS = ("{", "}", "<", ">")
 PLACEHOLDER_WORDS = {"路徑", "relative/path"}
+
+# 工單的 AC 打勾格式：`- [ ] AC-01：…` / `- [x] …`
+CHECKBOX_RE = re.compile(r"^\s*[-*] \[([ xX])\]", re.MULTILINE)
+
+# 允許 AC 全打勾卻不是 Done 的狀態。Canceled 的工單常常是外部前提消失，
+# 該做的都做了才被喊停，逼它把勾拿掉只會是造假。
+AC_EXEMPT_STATUSES = {"Done", "Canceled"}
 
 
 class Finding:
@@ -197,6 +206,45 @@ def check_dead_links(root):
     return findings
 
 
+def check_closed_filled(root):
+    """Status 是 Done 卻沒填 Closed。
+
+    這不會有任何錯誤：`scan_backlog.py` 照樣把它列進「近期結案」，只是完成時間欄空白，
+    而排序用的鍵拿不到值——工單於是沉到列表底部，看起來像最舊的一張。
+    PEV-DEV-AGENT-002 結案時就漏填過一次，當時四項檢查全綠。
+    """
+    findings = []
+    for task in iter_tasks(root):
+        if task.get("status") == "Done" and is_empty(task.get("closed")):
+            findings.append(Finding(rel(root, task), "Status 為 Done 但 Closed 留空"))
+    return findings
+
+
+def check_ac_matches_status(root):
+    """AC 全打勾卻還沒結案——做完了沒關帳，帳面上這張單還卡著。
+
+    KIT-DEV-AGENT-001 的 14 條 AC 全部打勾、交付物全部進了主線，Status 卻在
+    `In Review` 躺了兩天，直到人工清帳才發現。原本的四項檢查沒有一項看得到它。
+
+    邊界：只看「全打勾」這個形狀，看不出勾是不是誠實打的——那要跑專案測試，
+    屬第 2 層。這一項抓的是純粹的漏關帳。
+    """
+    findings = []
+    for task in iter_tasks(root):
+        status = task.get("status")
+        if status is None or status in AC_EXEMPT_STATUSES:
+            continue
+        boxes = CHECKBOX_RE.findall(Path(task["file"]).read_text(encoding="utf-8"))
+        if boxes and all(box.lower() == "x" for box in boxes):
+            findings.append(
+                Finding(
+                    rel(root, task),
+                    f"{len(boxes)} 個核取方塊全數打勾，Status 卻還是 {status!r}",
+                )
+            )
+    return findings
+
+
 def aware(value):
     return value if value.tzinfo else value.replace(tzinfo=sb.TZ_TAIPEI)
 
@@ -220,6 +268,8 @@ CHECKS = [
     ("工單 Status 值是否合法", check_status_values),
     ("工單時間戳是否正確", check_timestamps),
     ("文件是否有死連結", check_dead_links),
+    ("結案工單是否填了 Closed", check_closed_filled),
+    ("AC 全打勾的工單是否已結案", check_ac_matches_status),
 ]
 
 
@@ -242,7 +292,7 @@ def main():
     root = sb.find_project_root()
     failed = 0
 
-    # 刻意不短路：一次跑完全部四項。第一項紅就停會讓修復迴圈變成跑四趟。
+    # 刻意不短路：一次跑完全部。第一項紅就停會讓修復迴圈變成一項跑一趟。
     for name, check in CHECKS:
         findings = check(root)
         if findings:
