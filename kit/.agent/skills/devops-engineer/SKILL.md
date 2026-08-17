@@ -29,6 +29,7 @@ description: 負責執行所有開發環境建設、容器化配置與 DevOps �
 
 - **拒絕腦補**：引用任何現有檔案路徑、環境變數名稱、Docker image tag、CLI 參數或套件版本前，必須先使用 `view_file` 或 `grep_search` 確認其存在與正確性，嚴禁憑空猜測。
 - **官方文件優先**：當工單 Inputs 提供了官方文件連結（如 uv Docker 指南），務必使用 `read_url_content` 查閱最新內容，以官方推薦的最佳實踐為準。
+- **確認你查到的是原文**：查閱檔案或判讀建置／部署 log 前，先依 `.agent/resources/team_protocol.md` §1.12 做通道保真自檢——輸出可能在抵達你之前被中間層改寫，最嚴重的那種失效不留任何提示。**log 結構規律、重複度高，正是最容易被改寫的一類。**
 
 ## 4. 交付與回報格式 (Delivery Report)
 
