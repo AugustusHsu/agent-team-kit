@@ -1,7 +1,7 @@
 # 📋 待辦總表 (Backlog)
 
 > **工單來源目錄**：`docs/features/*/tasks/`
-> **工單總數**：22 張
+> **工單總數**：24 張
 
 ---
 
@@ -9,7 +9,12 @@
 
 > 包含狀態為 `In Progress` 或 `Ready` 的工單。
 
-*(無)*
+| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
+|---|---------|------|------|-------------------|---------------|
+| 1 | PEV-DEV-AGENT-021 | commit 規範送不到 Agent 手上：CLAUDE.md 只指路，沒帶格式 | process_evolution | devops-engineer | 🟢 Ready |
+| 2 | PEV-DEV-AGENT-022 | precheck 與 kit 自身測試收斂：同一個盲點兩份實作，再補兩項漏掉的檢查 | process_evolution | backend-developer | 🟢 Ready |
+
+**小計**：2 張（In Progress: 0 / Ready: 2）
 
 ---
 
@@ -17,11 +22,7 @@
 
 > 開發已完成，等待 Code Review 或驗收確認的工單。
 
-| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
-|---|---------|------|------|-------------------|---------------|
-| 1 | KIT-DEV-AGENT-001 | 回收 my_workstation 的文檔權威階序與指路檔，並建立 install.sh 升級路徑 | kit_sync | devops-engineer | In Review |
-
-**小計**：1 張
+*(無)*
 
 ---
 
@@ -32,9 +33,8 @@
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
 |---|---------|------|------|-------------------|---------------|
 | 1 | PEV-DEV-AGENT-002 | README 補上 git 流程能力對照表，讓換 git server 的人一眼看懂 | process_evolution | devops-engineer | ⏳ Pending |
-| 2 | PEV-DEV-AGENT-020 | 清帳：冰箱卡點更新，舊 design_note 轉為歷史索引 | process_evolution | scrum-master | ⏳ Pending |
 
-**小計**：2 張
+**小計**：1 張
 
 ---
 
@@ -44,20 +44,20 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) | 完成時間 |
 |---|---------|------|------|-------------------|---------------|----------|
-| 1 | PEV-DEV-AGENT-019 | CI adapter：出貨薄 workflow，並讓本 repo 的 commit 第一次真的跑到 CI | process_evolution | devops-engineer | ✅ Done | 2026-08-18T05:00+08:00 |
-| 2 | PEV-DEV-AGENT-015 | 審查證據來源：交付回報是線索，不是證據 | process_evolution | code-reviewer | ✅ Done | 2026-08-17T22:35+08:00 |
-| 3 | PEV-DEV-AGENT-014 | 冰箱清帳：移除已落地與前提消失的項目 | process_evolution | scrum-master | ✅ Done | 2026-08-17T21:55+08:00 |
-| 4 | PEV-DEV-AGENT-013 | 立規：納入版控的生成檔必須是輸入的純函數 | process_evolution | backend-engineer | ✅ Done | 2026-08-17T21:30+08:00 |
-| 5 | PEV-DEV-AGENT-012 | scan_backlog 的 metadata 正則跨行誤配：欄位留空會抓到下一行 | process_evolution | backend-engineer | ✅ Done | 2026-08-17T20:40+08:00 |
-| 6 | PEV-DEV-AGENT-018 | precheck.py：出貨第 1 層流程檢查，機械性失敗不再靠人眼抓 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T19:32+08:00 |
-| 7 | PEV-DEV-AGENT-009 | DOCS_MAP 的模組表抽成獨立檔，骨架恢復可升級 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T19:00+08:00 |
-| 8 | PEV-DEV-AGENT-008 | `scan_backlog.py` 生成 DN 索引，並檢查懸空依賴 | process_evolution | backend-developer | ✅ Done | 2026-08-17T18:20+08:00 |
-| 9 | PEV-DEV-AGENT-006 | scrum-master 加上「開單前置關卡」 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:40+08:00 |
-| 10 | PEV-DEV-AGENT-005 | `team_protocol.md`：DN 的權威效力與模組「類型」欄位 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:10+08:00 |
+| 1 | PEV-DEV-AGENT-020 | 清帳：冰箱卡點更新，舊 design_note 轉為歷史索引 | process_evolution | scrum-master | ✅ Done | 2026-08-18T05:31+08:00 |
+| 2 | PEV-DEV-AGENT-019 | CI adapter：出貨薄 workflow，並讓本 repo 的 commit 第一次真的跑到 CI | process_evolution | devops-engineer | ✅ Done | 2026-08-18T05:00+08:00 |
+| 3 | PEV-DEV-AGENT-015 | 審查證據來源：交付回報是線索，不是證據 | process_evolution | code-reviewer | ✅ Done | 2026-08-17T22:35+08:00 |
+| 4 | PEV-DEV-AGENT-014 | 冰箱清帳：移除已落地與前提消失的項目 | process_evolution | scrum-master | ✅ Done | 2026-08-17T21:55+08:00 |
+| 5 | PEV-DEV-AGENT-013 | 立規：納入版控的生成檔必須是輸入的純函數 | process_evolution | backend-engineer | ✅ Done | 2026-08-17T21:30+08:00 |
+| 6 | PEV-DEV-AGENT-012 | scan_backlog 的 metadata 正則跨行誤配：欄位留空會抓到下一行 | process_evolution | backend-engineer | ✅ Done | 2026-08-17T20:40+08:00 |
+| 7 | PEV-DEV-AGENT-018 | precheck.py：出貨第 1 層流程檢查，機械性失敗不再靠人眼抓 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T19:32+08:00 |
+| 8 | PEV-DEV-AGENT-009 | DOCS_MAP 的模組表抽成獨立檔，骨架恢復可升級 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T19:00+08:00 |
+| 9 | PEV-DEV-AGENT-008 | `scan_backlog.py` 生成 DN 索引，並檢查懸空依賴 | process_evolution | backend-developer | ✅ Done | 2026-08-17T18:20+08:00 |
+| 10 | PEV-DEV-AGENT-006 | scrum-master 加上「開單前置關卡」 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:40+08:00 |
 
 **小計**：10 張（Done: 10 / Canceled: 0）
 
-> 📦 另有 9 張已歸檔工單未顯示。
+> 📦 另有 11 張已歸檔工單未顯示。
 
 ---
 
@@ -67,16 +67,17 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟡 In Review | 1 | 100.0% |
+| ✅ Done | 1 | 100.0% |
 | **總計** | **1** | **100%** |
 
 ### process_evolution
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| ⏳ Pending | 2 | 10.0% |
-| ✅ Done | 18 | 90.0% |
-| **總計** | **20** | **100%** |
+| 🟢 Ready | 2 | 9.1% |
+| ⏳ Pending | 1 | 4.5% |
+| ✅ Done | 19 | 86.4% |
+| **總計** | **22** | **100%** |
 
 ### worktree_guard
 
@@ -113,10 +114,32 @@
 >
 > 📌 **不是每一項都要有 design note。** 依 [DN-001](../design_notes/DN-001_design_note_mechanism.md) §3.2：
 > **當場寫得出可驗收的 AC → 直接開工單；寫不出來 → 才開 DN。**
-> 沒有 DN 的項目，脈絡暫存在
-> [`process_evolution/design_note.md`](../features/process_evolution/design_note.md)（待拆）。
+> 沒有 DN 的項目，脈絡就寫在下表的「卡在哪」欄，或其後的小節。
+> 舊的 [`process_evolution/design_note.md`](../features/process_evolution/design_note.md)
+> 已於 2026-08-18（`PEV-DEV-AGENT-020`）轉為**歷史索引**，不再是待辦來源。
 
 | 項目 | 狀態 | 卡在哪 |
 |---|---|---|
-| 負向對照自動化 | 待開工單 | 要跑在 CI 上，等 [DN-007](../design_notes/DN-007_ci_gate.md) 定出檢查落點 |
+| 負向對照自動化 | 待開 DN | 落點**不在** precheck 第 1 層（要跑專案測試套件＝第 2 層），三條做法互斥未收斂 → 見下方小節 |
 | 展示層生成 | 待開 DN | 100% 從 source of truth 生成，Mermaid + 靜態站台。排最後。design_note §3.8 |
+
+### 負向對照自動化：三條互斥的做法
+
+**先更正一個過期的前提。** 本項原本寫「等 [DN-007](../design_notes/DN-007_ci_gate.md)
+定出檢查落點」——DN-007 已畢業、`PEV-DEV-AGENT-018`／`019` 也已落地，結論是落點
+**確定不在** precheck 出貨的那一層：`precheck.py` 是 stdlib-only、只讀 repo 內的檔案、
+**不執行任何測試**，而負向對照的定義就是「還原實作後**重跑專案測試套件**」，
+依 DN-007 §3.2 屬**第 2 層**（跟技術棧綁定，kit 只能留一個 hook 讓專案填）。
+
+所以卡點不是「落點未定」，而是**做法有三條、互斥、還沒擇一**：
+
+| # | 做法 | 落層 | 卡在哪 |
+|---|---|---|---|
+| a | 全量 mutation testing | 第 2 層 | 慢；且 kit 給不出跑法（測試指令跟技術棧綁定） |
+| b | 只對本次變更做負向對照——還原實作 diff，確認新增的測試轉紅 | 第 2 層 | 「還原到哪個 commit」沒有通用答案 |
+| c | 只檢查「審查檔有沒有記錄負向對照」（純文字檢查） | 第 1 層，precheck 做得到 | **驗證的是有沒有「寫」，不是有沒有「做」** |
+
+**c 的問題是自我指涉的**：一個只檢查「有沒有寫」的閘門，本身就會製造
+`design_note.md` §2 第 2 類人工介入（宣稱 ≠ 實際）——而那正是負向對照要抓的東西。
+
+依 `PEV-DEV-AGENT-015` 立下的判準（只有一種做法就直接開工單，有多種就開 DN）→ **待開 DN**。
