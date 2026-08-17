@@ -215,3 +215,62 @@ def test_standards_文件都登記在_DOCS_MAP(kit_root: Path):
         if p.name != "README.md" and p.name not in docs_map
     ]
     assert not 漏登記, "這些規範文件沒登記進 DOCS_MAP：" + "、".join(漏登記)
+
+
+def _載入_precheck(kit_root: Path):
+    """從 kit/ 載入出貨版 precheck，而不是根目錄那份安裝實例。"""
+    import importlib.util
+
+    路徑 = kit_root / ".agent/scripts/precheck.py"
+    spec = importlib.util.spec_from_file_location("_kit_precheck", 路徑)
+    模組 = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(模組)
+    return 模組
+
+
+def test_能力對照表的檢查內容與_precheck_實際項目一致(kit_root: Path):
+    """§8.1 多寫一項而腳本沒跑，就是承諾了一個不存在的閘門——本節原本的毛病。"""
+    precheck = _載入_precheck(kit_root)
+    腳本項目 = [標題 for 標題, _ in precheck.CHECKS]
+
+    表格 = (kit_root / "docs/standards/git_workflow.md").read_text(encoding="utf-8")
+    自動檢查列 = [
+        line for line in 表格.splitlines() if line.startswith("| 自動檢查 |")
+    ]
+    assert len(自動檢查列) == 1, "§8.1 找不到（或找到多列）「自動檢查」列"
+    檢查內容欄 = 自動檢查列[0].strip().strip("|").split("|")[-1].strip()
+    表格項目 = [x.strip() for x in 檢查內容欄.split("、")]
+
+    assert 表格項目 == 腳本項目, (
+        "§8.1「檢查內容」欄與 precheck.py 的 CHECKS 不一致：\n"
+        f"  表格：{表格項目}\n"
+        f"  腳本：{腳本項目}"
+    )
+
+
+def test_出貨的_workflow_只做第一層(kit_root: Path):
+    """第 2 層跟技術棧綁定，kit 猜不到；猜了就是出貨一份跑不動的 CI。"""
+    workflow = kit_root / ".github/workflows/kit-precheck.yml"
+    assert workflow.is_file(), "kit 沒有出貨 CI workflow，但規範三處指向它"
+
+    內容 = workflow.read_text(encoding="utf-8")
+    生效行 = [
+        line
+        for line in 內容.splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    ]
+    assert any("precheck.py" in line for line in 生效行), "workflow 沒有呼叫 precheck.py"
+
+    for 禁字 in ("uv ", "pytest", "npm ", "go test"):
+        違規 = [line for line in 生效行 if 禁字 in line]
+        assert not 違規, (
+            f"出貨的 workflow 不該含專案測試指令（{禁字.strip()}）：{違規}"
+        )
+
+
+def test_出貨的_workflow_監聽所有分支(kit_root: Path):
+    """只監聽主線的話，不開 PR 的專案整批 commit 在合併前從未被檢查（§8.3（b））。"""
+    內容 = (kit_root / ".github/workflows/kit-precheck.yml").read_text(encoding="utf-8")
+    assert "branches: ['**']" in 內容, (
+        "出貨的 workflow 必須監聽所有分支，否則對「有遠端但不推送 PR」的專案形同不存在"
+    )

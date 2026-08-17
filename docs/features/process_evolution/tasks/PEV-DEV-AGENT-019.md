@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** —
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** devops-engineer
-**🚥 任務狀態 (Status):** Pending
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-17T19:03+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-18T05:00+08:00
+**🔀 審查載體編號 (PR/MR):** —（依 `docs/standards/git_workflow.md` §8.3（b）不開 PR，審查載體為 [reviews/PEV-DEV-AGENT-019.md](../reviews/PEV-DEV-AGENT-019.md)）
 
 ## 1. 任務描述 (Description)
 
@@ -40,19 +40,25 @@
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：`kit/.github/workflows/` 下的 workflow **只做 checkout ＋ 呼叫 `precheck.py`**，
+- [x] AC-01：`kit/.github/workflows/` 下的 workflow **只做 checkout ＋ 呼叫 `precheck.py`**，
       不含任何專案測試指令、不含 `uv`。第 2 層留給專案自己填，且該處要有註解說明怎麼填。
-- [ ] AC-02：`git_workflow.md` §8.1 能力對照表新增「檢查內容」欄，內容與 `precheck.py`
+      **落地時檔名定為 `kit-precheck.yml` 而非 `ci.yml`**——實測撞名會讓升級出現
+      「待合併 1」並產生 `.new`（多數專案都有自己的 `ci.yml`）。改名後回到「待合併 0」。
+- [x] AC-02：`git_workflow.md` §8.1 能力對照表新增「檢查內容」欄，內容與 `precheck.py`
       實際跑的四項一致——**表格寫五項而腳本跑四項就是不通過**。
-- [ ] AC-03：§8.3 新增「有遠端但不推送」這第三種模式的處置，明說它跟「無遠端」的差別。
-- [ ] AC-04：`test_安裝後檔案與_kit_完全一致` 通過——新增 `kit/.github/` 後，
+- [x] AC-03：§8.3 新增「有遠端但不推送」這第三種模式的處置，明說它跟「無遠端」的差別。
+- [x] AC-04：`test_安裝後檔案與_kit_完全一致` 通過——新增 `kit/.github/` 後，
       預期清單要涵蓋它（既有規則：kit 檔案 ＋ `.agent/.kit-manifest`）。
-- [ ] AC-05：本 repo `.github/workflows/ci.yml` 的 `on.push.branches` 涵蓋 `feature/**`
+- [x] AC-05：本 repo `.github/workflows/ci.yml` 的 `on.push.branches` 涵蓋 `feature/**`
       與 `PEV-*` 這類開發分支；`stdlib-only` job 新增 `precheck.py` 的執行。
-- [ ] AC-06：**推送後到 GitHub Actions 確認 workflow 實際被觸發且通過**。
+      ⚠️ **實作與字面有一處偏離**：只保留了「在乾淨安裝的暫存專案裡跑 precheck」，
+      移除了「在本 repo 自己再跑一次」——後者與裝回本 repo 的 `kit-precheck.yml`
+      完全重複，而 dogfooding 的正確形狀是讓安裝實例真的擔起這個責任。
+      兩份 workflow 的 run 都已驗證通過，理由見審查檔 §2。
+- [x] AC-06：**推送後到 GitHub Actions 確認 workflow 實際被觸發且通過**。
       ⚠️ YAML 語法正確不等於有跑——DN-007 §4 #4 記的正是「以為有 CI，其實從沒跑過」。
       此 AC 的證據必須是 run 的 URL 或 `gh run list` 的輸出，不接受「應該會跑」。
-- [ ] AC-07：`uv run pytest` 全綠，`./install.sh . --upgrade --dry-run` 顯示「待合併 0」。
+- [x] AC-07：`uv run pytest` 全綠，`./install.sh . --upgrade --dry-run` 顯示「待合併 0」。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
@@ -61,3 +67,23 @@
     皆由 DN-007 §4.1 裁定。
 - **✍️ User 補充回覆 (User Input)**：
   - （2026-08-17）「CI 要怎麼第一次真的跑起來」選「改觸發條件」，不開 PR。
+
+## 5. 📝 Code Review 備註
+
+**結論：✅ APPROVED**（2026-08-18）。完整報告：[reviews/PEV-DEV-AGENT-019.md](../reviews/PEV-DEV-AGENT-019.md)
+
+### 📊 客觀指標
+
+| 指標 | 數值 | 怎麼重跑 |
+|---|---|---|
+| 全套件測試 | 126 passed / 0 failed（基準 123，本單 +3） | `uv run pytest` |
+| CI 實際觸發（AC-06 證據） | 流程檢查 [32068588715](https://github.com/AugustusHsu/agent-team-kit/actions/runs/32068588715) success、CI [32068586280](https://github.com/AugustusHsu/agent-team-kit/actions/runs/32068586280) success | `gh run list --branch PEV-DEV-AGENT-019` |
+| 紅燈負向對照 | [32068710615](https://github.com/AugustusHsu/agent-team-kit/actions/runs/32068710615) **failure** | 見審查檔 §3 |
+| 升級待合併 | 0（新增 1、更新 1、已是最新 58、保留 4） | `./install.sh . --upgrade --dry-run` |
+| `precheck.py` 在本 repo | 4 項全綠，exit 0 | `python3 .agent/scripts/precheck.py; echo $?` |
+| 破壞實作的負向對照 | 3 種改法皆讓對應測試轉紅，`diff -q` 確認還原 | 見審查檔 §3 |
+
+### 待修正清單
+
+- 無阻斷項。已知落差（冰箱區偵測不到、乾淨安裝驗證力有限、紅燈尚無硬阻擋機制）
+  見審查檔 §5，建議列入後續工單。

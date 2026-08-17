@@ -1,0 +1,46 @@
+# 流程檢查（adapter 的薄層）
+#
+# ⚠️ 檔名刻意不叫 ci.yml：多數專案已經有自己的 ci.yml，撞名會在升級 kit 時
+#    產生衝突，也會逼你把兩種性質不同的檢查塞進同一份 YAML。
+#    這份只管第 1 層（流程有沒有被遵守），你自己的 CI 管第 2 層（測試跑不跑得動）。
+#
+# 這一層只做兩件事：checkout、呼叫 .agent/scripts/precheck.py。
+# 檢查邏輯全在那支腳本裡——本機直接跑 `python3 .agent/scripts/precheck.py`
+# 會得到完全相同的結果，換 CI 平台時只要重寫這份 YAML。
+#
+# ⚠️ 這裡刻意不含任何專案測試指令。「跑得動這個專案的測試」跟技術棧綁定，
+#    kit 無從得知，留給下方註解掉的第 2 層由專案自己填。
+
+name: 流程檢查
+
+# 監聽所有分支，不是只有主線。
+# 沒有 PR 的專案（開發全程在整合分支上、用 --no-ff 合併）如果只監聽 main，
+# 整批 commit 會在合併前從未跑過任何檢查——CI 存在但從未生效。
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# 同一分支連續推送時，取消還沒跑完的舊 run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  precheck:
+    name: 流程檢查
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      # precheck.py 只依賴標準函式庫，不需要安裝任何相依套件
+      - name: 執行流程檢查
+        run: python .agent/scripts/precheck.py
+
+  # ── 第 2 層：這個專案自己的測試 ─────────────────────────────
+  # 不寫在這裡。第 2 層跟技術棧綁定，kit 無從得知，請放進你自己的
+  # workflow（例如 .github/workflows/ci.yml）——那份檔案 kit 不會碰。
+  #
+  # 兩份 YAML 不必收斂成一份：共用的是 precheck.py 這支腳本，不是 YAML。
