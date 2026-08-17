@@ -36,13 +36,18 @@ kit/
 │   ├── workflows/              # commit-message / product-analysis / validate-wireframes
 │   └── scripts/
 │       ├── scan_backlog.py     # 掃工單 → 產生 BACKLOG.md（狀態儀表板）
+│       ├── precheck.py         # 第 1 層流程檢查，stdlib-only、不跑你的測試
 │       ├── migrate_dates.py    # 工單日期格式遷移
 │       └── check_versions.py   # 第三方版本檢查
 ├── docs/
 │   ├── DOCS_MAP.md             # 文件導覽入口
 │   ├── development/            # BACKLOG.md、PLAN_FROM_HANDOFF.md
-│   ├── standards/              # 文檔慣例、QA 規範、資安查核、ADR
-│   └── features/_TEMPLATE/     # 單一功能模組的文件骨架
+│   ├── standards/              # git 流程、文檔慣例、QA 規範、資安查核、ADR
+│   ├── design_notes/           # 設計筆記：AC 寫不出來時的探索容器（README + 範本）
+│   └── features/_TEMPLATE/     # 單一功能模組的文件骨架（含 tasks/、reviews/）
+├── .github/
+│   └── workflows/
+│       └── kit-precheck.yml    # 薄轉接層：在 CI 上跑第 1 層檢查
 ├── .gitignore                  # 基礎忽略清單
 └── CLAUDE.md                   # 專案接手指南模板
 
@@ -114,6 +119,38 @@ scrum-master 開單 → (HITL 閘門：問使用者未決事項)
 
 狀態流：`Pending → Ready → In Progress → In Review → Done`（另有 `Canceled`）。
 完整規則見 `kit/.agent/resources/team_protocol.md`（安裝後為 `.agent/resources/team_protocol.md`）。
+
+## Git 流程與換平台
+
+流程綁定的是**能力**，不是某一家 git server 的指令。換平台時對映下表即可——
+你的平台填得滿這七列，就能直接套用。
+
+| kit 要求的能力 | GitHub（預設） | GitLab | 沒有遠端 |
+|---|---|---|---|
+| 隔離變更 | branch | branch | branch |
+| 合併前審查的載體 | Pull Request | Merge Request | 審查檔 `docs/features/<模組>/reviews/<TaskID>.md` |
+| 自動檢查 | Actions | GitLab CI | 合併前手動跑 |
+| 阻擋未通過的合併 | Branch protection ＋ required checks | Protected branch ＋ pipeline | 人工紀律 |
+| 審查意見的落點 | PR review comment | MR discussion | 同審查檔 |
+| 合併方式 | squash | squash | `--no-ff` |
+| 「已合併」的訊號 | PR merged | MR merged | `git branch -d` 成功 |
+
+**預設實作是 GitHub。** kit 對平台的**最低要求只有一條**：要有 branch，
+以及一個「合併前留得下審查紀錄」的地方——後者不必是 PR，沒有遠端時審查檔就夠。
+其餘各列填不滿的，在專案 `CLAUDE.md` 註明降級方式即可。
+
+**沒有 PR 不代表不支援，只是能力打折**，而且有兩種：完全沒有遠端，
+以及有遠端但不開 PR。後者仍跑得動 CI，但要注意**只監聽預設分支的 workflow
+在工單分支上等於沒跑**。
+
+出貨的 `.github/workflows/kit-precheck.yml` 只做**第 1 層流程檢查**
+（BACKLOG 是否為最新、工單 Status 值是否合法、工單時間戳是否正確、文件是否有死連結），
+這一層跟技術棧無關；第 2 層「你的專案測試跑不跑得動」由你自己的 workflow 負責，
+kit 完全不碰。
+
+完整規則、GitHub 分支保護設定、兩種降級的操作步驟與換平台檢查清單，見
+[`kit/docs/standards/git_workflow.md`](kit/docs/standards/git_workflow.md)
+（安裝後為 `docs/standards/git_workflow.md`）。
 
 ## 相容性
 
