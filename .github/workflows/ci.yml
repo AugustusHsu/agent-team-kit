@@ -1,9 +1,19 @@
 name: CI
 
+# 開發全程在整合分支上、不開 PR（git_workflow.md §8.3（b））。
+# 只監聽 main 的話，commit 要等到合併進主線才第一次被檢查——太晚了。
+#
+# 本 repo 的第 1 層流程檢查不寫在這裡：它由 kit 出貨、再裝回本 repo 的
+# .github/workflows/kit-precheck.yml 負責——dogfooding 就該讓安裝實例真的跑。
 on:
   push:
-    branches: [main]
+    branches: [main, 'feature/**', 'PEV-*']
   pull_request:
+
+# 同一分支連續推送時，取消還沒跑完的舊 run
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
@@ -42,3 +52,5 @@ jobs:
           python .agent/scripts/scan_backlog.py --format summary
           python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md
           python .agent/scripts/migrate_dates.py
+          # 乾淨安裝的專案也要跑得動 precheck（出貨腳本不能只在本 repo 能跑）
+          python .agent/scripts/precheck.py

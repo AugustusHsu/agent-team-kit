@@ -246,18 +246,27 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 
 ### 8.1 能力對照表
 
-| kit 要求的能力 | GitHub（預設） | GitLab | 無遠端／純本地 |
-|---|---|---|---|
-| 隔離變更 | branch | branch | branch |
-| 合併前審查的載體 | **Pull Request** | Merge Request | 審查檔 `docs/features/<模組>/reviews/<TaskID>.md` |
-| 自動檢查 | **Actions** | GitLab CI | 合併前手動跑測試 |
-| 阻擋未通過的合併 | Branch protection ＋ required checks | Protected branch ＋ pipeline | 人工紀律 |
-| 審查意見的落點 | PR review comment | MR discussion | 同上 |
-| 合併方式（§6.1） | squash | squash | **`--no-ff`** |
-| 「已合併」的訊號 | PR merged | MR merged | `git branch -d` 成功（§6.4） |
+| kit 要求的能力 | GitHub（預設） | GitLab | 無遠端／純本地 | 檢查內容 |
+|---|---|---|---|---|
+| 隔離變更 | branch | branch | branch | — |
+| 合併前審查的載體 | **Pull Request** | Merge Request | 審查檔 `docs/features/<模組>/reviews/<TaskID>.md` | — |
+| 自動檢查 | **Actions** | GitLab CI | 合併前手動跑測試 | BACKLOG 是否為最新、工單 Status 值是否合法、工單時間戳是否正確、文件是否有死連結 |
+| 阻擋未通過的合併 | Branch protection ＋ required checks | Protected branch ＋ pipeline | 人工紀律 | — |
+| 審查意見的落點 | PR review comment | MR discussion | 同上 | — |
+| 合併方式（§6.1） | squash | squash | **`--no-ff`** | — |
+| 「已合併」的訊號 | PR merged | MR merged | `git branch -d` 成功（§6.4） | — |
 
 **只要一個平台能填滿這七列，就能套用本流程。**
 填不滿的列，要在專案 `CLAUDE.md` 註明降級方式。
+
+「檢查內容」欄不是平台能力，是 kit 出貨的 `.agent/scripts/precheck.py` **實際跑的項目**。
+它只涵蓋第 1 層「流程有沒有被遵守」——這一層跟技術棧無關、輸入全在 repo 內，
+所以 kit 有資格替所有專案定義。第 2 層「這個專案的測試跑不跑得動」跟技術棧綁定，
+kit 出貨的 workflow 完全不碰第 2 層（見 `.github/workflows/kit-precheck.yml`）。
+
+**這一欄與腳本必須逐項對得起來。** 表格多寫一項而腳本沒跑，就是承諾了一個不存在的閘門
+——這正是本節原本的毛病：規範三處指向 CI，而 kit 一份 CI 都沒出貨。
+新增或移除檢查項時，`precheck.py` 的 `CHECKS` 與這一欄要一起改。
 
 ### 8.2 GitHub 設定要求
 
@@ -276,7 +285,11 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 > 開著的話，§6.2 第 2 步的結案 commit 會讓第 1 步剛拿到的 approve 失效；
 > 重新 approve 之後又還是得推結案 commit，再度失效——**死循環，PR 永遠合不進去**。
 
-### 8.3 無遠端專案的降級
+### 8.3 沒有 PR 時的降級
+
+有兩種情形會走到這裡，**共通點是「沒有 PR 當審查載體與閘門」**，差別在有沒有遠端。
+
+#### （a）完全沒有遠端
 
 沒有遠端時，審查載體改為審查檔 `docs/features/<模組>/reviews/<TaskID>.md`——
 此情境下 **APPROVED 也必須寫**，否則 repo 裡不會留下任何審查紀錄，載體等於是空的。
@@ -299,6 +312,45 @@ git merge --no-ff <工單分支> -F <經複查的訊息檔>
 git branch -d <工單分支>            # 成功 = 已合併，這就是 Done 的訊號
 git log --oneline --first-parent    # 主線一張工單一行，且每行都看得到 Task ID
 ```
+
+#### （b）有遠端，但不開 PR
+
+開發全程在整合分支上、用 `--no-ff` 合併，遠端只當備份與協作點。
+審查載體與合併方式都比照（a）——**沒有 PR 就付不出 squash 的對價，一樣降級為 `--no-ff`**。
+
+**跟（a）唯一的實質差別是自動檢查跑得起來，因此不准降級成人工紀律。**
+（a）沒有遠端，CI 無處可跑，§8.1「自動檢查」那列只能退回「合併前手動跑測試」；
+（b）有遠端，Actions 跑得動，那一列不降級。
+
+⚠️ **但預設的觸發條件會讓它形同不存在。** 多數 workflow 範本寫的是：
+
+```yaml
+on:
+  push:
+    branches: [main]
+  pull_request:
+```
+
+這個模式下兩個觸發條件**都不會發生**——commit 進不了 `main`（要先合併），
+也沒有 PR。結果是 repo 裡躺著一份綠色的 CI 設定，而整批 commit 從合併前到合併後
+從未被檢查過一次。**這比沒有 CI 更糟：它讓人以為已經檢查過了。**
+
+處置是**改觸發條件**，不是改用 PR：
+
+```yaml
+on:
+  push:
+    branches: ['**']      # 工單分支與整合分支都要跑，不是只有主線
+  pull_request:
+```
+
+kit 出貨的 `.github/workflows/kit-precheck.yml` 已經是這個設定。
+**它刻意不叫 `ci.yml`**——多數專案已經有自己的 `ci.yml`，撞名會在升級時衝突。
+第 2 層留在你自己的 workflow 裡，kit 不碰那份檔案。
+
+**驗收方式是看 run，不是看 YAML。** 語法正確不等於有被觸發——
+第一次設定完，推一顆 commit 上去，用 `gh run list --branch <分支>` 確認真的出現 run。
+沒有 run 就等於這一節沒生效。
 
 ## 9. 換平台檢查清單
 

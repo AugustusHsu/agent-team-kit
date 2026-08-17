@@ -9,7 +9,11 @@
 
 > 包含狀態為 `In Progress` 或 `Ready` 的工單。
 
-*(無)*
+| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
+|---|---------|------|------|-------------------|---------------|
+| 1 | PEV-DEV-AGENT-019 | CI adapter：出貨薄 workflow，並讓本 repo 的 commit 第一次真的跑到 CI | process_evolution | devops-engineer | 🔵 In Progress |
+
+**小計**：1 張（In Progress: 1 / Ready: 0）
 
 ---
 
@@ -32,10 +36,9 @@
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
 |---|---------|------|------|-------------------|---------------|
 | 1 | PEV-DEV-AGENT-002 | README 補上 git 流程能力對照表，讓換 git server 的人一眼看懂 | process_evolution | devops-engineer | ⏳ Pending |
-| 2 | PEV-DEV-AGENT-019 | CI adapter：出貨薄 workflow，並讓本 repo 的 commit 第一次真的跑到 CI | process_evolution | devops-engineer | ⏳ Pending |
-| 3 | PEV-DEV-AGENT-020 | 清帳：冰箱卡點更新，舊 design_note 轉為歷史索引 | process_evolution | scrum-master | ⏳ Pending |
+| 2 | PEV-DEV-AGENT-020 | 清帳：冰箱卡點更新，舊 design_note 轉為歷史索引 | process_evolution | scrum-master | ⏳ Pending |
 
-**小計**：3 張
+**小計**：2 張
 
 ---
 
@@ -75,7 +78,8 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| ⏳ Pending | 3 | 15.0% |
+| 🔵 In Progress | 1 | 5.0% |
+| ⏳ Pending | 2 | 10.0% |
 | ✅ Done | 17 | 85.0% |
 | **總計** | **20** | **100%** |
 

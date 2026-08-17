@@ -3,7 +3,7 @@
 **🔗 依附母任務 (Parent Task ID):** —
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** devops-engineer
-**🚥 任務狀態 (Status):** Pending
+**🚥 任務狀態 (Status):** In Progress
 **📅 建立時間 (Created):** 2026-08-17T19:03+08:00
 **✅ 完成時間 (Closed):** —
 **🔀 審查載體編號 (PR/MR):** —
