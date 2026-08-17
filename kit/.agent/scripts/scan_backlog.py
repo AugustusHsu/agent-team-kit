@@ -22,15 +22,19 @@ from pathlib import Path
 # 定義台北時區 (UTC+8)
 TZ_TAIPEI = timezone(timedelta(hours=8))
 
+# 欄位值前面只吃水平空白：\s* 會連換行一起吃掉，欄位留空時
+# 正則會跨行抓到下一行整行當值（PEV-DEV-AGENT-012）。
+_H = r"[^\S\r\n]*"
+
 # 工單 metadata 正則表達式
 PATTERNS = {
     "task_id": re.compile(r"^#\s*\[Task ID:\s*([^\]]+)\]\s*(.+)$", re.MULTILINE),
-    "parent_id": re.compile(r"\*\*🔗\s*依附母任務\s*\(Parent Task ID\):\*\*\s*(.+)$", re.MULTILINE),
-    "task_type": re.compile(r"\*\*🏷️\s*任務類型\s*\(Task Type\):\*\*\s*(.+)$", re.MULTILINE),
-    "assignee": re.compile(r"\*\*👤\s*負責人\s*\(Assignee\):\*\*\s*(.+)$", re.MULTILINE),
-    "status": re.compile(r"\*\*🚥\s*任務狀態\s*\(Status\):\*\*\s*(.+)$", re.MULTILINE),
-    "created": re.compile(r"\*\*📅\s*建立時間\s*\(Created\):\*\*\s*(.+)$", re.MULTILINE),
-    "closed": re.compile(r"\*\*✅\s*完成時間\s*\(Closed\):\*\*\s*(.+)$", re.MULTILINE),
+    "parent_id": re.compile(rf"^\*\*🔗{_H}依附母任務{_H}\(Parent Task ID\):\*\*{_H}(\S.*?){_H}$", re.MULTILINE),
+    "task_type": re.compile(rf"^\*\*🏷️{_H}任務類型{_H}\(Task Type\):\*\*{_H}(\S.*?){_H}$", re.MULTILINE),
+    "assignee": re.compile(rf"^\*\*👤{_H}負責人{_H}\(Assignee\):\*\*{_H}(\S.*?){_H}$", re.MULTILINE),
+    "status": re.compile(rf"^\*\*🚥{_H}任務狀態{_H}\(Status\):\*\*{_H}(\S.*?){_H}$", re.MULTILINE),
+    "created": re.compile(rf"^\*\*📅{_H}建立時間{_H}\(Created\):\*\*{_H}(\S.*?){_H}$", re.MULTILINE),
+    "closed": re.compile(rf"^\*\*✅{_H}完成時間{_H}\(Closed\):\*\*{_H}(\S.*?){_H}$", re.MULTILINE),
 }
 
 # Design Note (DN) 的 header 正則表達式
