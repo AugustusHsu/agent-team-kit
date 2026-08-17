@@ -52,8 +52,9 @@ BACKLOG 卻完全沒更新。
 必須把合併訊息原文給我複查、取得當次同意；上一次的同意不算。
 直接在主線／整合分支上 commit 不適用這項豁免，仍須事前同意。
 訊息只描述這個專案的變更，**不得加入 AI 署名 trailer**
-（`Co-Authored-By:`、`🤖 Generated with ...`）。完整格式見
-`kit/.agent/workflows/commit-message.md`。
+（`Co-Authored-By:`、`🤖 Generated with ...`）。
+格式：`<emoji> <type>(<scope>): <繁中標題>`，空行後 Body 用 `- **標題**：說明` 條列。
+對照表與其餘規則見 `kit/.agent/workflows/commit-message.md`。
 
 ## 本專案自己的開發流程（dogfooding）
 

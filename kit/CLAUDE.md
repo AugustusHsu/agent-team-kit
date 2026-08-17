@@ -72,13 +72,23 @@
 （`/commit-message`）時才載入；Agent 順手 commit 的路徑完全不經過它。要讓規則對**每一次**
 提交生效，只能靠 CLAUDE.md——它是唯一每次請求都在 context 裡的檔案。
 
-寫**三行以內**，細節一律指向正版：
+⚠️ **指路不等於送達。** 只寫「格式見 `.agent/workflows/commit-message.md`」仍然無效——
+**問題正是那個地址不會被走到**。判準沿用本檔開頭那條：「不寫這條，Claude 會不會做錯事？」
+
+| 判準 | 處理 | 有哪些 |
+|---|---|---|
+| 不寫就會**寫錯** | **內嵌進 CLAUDE.md** | Body 條列格式、禁止 AI 署名 trailer、閘門的範圍 |
+| 不寫只是**查得慢** | 指路即可 | gitmoji 對照表、scope 命名、`--amend` 等操作細節 |
+
+寫**五行以內**（原訂三行，為了塞下 Body 格式而放寬——本套件自己漏寫那一行，
+整批歷史 commit 的 Body 就寫成了散文，這一行是實測過的必要成本）：
 
 ```markdown
 ## Commit
 工單分支上的 commit 直接做，不用先問。**合併回主線前**須把訊息原文給我複查、
 取得當次同意；上一次的同意不算。訊息只描述本專案的變更，禁止 AI 署名 trailer。
-格式見 `.agent/workflows/commit-message.md`。
+格式：`<emoji> <type>(<scope>): <繁中標題>`，空行後 Body 用 `- **標題**：說明` 條列。
+對照表與其餘規則見 `.agent/workflows/commit-message.md`。
 ```
 
 ⚠️ **閘門的範圍是「進入主線前」，不是「每一顆 commit 前」。** 寫成後者會讓 Agent

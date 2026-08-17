@@ -52,6 +52,12 @@ LINK_PLACEHOLDERS = {"路徑", "relative/path"}
         r"任何 commit 之前|commit 前必須把訊息原文",
         "commit 閘門在進入主線那一刻；工單分支上的中間 commit 不需事前同意（§1.10）",
     ),
+    # 模板的 Commit 範例原本只寫「格式見 …」，而那個地址在順手 commit 的路徑上
+    # 不會被載入——PEV-DEV-AGENT-021 把 Body 格式改為內嵌，長度紀律隨之放寬到五行。
+    (
+        r"寫\*\*三行以內\*\*|^格式見 `\.agent/workflows/commit-message\.md`。$",
+        "Commit 範例必須內嵌 Body 條列格式，長度紀律改為五行以內（PEV-DEV-AGENT-021）",
+    ),
     # 審查紀錄的落點改成 reviews/<TaskID>.md（PEV-DEV-AGENT-016）。工單仍留
     # 「📝 Code Review 備註」章節，所以不能抓章節名，只能抓「完整報告塞進工單」的形狀。
     (
@@ -360,3 +366,27 @@ def test_README_沒有死連結(kit_root: Path, repo_root: Path):
             if not (repo_root / target).exists():
                 broken.append(f"README.md:{lineno} → {target}")
     assert not broken, "README 死連結：\n" + "\n".join(broken)
+
+
+def test_模板的_commit_範例帶上_body_格式(kit_root: Path):
+    """只寫「格式見 …」等於沒寫——那個地址在順手 commit 的路徑上不會被載入。
+
+    本套件自己踩過：`CLAUDE.md` 忠實照抄了只指路的舊範例，整批歷史 commit 的 Body
+    因此寫成散文，而 `commit-message.md` 要求的是 `- **標題**：說明`。
+    模板是槓桿最大的地方——它錯一次，每個裝了 kit 的專案都跟著錯。
+    """
+    模板 = (kit_root / "CLAUDE.md").read_text(encoding="utf-8")
+    起 = 模板.index("## Commit 規則這裡必須寫")
+    _, _, 後 = 模板[起:].partition("```markdown")
+    範例, _, _ = 後.partition("```")
+    assert 範例.strip(), "「Commit 規則這裡必須寫」底下找不到範例區塊"
+
+    for 必要, 說明 in [
+        ("- **標題**：說明", "Body 條列格式"),
+        ("AI 署名 trailer", "禁止 AI 署名 trailer"),
+        ("合併回主線前", "閘門的範圍"),
+    ]:
+        assert 必要 in 範例, f"範例沒帶上「{說明}」，等於又退回只指路"
+
+    行數 = len([l for l in 範例.strip().splitlines() if l.strip()])
+    assert 行數 <= 5, f"範例 {行數} 行，超過模板自訂的五行紀律"
