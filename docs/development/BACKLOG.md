@@ -1,7 +1,7 @@
 # 📋 待辦總表 (Backlog)
 
 > **工單來源目錄**：`docs/features/*/tasks/`
-> **工單總數**：16 張
+> **工單總數**：17 張
 
 ---
 
@@ -43,20 +43,20 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) | 完成時間 |
 |---|---------|------|------|-------------------|---------------|----------|
-| 1 | PEV-DEV-AGENT-014 | 冰箱清帳：移除已落地與前提消失的項目 | process_evolution | scrum-master | ✅ Done | 2026-08-17T21:55+08:00 |
-| 2 | PEV-DEV-AGENT-013 | 立規：納入版控的生成檔必須是輸入的純函數 | process_evolution | backend-engineer | ✅ Done | 2026-08-17T21:30+08:00 |
-| 3 | PEV-DEV-AGENT-012 | scan_backlog 的 metadata 正則跨行誤配：欄位留空會抓到下一行 | process_evolution | backend-engineer | ✅ Done | 2026-08-17T20:40+08:00 |
-| 4 | PEV-DEV-AGENT-009 | DOCS_MAP 的模組表抽成獨立檔，骨架恢復可升級 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T19:00+08:00 |
-| 5 | PEV-DEV-AGENT-008 | `scan_backlog.py` 生成 DN 索引，並檢查懸空依賴 | process_evolution | backend-developer | ✅ Done | 2026-08-17T18:20+08:00 |
-| 6 | PEV-DEV-AGENT-006 | scrum-master 加上「開單前置關卡」 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:40+08:00 |
-| 7 | PEV-DEV-AGENT-005 | `team_protocol.md`：DN 的權威效力與模組「類型」欄位 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:10+08:00 |
-| 8 | PEV-DEV-AGENT-011 | commit 閘門的範圍：把關「進入主線」，不是每一顆 commit | process_evolution | devops-engineer | ✅ Done | 2026-08-17T16:40+08:00 |
-| 9 | PEV-DEV-AGENT-004 | `documentation_conventions.md` 新增 Design Note 機制章節 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T15:45+08:00 |
-| 10 | PEV-DEV-AGENT-007 | 出貨 `kit/docs/design_notes/`：DN 範本與目錄說明 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T15:10+08:00 |
+| 1 | PEV-DEV-AGENT-015 | 審查證據來源：交付回報是線索，不是證據 | process_evolution | code-reviewer | ✅ Done | 2026-08-17T22:35+08:00 |
+| 2 | PEV-DEV-AGENT-014 | 冰箱清帳：移除已落地與前提消失的項目 | process_evolution | scrum-master | ✅ Done | 2026-08-17T21:55+08:00 |
+| 3 | PEV-DEV-AGENT-013 | 立規：納入版控的生成檔必須是輸入的純函數 | process_evolution | backend-engineer | ✅ Done | 2026-08-17T21:30+08:00 |
+| 4 | PEV-DEV-AGENT-012 | scan_backlog 的 metadata 正則跨行誤配：欄位留空會抓到下一行 | process_evolution | backend-engineer | ✅ Done | 2026-08-17T20:40+08:00 |
+| 5 | PEV-DEV-AGENT-009 | DOCS_MAP 的模組表抽成獨立檔，骨架恢復可升級 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T19:00+08:00 |
+| 6 | PEV-DEV-AGENT-008 | `scan_backlog.py` 生成 DN 索引，並檢查懸空依賴 | process_evolution | backend-developer | ✅ Done | 2026-08-17T18:20+08:00 |
+| 7 | PEV-DEV-AGENT-006 | scrum-master 加上「開單前置關卡」 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:40+08:00 |
+| 8 | PEV-DEV-AGENT-005 | `team_protocol.md`：DN 的權威效力與模組「類型」欄位 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T17:10+08:00 |
+| 9 | PEV-DEV-AGENT-011 | commit 閘門的範圍：把關「進入主線」，不是每一顆 commit | process_evolution | devops-engineer | ✅ Done | 2026-08-17T16:40+08:00 |
+| 10 | PEV-DEV-AGENT-004 | `documentation_conventions.md` 新增 Design Note 機制章節 | process_evolution | devops-engineer | ✅ Done | 2026-08-17T15:45+08:00 |
 
 **小計**：10 張（Done: 10 / Canceled: 0）
 
-> 📦 另有 4 張已歸檔工單未顯示。
+> 📦 另有 5 張已歸檔工單未顯示。
 
 ---
 
@@ -73,9 +73,9 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| ⏳ Pending | 1 | 7.1% |
-| ✅ Done | 13 | 92.9% |
-| **總計** | **14** | **100%** |
+| ⏳ Pending | 1 | 6.7% |
+| ✅ Done | 14 | 93.3% |
+| **總計** | **15** | **100%** |
 
 ### worktree_guard
 
@@ -121,6 +121,5 @@
 | 負向對照自動化 | 待開工單 | 要跑在 CI 上，等 [DN-007](../design_notes/DN-007_ci_gate.md) 定出檢查落點 |
 | 工單瘦身 | 待開 DN | 審查輪次與 HITL 問答移出工單檔案，落點未定。design_note §3.5 |
 | 展示層生成 | 待開 DN | 100% 從 source of truth 生成，Mermaid + 靜態站台。排最後。design_note §3.8 |
-| 審查與開發拆 context | 待判定 | 若只有一種做法就直接開工單；若有 subagent／獨立 session／換模型之分則需 DN。design_note §3.3 |
 | precheck 腳本 | 可直接開工單 | 審查清單三分法，做法單一。design_note §3.4 |
 | headroom 壓縮工具輸出 | 待調查 | code-reviewer 讀 diff 可能讀到壓縮版；2026-08-17 該輪對話三度遇到，隔輪的 PEV-DEV-AGENT-012/013 開發中又遇到兩次（讀 DN-007、讀 Icebox 表格時被壓成 JSON）。開 spike 工單 |
