@@ -274,3 +274,89 @@ def test_出貨的_workflow_監聽所有分支(kit_root: Path):
     assert "branches: ['**']" in 內容, (
         "出貨的 workflow 必須監聽所有分支，否則對「有遠端但不推送 PR」的專案形同不存在"
     )
+
+
+# --- 根目錄 README 與出貨內容的同步 ---------------------------------------
+# README 是評估用門面，它抄的每一份表述都是「第二份表述」，依 design_note §3.8
+# 必然漂移。以下三個測試把漂移變成紅燈，而不是靠人記得回來改。
+
+
+def _表格第一欄(內容: str, 標題: str) -> list[str]:
+    """取出指定標題底下第一張表格的第一欄（去掉表頭、分隔列與尾綴的節號）。"""
+    行 = 內容.split("\n")
+    for i, l in enumerate(行):
+        if l.startswith(標題):
+            起 = i
+            break
+    else:
+        raise AssertionError(f"找不到標題：{標題}")
+
+    欄, 進入表格 = [], False
+    for l in 行[起 + 1 :]:
+        if l.startswith("|"):
+            進入表格 = True
+            欄.append([c.strip() for c in l.strip().strip("|").split("|")][0])
+        elif 進入表格:
+            break
+    return [re.sub(r"（§[^）]*）$", "", c) for c in 欄[2:]]
+
+
+def test_README_能力對照表與_git_workflow_同步(kit_root: Path, repo_root: Path):
+    """README 摘要的那七列，必須就是正版 §8.1 的那七列。"""
+    正版 = _表格第一欄(
+        (kit_root / "docs" / "standards" / "git_workflow.md").read_text(encoding="utf-8"),
+        "### 8.1 能力對照表",
+    )
+    摘要 = _表格第一欄(
+        (repo_root / "README.md").read_text(encoding="utf-8"), "## Git 流程與換平台"
+    )
+    assert 摘要 == 正版, (
+        "README 的能力對照表與 git_workflow.md §8.1 不同步：\n"
+        f"  README：{摘要}\n  正版　：{正版}"
+    )
+
+
+def _內容物樹(readme: str) -> str:
+    """取出「## 內容物」底下那個 fenced block。
+
+    ⚠️ 不能拿整份 README 做子字串比對——正文別處順口提到 `precheck.py`
+    就會把樹裡的缺漏遮掉（實測過，負向對照因此不轉紅）。
+    """
+    起 = readme.index("## 內容物")
+    前, _, 後 = readme[起:].partition("```")
+    區塊, _, _ = 後.partition("```")
+    assert 區塊.strip(), "「## 內容物」底下找不到目錄樹區塊"
+    return 區塊
+
+
+def test_README_內容物涵蓋出貨的腳本與目錄(kit_root: Path, repo_root: Path):
+    """新增出貨腳本或頂層目錄卻沒寫進 README 的目錄樹，就是門面落後於出貨內容。"""
+    readme = _內容物樹((repo_root / "README.md").read_text(encoding="utf-8"))
+    缺漏 = []
+    for p in sorted((kit_root / ".agent" / "scripts").glob("*.py")):
+        if p.name not in readme:
+            缺漏.append(f".agent/scripts/{p.name}")
+    for p in sorted(kit_root.iterdir()):
+        if p.is_dir() and p.name not in readme:
+            缺漏.append(f"{p.name}/")
+    for p in sorted((kit_root / "docs").iterdir()):
+        if p.is_dir() and p.name not in readme:
+            缺漏.append(f"docs/{p.name}/")
+    assert not 缺漏, "README「內容物」沒跟上 kit 的實際結構：\n" + "\n".join(缺漏)
+
+
+def test_README_沒有死連結(kit_root: Path, repo_root: Path):
+    """precheck 只掃 docs/、test_kit_內沒有死連結 只掃 kit/，根目錄 README 兩邊都漏。"""
+    precheck = _載入_precheck(kit_root)
+    內容 = precheck.strip_code((repo_root / "README.md").read_text(encoding="utf-8"))
+    broken = []
+    for lineno, line in enumerate(內容.splitlines(), start=1):
+        for match in LINK.finditer(line):
+            target = match.group(1).split("#")[0].strip()
+            if not target or target.startswith(("http://", "https://", "mailto:")):
+                continue
+            if target in LINK_PLACEHOLDERS:
+                continue
+            if not (repo_root / target).exists():
+                broken.append(f"README.md:{lineno} → {target}")
+    assert not broken, "README 死連結：\n" + "\n".join(broken)
