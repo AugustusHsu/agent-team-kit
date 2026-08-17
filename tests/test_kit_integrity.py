@@ -10,10 +10,9 @@ from pathlib import Path
 import pytest
 
 FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
-LINK = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 EVAL_KEYS = {"id", "prompt", "expected_output", "files", "expectations"}
-# 文中拿來說明格式、不是真實路徑的字面值
-LINK_PLACEHOLDERS = {"路徑", "relative/path"}
+# 連結的正則、placeholder 白名單與剝除規則一律取自出貨的 precheck（見 _死連結）——
+# 這裡不留第二份常數，否則兩邊遲早分岔，而分岔的方向永遠是測試這邊放行得比較寬。
 # 每次推翻一條流程規則，就把舊說法加進這張表。反轉規範時你清楚自己廢除了什麼，
 # 不清楚的是它還躺在哪幾個角落。
 已廢除的流程規則 = [
@@ -133,18 +132,36 @@ def markdown_files(root: Path):
     return sorted(p for p in root.rglob("*.md"))
 
 
+def _死連結(precheck, 檔案: Path, 基準: Path, 標籤: str) -> list[str]:
+    """死連結的判定完全委派給出貨的 precheck，測試這邊一行判斷邏輯都不寫。
+
+    原本這裡是逐行 `LINK.finditer`，**沒有剝 code fence 與行內 code**——
+    跟 `precheck.check_dead_links()` 是同一件事的兩份實作，而落後的是這一份。
+    文件把連結語法當例子引用時（`[DN-007](DN-007_ci_gate.md)`），
+    precheck 會跳過、測試會誤判；反過來 `{TaskID}` 這類佔位路徑 precheck 跳過
+    而測試沒有。收斂之後只剩一份規則，改一次兩邊同時生效。
+    """
+    壞的 = []
+    內容 = precheck.strip_code(檔案.read_text(encoding="utf-8"))
+    for lineno, line in enumerate(內容.splitlines(), start=1):
+        for match in precheck.LINK_RE.finditer(line):
+            target = match.group(1).split("#")[0].strip()
+            if not target or target.startswith(("http://", "https://", "mailto:")):
+                continue
+            if target in precheck.PLACEHOLDER_WORDS:
+                continue
+            if any(char in target for char in precheck.PLACEHOLDER_CHARS):
+                continue
+            if not (基準 / target).exists():
+                壞的.append(f"{標籤}:{lineno} → {target}")
+    return 壞的
+
+
 def test_kit_內沒有死連結(kit_root: Path):
+    precheck = _載入_precheck(kit_root)
     broken = []
     for md in markdown_files(kit_root):
-        for lineno, line in enumerate(md.read_text(encoding="utf-8").splitlines(), start=1):
-            for match in LINK.finditer(line):
-                target = match.group(1).split("#")[0].strip()
-                if not target or target.startswith(("http://", "https://", "mailto:")):
-                    continue
-                if target in LINK_PLACEHOLDERS:
-                    continue
-                if not (md.parent / target).exists():
-                    broken.append(f"{md.relative_to(kit_root)}:{lineno} → {target}")
+        broken += _死連結(precheck, md, md.parent, str(md.relative_to(kit_root)))
     assert not broken, "死連結：\n" + "\n".join(broken)
 
 
@@ -354,17 +371,7 @@ def test_README_內容物涵蓋出貨的腳本與目錄(kit_root: Path, repo_roo
 def test_README_沒有死連結(kit_root: Path, repo_root: Path):
     """precheck 只掃 docs/、test_kit_內沒有死連結 只掃 kit/，根目錄 README 兩邊都漏。"""
     precheck = _載入_precheck(kit_root)
-    內容 = precheck.strip_code((repo_root / "README.md").read_text(encoding="utf-8"))
-    broken = []
-    for lineno, line in enumerate(內容.splitlines(), start=1):
-        for match in LINK.finditer(line):
-            target = match.group(1).split("#")[0].strip()
-            if not target or target.startswith(("http://", "https://", "mailto:")):
-                continue
-            if target in LINK_PLACEHOLDERS:
-                continue
-            if not (repo_root / target).exists():
-                broken.append(f"README.md:{lineno} → {target}")
+    broken = _死連結(precheck, repo_root / "README.md", repo_root, "README.md")
     assert not broken, "README 死連結：\n" + "\n".join(broken)
 
 

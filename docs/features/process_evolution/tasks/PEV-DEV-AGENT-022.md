@@ -3,9 +3,9 @@
 **🔗 依附母任務 (Parent Task ID):** —
 **🏷️ 任務類型 (Task Type):** queue_backend
 **👤 負責人 (Assignee):** backend-developer
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-18T05:26+08:00
-**✅ 完成時間 (Closed):** —
+**✅ 完成時間 (Closed):** 2026-08-18T06:35+08:00
 **🔀 審查載體編號 (PR/MR):** —
 
 ## 1. 任務描述 (Description)
@@ -41,21 +41,21 @@
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：`test_kit_內沒有死連結` 改用 `precheck.strip_code()`（經既有的
+- [x] AC-01：`test_kit_內沒有死連結` 改用 `precheck.strip_code()`（經既有的
       `_載入_precheck(kit_root)` helper 取得），**不另寫一份剝除邏輯**。
-- [ ] AC-02：兩邊的 placeholder／略過規則（`LINK_PLACEHOLDERS`、`http(s)`、`mailto`）
+- [x] AC-02：兩邊的 placeholder／略過規則（`LINK_PLACEHOLDERS`、`http(s)`、`mailto`）
       對齊；若有差異，在測試或腳本裡註明差異存在的理由。
-- [ ] AC-03：precheck 新增檢查「Status 為 `Done` 但 `Closed` 留空」。
-- [ ] AC-04：precheck 新增檢查「AC 全數打勾但 Status 不是 `Done` 也不是 `Canceled`」。
+- [x] AC-03：precheck 新增檢查「Status 為 `Done` 但 `Closed` 留空」。
+- [x] AC-04：precheck 新增檢查「AC 全數打勾但 Status 不是 `Done` 也不是 `Canceled`」。
       `Canceled` 必須排除——取消的工單允許帶著打勾的 AC。
-- [ ] AC-05：兩項新檢查沿用 `iter_tasks()`，確認 `_TEMPLATE/_EXAMPLE-DEV-BE-001`
+- [x] AC-05：兩項新檢查沿用 `iter_tasks()`，確認 `_TEMPLATE/_EXAMPLE-DEV-BE-001`
       不會誤觸（**要實測，不是推論**）。
-- [ ] AC-06：`git_workflow.md` §8.1 的「檢查內容」欄同步成六項，
+- [x] AC-06：`git_workflow.md` §8.1 的「檢查內容」欄同步成六項，
       `test_能力對照表的檢查內容與_precheck_實際項目一致` 保持綠燈。
-- [ ] AC-07：**負向對照，兩個方向都要做**——(a) 造一張假工單觸發每一項新檢查，
+- [x] AC-07：**負向對照，兩個方向都要做**——(a) 造一張假工單觸發每一項新檢查，
       確認 precheck 轉紅；(b) 把新檢查的判斷式改反，確認現有工單集合會轉紅，
       證明它不是恆綠。兩者都要記進審查檔。
-- [ ] AC-08：`uv run pytest` 全綠；`./install.sh . --upgrade --dry-run` 的
+- [x] AC-08：`uv run pytest` 全綠；`./install.sh . --upgrade --dry-run` 的
       「待合併」數與實際改動的 kit 檔案數相符。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
