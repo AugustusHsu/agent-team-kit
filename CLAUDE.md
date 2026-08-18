@@ -46,6 +46,38 @@ BACKLOG 卻完全沒更新。
 - `kit/.agent/resources/team_protocol.md` 改章節結構時，要同步 `kit/docs/standards/team_protocol.md`
   指路檔的章節索引，否則 `test_指路檔章節索引與正版同步` 會失敗。
 
+## 取證通道（`team_protocol.md` §1.12 第 2 層）
+
+§1.12 規定每個專案要記下自己的通道狀況，本節就是本 repo 的那一份。
+判準與探針在 §1.12，**這裡不重複**。
+
+**中間層是哪一套**：本機開發環境跑 **headroom**（本地 context 壓縮 proxy，
+`~/.local/bin/headroom`，以 `uv tool` 安裝的 `headroom-ai`）。它預設保護
+Read／Glob／Grep／Write／Edit／WebSearch／WebFetch，**刻意不保護 Bash**——
+原始碼註解直言 shell 輸出（build log、測試輸出）是理想的壓縮目標。
+未保真時實測：五行含 Markdown 表格的文字送出去，回來只剩 `[{"a":"1","b":"2"}]`，
+前後兩句散文整段消失且**不留任何提示**。若你的環境沒跑 headroom，本節不適用，
+但 §1.12 的開工探針照跑——沒有中間層這件事也要由探針證實。
+
+**保真怎麼開**：`~/.bashrc` 一行 `export HEADROOM_PROTECT_TOOL_RESULTS=Bash`。
+生效條件有兩個，**缺一都不會生效**：
+
+- **proxy 必須重啟**——設定是 proxy 進程啟動時從環境變數繼承的，改 rc 不影響已在跑的 proxy；
+- **必須從新開的終端啟動**——舊終端沒有這個變數，`headroom wrap` 也就傳不下去。
+
+**驗證看 proxy 端，不是看自己的 shell**：
+`tr '\0' '\n' < /proc/$(pgrep -f 'headroom.cli proxy')/environ | grep PROTECT`。
+在既有終端 `echo $HEADROOM_PROTECT_TOOL_RESULTS` 是空的**不代表沒生效**，
+反之亦然——最終仍以 §1.12 的探針輸出為準。
+
+⚠️ **重啟的坑**：舊 proxy 還被 session 連著時，新 wrap 不會殺它（defer-until-idle），
+而是**靜默 fallback 到 8788／8789**——於是你以為換新版了，其實還連在舊 proxy 上。
+重開前先 `pgrep -af 'headroom.cli proxy'` 確認乾淨。
+
+**成本與回滾**：關掉有損壓縮不影響 headroom 的主要價值——實測帳單裡有損壓縮只佔
+省下金額的 1.2%，其餘來自無損的 tool schema 去重與 prefix cache。
+回滾就是移除 `~/.bashrc` 那行（備份 `~/.bashrc.bak-headroom-20260818`）再重啟 proxy。
+
 ## Commit
 
 工單分支（含 worktree）上的 commit 直接做，不用先問。**合併回整合分支或主線前**，
