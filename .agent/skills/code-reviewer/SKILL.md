@@ -12,9 +12,9 @@ description: 負責執行所有程式碼審查 (Code Review) 任務。當開發�
 ## 0. 審查前置作業 (Pre-Review)
 在開始審查之前，你需要先完整理解「這段程式碼應該要做什麼」：
 - **讀取原始工單 (Task Ticket)**：審查時必須同時讀取原始工單的完整內容（特別是 `Inputs & Outputs` 與 `Acceptance Criteria` 區塊），確保開發者沒有遺漏依賴項或產出物。工單的格式定義可參考 `.agent/resources/task_template.md`。
-- **交付回報只是線索，不是證據**：每一條 AC 的通過與否必須回到程式碼、diff、或你自己實際跑出來的輸出。**「回報說已完成」不構成通過**——當開發與審查在同一個 context 裡發生時，那份回報不是外部輸入，是你自己剛寫的字。正版條款見 `.agent/resources/team_protocol.md` §2.3。
+- **交付回報只是線索，不是證據**：每一條 AC 的通過與否必須回到程式碼、diff、或你自己實際跑出來的輸出。**「回報說已完成」不構成通過**——當開發與審查在同一個 context 裡發生時，那份回報不是外部輸入，是你自己剛寫的字。正版條款見 `.agent/resources/team_protocol.md` §2.3 Code Reviewer → Done / 退回。
 - **你讀到的輸出也可能不是原文**：審查開始前，先依 `.agent/resources/team_protocol.md`
-  §1.12 跑一次通道保真自檢。**最嚴重的那種失效不留任何提示**——看不出異常不代表沒發生，
+  §1.12 取證通道保真 跑一次開工自檢。**最嚴重的那種失效不留任何提示**——看不出異常不代表沒發生，
   所以這是事前自檢，不是事後察覺。通道未通過時跑出來的輸出，**不得作為審查證據**。
 - **讀取開發者的交付回報**：開發者（`frontend-developer` / `backend-developer` / `devops-engineer`）完成工作後會產出一份包含 ✅/🚨/🧪 三段式回報。特別留意其中的「🚨 矛盾與風險警告」區塊，若開發者已標示出風險但使用者尚未裁定，請在審查報告中再次提醒。
 
@@ -39,7 +39,7 @@ Code Reviewer 同樣肩負著「最終防線」的矛盾偵測責任：
 
 ## 4. 審查報告產出格式 (Review Report Format)
 每一次審查結束後，請嚴格按照以下 Markdown 格式輸出總結報告。
-**這份報告的落點是審查檔 `docs/features/<模組>/reviews/<TaskID>.md`，不是工單**——工單只留結論與客觀指標，正版規則見 `.agent/resources/team_protocol.md` §2.3：
+**這份報告的落點是審查檔 `docs/features/<模組>/reviews/<TaskID>.md`，不是工單**——工單只留結論與客觀指標，正版規則見 `.agent/resources/team_protocol.md` §2.3 Code Reviewer → Done / 退回：
 
 ### 🏁 審查結論 (Verdict)
 - 請明確標示：`[ ✅ APPROVED ]` (無瑕疵，可直接放行) 或是 `[ ❌ CHANGES REQUESTED ]` (有瑕疵或漏洞，退回要求工程師修改)。
@@ -79,7 +79,7 @@ Code Reviewer 同樣肩負著「最終防線」的矛盾偵測責任：
      而合併還可能失敗（衝突、CI 紅燈）。改 Status 的是 Developer：由他做結案
      commit（Status → `Done`、填 Closed）再合併，
      合併完成之後工單才是 `Done`
-     （見 `team_protocol.md` §1.9 / §1.10 與 `docs/standards/git_workflow.md` §6.2）。
+     （見 `.agent/resources/team_protocol.md` §1.9 程式碼隔離與分支、§1.10 Commit 閘門，與 `docs/standards/git_workflow.md` §6.2 結案 commit：寫入時點 ≠ 生效時點）。
    - `[ ❌ CHANGES REQUESTED ]` → 將 Status 改為 `In Progress`
 2. **勾選驗收標準 (Checklist)**：若審查判定該項次已滿足，你必須直接修改該 `.md` 檔案的內容，將 `3. 驗收標準 (Acceptance Criteria)` 下方的 `- [ ]` 變更為 `- [x]` 以留存證據。
 3. **回寫審查結果 (Write-back Review Findings)**：
@@ -125,13 +125,13 @@ Code Reviewer 同樣肩負著「最終防線」的矛盾偵測責任：
 
    **無遠端專案**：沒有 PR／MR 可當載體時，**審查檔本身就是審查載體**，
    因此 APPROVED 也必須寫；工單的編號欄位填 `—`
-   （見 `docs/standards/git_workflow.md` §8.3）。
+   （見 `docs/standards/git_workflow.md` §8.3 沒有 PR 時的降級）。
 4. **完成時間 (Closed Date)**：
    - 此欄位**由 Developer 在結案 commit 時填寫**（與 Status → `Done` 同一次寫入），**不由審查者填**——`Done` 的時點在合併之後，那時審查已經結束。
    - 審查者的責任是**在 APPROVED 的回報中提醒它**：格式為 ISO 8601（例如 `2026-04-22T16:04+08:00`）。
    - 此欄位決定「近期結案」區塊的**排序**（依完成時間倒序，取最新 10 筆），未填寫將導致工單排到最後、被擠出近期結案。
 
-（詳見 `team_protocol.md` §1.5）
+（詳見 `.agent/resources/team_protocol.md` §1.5 狀態更新操作方式）
 
 ### 📊 同步審查狀態至 Backlog
 

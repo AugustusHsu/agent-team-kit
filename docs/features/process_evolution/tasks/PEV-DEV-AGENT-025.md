@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** —
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** tech-lead
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-18T21:40+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-18T23:55+08:00
+**🔀 審查載體編號 (PR/MR):** `reviews/PEV-DEV-AGENT-025.md`（無遠端 PR，見 git_workflow.md §8.3b）
 
 ## 1. 任務描述 (Description)
 
@@ -46,25 +46,25 @@
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：§1.12 補進缺的 8 份 skill。
-- [ ] AC-02：**8 份各寫各的，不得複製貼上。** §1.12 適用全角色，但非開發角色
+- [x] AC-01：§1.12 補進缺的 8 份 skill。
+- [x] AC-02：**8 份各寫各的，不得複製貼上。** §1.12 適用全角色，但非開發角色
       （business-analyst、product-manager、uiux）的取證形式與開發角色不同——
       現有 5 份各自寫了貼合自身的一句（devops 講 build／部署 log、
       qa-automation 講測試輸出、frontend／backend 講查閱檔案）。
       複製貼上就是製造「宣稱 ≠ 實際」。審查時逐份比對這 8 句彼此不相同。
-- [ ] AC-03：b 那 4 筆 `§1.3` 改為 `§1.5`。
-- [ ] AC-04：13 份 skill 內所有 `team_protocol.md` 章節引用**補上章節標題**
+- [x] AC-03：b 那 4 筆 `§1.3` 改為 `§1.5`。
+- [x] AC-04：13 份 skill 內所有 `team_protocol.md` 章節引用**補上章節標題**
       並正規化成單一寫法；`grep -rnE '§[0-9]+\.[0-9]+' kit/.agent/skills/`
       的每一筆後面都跟著標題。
-- [ ] AC-05：那 7 份從未複檢的 skill **逐份開檔比對** §1.9～§1.12，
+- [x] AC-05：那 7 份從未複檢的 skill **逐份開檔比對** §1.9～§1.12，
       盤點報告逐份寫出「有無脫節、處置為何」，不得只寫「已檢查」。
-- [ ] AC-06：盤點報告列出 13 個角色的使用紀錄（在 26 張工單中各被指派幾次）。
+- [x] AC-06：盤點報告列出 13 個角色的使用紀錄（在 26 張工單中各被指派幾次）。
       **只盤點不裁撤**——裁撤會連帶動到 `evals.json` 與 `test_每個角色都有_evals`，
       且「沒派用過」在一個只跑了 26 張工單的 repo 裡樣本太小、不構成證據。
-- [ ] AC-07：**不動 `qa-automation-engineer` 的技術棧內容**——那是
+- [x] AC-07：**不動 `qa-automation-engineer` 的技術棧內容**——那是
       `PEV-DEV-AGENT-027` 的範圍，兩張同時改同一檔會衝突。
-- [ ] AC-08：`uv run pytest` 全綠；`python3 .agent/scripts/precheck.py` 6 項全綠。
-- [ ] AC-09：`BACKLOG.md` 重新生成，含本工單。
+- [x] AC-08：`uv run pytest` 全綠；`python3 .agent/scripts/precheck.py` 6 項全綠。
+- [x] AC-09：`BACKLOG.md` 重新生成，含本工單。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
