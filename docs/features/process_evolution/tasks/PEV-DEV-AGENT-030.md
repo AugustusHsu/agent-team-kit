@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** —
 **🏷️ 任務類型 (Task Type):** docs_generation
 **👤 負責人 (Assignee):** scrum-master
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-18T21:40+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-18T23:35+08:00
+**🔀 審查載體編號 (PR/MR):** `reviews/PEV-DEV-AGENT-030.md`（無遠端 PR，見 git_workflow.md §8.3b）
 
 ## 1. 任務描述 (Description)
 
@@ -41,17 +41,17 @@ README 要寫明此時從 `DN-001` 開始。
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：`docs/design_notes/README.md` 與 `kit/docs/design_notes/README.md`
+- [x] AC-01：`docs/design_notes/README.md` 與 `kit/docs/design_notes/README.md`
       兩份的指令都改掉（出貨內容與本 repo 的安裝實例是同一份文字，兩邊都要對）。
-- [ ] AC-02：新指令在本 repo 實測回**當前真正的最大號**，輸出留進審查紀錄。
-- [ ] AC-03：**負向對照**——在某份 DN 內文寫一行 `DN-099`，重跑新指令，
+- [x] AC-02：新指令在本 repo 實測回**當前真正的最大號**，輸出留進審查紀錄。
+- [x] AC-03：**負向對照**——在某份 DN 內文寫一行 `DN-099`，重跑新指令，
       確認**不受影響**（舊指令在同一情境下會回 `DN-099`）。兩次輸出都留進審查紀錄。
-- [ ] AC-04：README 寫明空輸出時從 `DN-001` 開始。
-- [ ] AC-05：**不回頭改 `PEV-DEV-AGENT-008` 的內文**——依 `team_protocol.md` §1.11
+- [x] AC-04：README 寫明空輸出時從 `DN-001` 開始。
+- [x] AC-05：**不回頭改 `PEV-DEV-AGENT-008` 的內文**——依 `team_protocol.md` §1.11
       已結案工單不改它，那份 fixture 名稱留著。它現在還是這條指令的天然測試案例。
-- [ ] AC-06：`uv run pytest` 全綠（含 `test_安裝後檔案與_kit_完全一致`——
+- [x] AC-06：`uv run pytest` 全綠（含 `test_安裝後檔案與_kit_完全一致`——
       兩份 README 若不同步會被抓到）；`python3 .agent/scripts/precheck.py` 6 項全綠。
-- [ ] AC-07：`BACKLOG.md` 重新生成，含本工單。
+- [x] AC-07：`BACKLOG.md` 重新生成，含本工單。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
