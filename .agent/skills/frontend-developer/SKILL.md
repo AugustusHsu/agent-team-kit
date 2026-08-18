@@ -64,7 +64,7 @@ description: 負責執行所有前端與 UI 相關的實作任務。當使用者
 - **📝 Commit Message**: 附上分支上**實際的** commit message 原文（依 `.agent/workflows/commit-message.md` 產出），隨本回報一併呈交供複查。**變更此時已 commit 並推送**，訊息可用 `git commit --amend` 修改（team_protocol §1.10）。
 - **➡️ 下一步**: 提示使用者「開發已完成，交付回報與 commit message 如上，請提交給 `code-reviewer` 審查；APPROVED 後才做結案 commit、合併、刪除分支，**合併完成才是 `Done`**（team_protocol §1.9 / §1.10、`docs/standards/git_workflow.md`）。」
 - **📌 Status 更新**: 開始執行時將工單 Status 改為 `In Progress`；交付完成時改為 `In Review`。（詳見 `team_protocol.md` §1.3）
-- **🔄 刷新 BACKLOG**: 更新完工單的 Status 後，你**必須**使用 `run_command` 執行以下指令來刷新總表，確保團隊進度同步：`uv run python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md`
+- **🔄 刷新 BACKLOG**: 更新完工單的 Status 後，你**必須**使用 `run_command` 執行以下指令來刷新總表，確保團隊進度同步：`python3 .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md`
 
 ## 7. 品質保證 (Quality Assurance)
 - 確保所有按鈕與可互動元素都有唯一的 `id`，以便後續進行 E2E 自動化測試。

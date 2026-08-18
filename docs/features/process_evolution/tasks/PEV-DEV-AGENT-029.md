@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** —
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** devops-engineer
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-18T21:40+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-18T23:40+08:00
+**🔀 審查載體編號 (PR/MR):** `reviews/PEV-DEV-AGENT-029.md`（無遠端 PR，見 git_workflow.md §8.3b）
 
 ## 1. 任務描述 (Description)
 
@@ -31,16 +31,16 @@
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：`grep -rn "uv run" kit/` 回空。
-- [ ] AC-02：改用 `python3`；若某處確實需要專案自己的執行器，
+- [x] AC-01：`grep -rn "uv run" kit/` 回空。
+- [x] AC-02：改用 `python3`；若某處確實需要專案自己的執行器，
       改寫成「用你的專案執行器」而非寫死另一個工具名。
-- [ ] AC-03：**根目錄 `CLAUDE.md` 的 `uv run` 不動**（見 §2）。
+- [x] AC-03：**根目錄 `CLAUDE.md` 的 `uv run` 不動**（見 §2）。
       `git diff --stat` 佐證改動只在 `kit/`。
-- [ ] AC-04：改完後**實跑一次**被改到的每一條指令，輸出留進審查紀錄——
+- [x] AC-04：改完後**實跑一次**被改到的每一條指令，輸出留進審查紀錄——
       證明 `python3` 版本真的跑得起來，不是只做字串替換。
-- [ ] AC-05：`uv run pytest` 全綠（含 `test_安裝後檔案與_kit_完全一致`）；
+- [x] AC-05：`uv run pytest` 全綠（含 `test_安裝後檔案與_kit_完全一致`）；
       `python3 .agent/scripts/precheck.py` 6 項全綠。
-- [ ] AC-06：`BACKLOG.md` 重新生成，含本工單。
+- [x] AC-06：`BACKLOG.md` 重新生成，含本工單。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 

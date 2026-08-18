@@ -138,5 +138,5 @@ Code Reviewer 同樣肩負著「最終防線」的矛盾偵測責任：
 審查完成並更新工單 Status 後，**必須**使用 `run_command` 執行以下指令來刷新 `docs/development/BACKLOG.md` 總表，確保專案進度追蹤同步：
 
 ```bash
-uv run python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md
+python3 .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md
 ```
