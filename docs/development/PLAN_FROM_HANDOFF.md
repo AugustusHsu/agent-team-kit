@@ -96,7 +96,7 @@ Icebox 為手動維護。⚠️ **關鍵**：`scan_backlog.py` 的 Icebox 保留
 1. **備份**目標檔：`cp docs/development/BACKLOG.md $CLAUDE_JOB_DIR/tmp/BACKLOG_backup.md`。
 2. **直接對目標檔**執行官方指令覆寫（它會讀 BACKLOG.md 自己的 Icebox 保留）：
    ```bash
-   uv run python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md
+   python3 .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md
    ```
 3. **與備份 diff** 確認 Icebox 各列完整無損：`diff <(sed -n '/🧊 冰箱/,/^## [^🧊]/p' 備份) <(sed -n '/🧊 冰箱/,/^## [^🧊]/p' BACKLOG.md)`；若有異常即從備份還原。
 4. 以 `--format summary` 覆核工單數與狀態分佈是否如預期。
