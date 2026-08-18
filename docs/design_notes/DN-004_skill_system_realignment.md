@@ -173,6 +173,11 @@ b 只要 `grep -rn "uv run" kit/` 回空即可；a 需要一份技術棧關鍵�
 > 它對非 Python 專案是有害的，不只是無用。
 > **已知代價（裁定時已知並接受）**：抽走範例後新專案沒有可抄的樣板。
 
+> ✅ **裁定（2026-08-18，使用者）：4.5 採用 B ＋ A+。**
+> 不採用單獨的 A——實驗證明它現況命中 0、重編號情境也命中 0。
+> A+ 的 25 筆補標題工作併入 4.2 的全面盤點一起做。
+> 落點 `tests/test_kit_integrity.py`（理由見下方附錄）。
+
 > 📌 **§1.4b 的 `uv run` 硬編碼不列為待決事項。** 依 DN-001 §3.2「當場寫得出可驗收的 AC
 > 就直接開工單」——它的 AC 是 `grep -rn "uv run" kit/` 回空，做法只有一種（改成 `python3`），
 > 沒有要比的選項。它在本 DN 出現只是因為盤點時順帶查到，**畢業時直接開成工單**。
@@ -242,6 +247,40 @@ DN-001 §3.4 第 2 條要求「寫得出至少一張工單的驗收標準」。�
 > PEV-DEV-AGENT-017 實測）已升格為 `team_protocol.md` §1.12，
 > 由 PEV-DEV-AGENT-023／024 落地，並成為 DN-008 §3 的既有約束。
 
-## 6. 畢業去向（畢業時才填）
+## 6. 畢業去向
 
-待填。
+> 📏 **已檢查長度**（本檔 250 行上下，DN-001 軟上限）：兩個檢查點的答案一致——
+> 待決已全數結清、AC 寫得出來，該做的是畢業而不是繼續長。
+
+**六項待決全數結清，無延後至本檔之外者**（4.7～4.9 已移入 DN-008，那是拆分不是延後）。
+⭐ 三項（4.1／4.4／4.5）由使用者本人裁定，其餘三項（4.2／4.3／4.6）由 AI 提案、
+使用者於畢業時一併簽核。
+
+### 6.1 會被改動的第 1 層文件
+
+| 文件 | 改什麼 |
+|---|---|
+| `kit/.agent/skills/*/SKILL.md`（13 份） | 補 §1.12、修 §1.3→§1.5、25 筆引用補章節標題 |
+| `kit/.agent/skills/qa-automation-engineer/SKILL.md` | 技術棧內容拆成第 2 層（4.4 裁定） |
+| `kit/docs/standards/skill_conventions.md`（新增） | skill 撰寫標準（4.3） |
+| `kit/docs/DOCS_MAP.md` | 登記上一列的新文件，否則 `test_standards_文件都登記在_DOCS_MAP` 失敗 |
+| `tests/test_kit_integrity.py` | 檢查 B ＋ A+（4.5 裁定） |
+| `docs/design_notes/README.md`、`kit/docs/design_notes/README.md` | DN 取號指令修正 |
+
+### 6.2 開出的工單
+
+順序是**先對齊、後上鎖**——反過來做會讓 CI 立刻紅在 13 份 skill 有一半不合規上，擋住自己的合併。
+
+| 工單 | 內容 | AC 方向 |
+|---|---|---|
+| `PEV-DEV-AGENT-025` | 13 份 skill 全面盤點與對齊（4.1 第一張、4.2、4.6、A+ 補標題） | §1.12 補進缺的 8 份且**各寫各的**、`§1.3`→`§1.5` 修 4 份、25 筆引用補章節標題並正規化成單一寫法、盤點報告列出 13 個角色的使用紀錄（**只盤點不裁撤**） |
+| `PEV-DEV-AGENT-026` | skill 與規範一致性的自動檢查 B ＋ A+（4.5） | 落在 `tests/test_kit_integrity.py`。**負向對照**：拿掉任一份的 §1.12 引用 → 紅；把某筆引用改成 `§9.9` → 紅；模擬章節重編號 → 紅；還原 → 全綠 |
+| `PEV-DEV-AGENT-027` | `qa-automation-engineer` 技術棧拆成第 2 層（4.4） | 107 行 Pytest／Cypress 範例移出、§2「不可自行引入其他框架」移除、留下專案自己填的落點；`grep -riE 'pytest\|cypress' kit/.agent/skills/qa-automation-engineer/SKILL.md` 只剩「範例」性質的提及 |
+| `PEV-DEV-AGENT-028` | `kit/docs/standards/skill_conventions.md` 撰寫標準（4.1 第二張、4.3） | 含引用格式（A+ 的慣例）、必備章節、與 `team_protocol.md` 的引用方式；`test_standards_文件都登記在_DOCS_MAP` 通過 |
+| `PEV-DEV-AGENT-029` | 移除 kit 內硬編碼的 `uv run`（§1.4b） | `grep -rn "uv run" kit/` 回空 |
+| `PEV-DEV-AGENT-030` | 修正 DN 取號指令 | 指令改為只掃 `docs/design_notes/`；實測回真正的最大號而非 `DN-099`。**不回頭改 `PEV-DEV-AGENT-008` 的內文**（§1.11 已結案工單不改它） |
+
+⚠️ **025 補 §1.12 時不得複製貼上。** §1.12 適用全角色，但非開發角色
+（business-analyst、product-manager、uiux）的取證形式與開發角色不同——
+現有 5 份各自寫了貼合自身的一句。缺的 8 份要照這個規格各寫各的，
+否則就是製造「宣稱 ≠ 實際」。
