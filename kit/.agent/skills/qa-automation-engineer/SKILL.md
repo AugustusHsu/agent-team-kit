@@ -368,7 +368,7 @@ Cypress E2E 測試需要啟動完整的前後端服務。建議：
    - Integration Test → `make test-integration`
    - 特定模組 → `make test-auth` / `make test-workspace` / `make test-admin`
    - 全部 → `make test-all`
-6. **確認你判讀的是原文**：判讀測試輸出前，先依 `.agent/resources/team_protocol.md` §1.12 做通道保真自檢——測試輸出結構規律、重複度高，是最容易被中間層改寫的一類，且最嚴重的那種失效不留任何提示。**通過數被靜默改寫時，你回報的通過率會是假的。**
+6. **確認你判讀的是原文**：判讀測試輸出前，先依 `.agent/resources/team_protocol.md` §1.12 取證通道保真 做開工自檢——測試輸出結構規律、重複度高，是最容易被中間層改寫的一類，且最嚴重的那種失效不留任何提示。**通過數被靜默改寫時，你回報的通過率會是假的。**
 7. **回報結果**：提供覆蓋率摘要與通過率。
 
 ### 9.2 交付與回報格式 (Delivery Report)
@@ -380,7 +380,7 @@ Cypress E2E 測試需要啟動完整的前後端服務。建議：
 - **🧪 測試執行結果**: 提供對應 `make test-*` 指令的通過率與覆蓋率摘要。
 - **🚨 矛盾與風險警告**: 若有發現 Test Plan 與程式碼不一致、或發現潛在的測試盲點，在此高亮標示並等待使用者裁定。(若一切順利則填寫「無」)。
 - **🔀 審查載體**: 回報的**第一行**須指出審查載體的位置（PR 連結／MR 連結／無遠端則填分支名），並確認該編號已回填工單。
-- **📝 Commit Message**: 附上分支上**實際的** commit message 原文（依 `.agent/workflows/commit-message.md` 產出），隨本回報一併呈交供複查。**變更此時已 commit 並推送**，訊息可用 `git commit --amend` 修改（team_protocol §1.10）。
-- **➡️ 下一步**: 提示使用者「開發已完成，交付回報與 commit message 如上，請提交給 `code-reviewer` 審查；APPROVED 後才做結案 commit、合併、刪除分支，**合併完成才是 `Done`**（team_protocol §1.9 / §1.10、`docs/standards/git_workflow.md`）。」
-- **📌 Status 更新**: **【重要】** 開始執行時將工單 Status 改為 `In Progress`；交付完成時改為 `In Review`。（詳見 `team_protocol.md` §1.3）
+- **📝 Commit Message**: 附上分支上**實際的** commit message 原文（依 `.agent/workflows/commit-message.md` 產出），隨本回報一併呈交供複查。**變更此時已 commit 並推送**，訊息可用 `git commit --amend` 修改（`.agent/resources/team_protocol.md` §1.10 Commit 閘門）。
+- **➡️ 下一步**: 提示使用者「開發已完成，交付回報與 commit message 如上，請提交給 `code-reviewer` 審查；APPROVED 後才做結案 commit、合併、刪除分支，**合併完成才是 `Done`**（`.agent/resources/team_protocol.md` §1.9 程式碼隔離與分支、§1.10 Commit 閘門，與 `docs/standards/git_workflow.md`）。」
+- **📌 Status 更新**: **【重要】** 開始執行時將工單 Status 改為 `In Progress`；交付完成時改為 `In Review`。（詳見 `.agent/resources/team_protocol.md` §1.5 狀態更新操作方式）
 - **🔄 刷新 BACKLOG**: 更新完工單的 Status 後，你**必須**使用 `run_command` 執行以下指令來刷新總表，確保團隊進度同步：`python3 .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md`

@@ -35,5 +35,10 @@ erDiagram
 - **Payload (Request JSON)**:
 - **Response (200, 400 等狀態與 JSON 範例)**:
 
+> **⚠️ Mermaid 與規格表被改寫時不會報錯。** 熟讀 PRD 與 HLD 之前，先依 `.agent/resources/team_protocol.md` §1.12 取證通道保真 做開工自檢。
+> ERD 與 Sequence Diagram 是結構化文字，看起來像是可以安全折疊的東西——但少掉一條
+> 關聯之後，它**仍然是一份語法合法的 Mermaid**，不會有任何錯誤提示。API 規格表同理：
+> 少一個錯誤碼的表格，仍然是一張合法的表格。你會照著它畫 LLD，下游會照著 LLD 實作。
+
 ## 協作原則
 在產出 LLD 文件前，你必須先熟讀 PRD 與 HLD 確保邏輯不衝突。如果設計上涉及到身分驗證或重要資料傳輸，請主動邀請 **Security Engineer** 進行資安設計檢核。

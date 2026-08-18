@@ -47,7 +47,7 @@ description: 當使用者需要「安排 Sprint 規劃」、「拆解任務 (Bre
 3. **判定工作佇列分類 (Task Type)**：
    - 根據任務的性質指定適當的類型 (對應架構中的不同 Worker Queue)。例如：`queue_frontend` (UI 介面開發)、`queue_backend` (API/核心邏輯)、`queue_agent` (代理或基礎建設)、`queue_data` (資料庫處理)、`docs_generation` (文件產出)、`manual_user` (需使用者親自手動執行的任務，如部署審批、外部服務申請等)。
 4. **指定 Task ID 編碼**：
-   - 所有工單的 ID 須遵循 `{模組前綴}-{階段}-{佇列}-{流水號}` 格式。模組前綴由 `team_protocol.md` §3.1 的「模組前綴對照表」定義（3 個大寫字母，全專案唯一）。
+   - 所有工單的 ID 須遵循 `{模組前綴}-{階段}-{佇列}-{流水號}` 格式。模組前綴由 `.agent/resources/team_protocol.md` §3.1 Task ID 編碼規則 的「模組前綴對照表」定義（3 個大寫字母，全專案唯一）。
    - 範例：
      - `ABC-DEV-FE-001` (ABC 模組-開發-前端-第 1 張)
      - `ABC-DEV-BE-002` (ABC 模組-開發-後端-第 2 張)
@@ -83,7 +83,7 @@ description: 當使用者需要「安排 Sprint 規劃」、「拆解任務 (Bre
 其中 `N` 為該 Epic 預計產出的子工單總數（不含已取消的工單）。此規則的目的在於：
 - 提供 Epic 層級的明確完工定義
 - 讓 BACKLOG 掃描工具可依據此 AC 自動判斷 Epic 是否應該關閉
-- 當最後一張子工單**合併完成**（Status 成為 `Done`）時，可連帶勾選此 AC 並推進 Epic Status 至 `Done`——**APPROVED 不算**，`Done` 的定義是已合併進主線（`team_protocol.md` §1.9）
+- 當最後一張子工單**合併完成**（Status 成為 `Done`）時，可連帶勾選此 AC 並推進 Epic Status 至 `Done`——**APPROVED 不算**，`Done` 的定義是已合併進主線（`.agent/resources/team_protocol.md` §1.9 程式碼隔離與分支）
 
 8. **預留人為介入空間 (Human-in-the-loop)**：
    - Scrum Master 在拆解任務時若發現邊界條件模糊、API 參數不明等狀況，**切勿自行捏造或腦補**。這是系統防護的重要一環。請將疑問事項列入任務單中的「人為補充與確認 (Human-in-the-loop)」區塊，等待使用者回答或確認。
@@ -104,15 +104,15 @@ description: 當使用者需要「安排 Sprint 規劃」、「拆解任務 (Bre
 
 - 面對大型 HLD 拆解時，請先針對核心部分拆解出前 2-3 張工單作為範例，詢問使用者：「這是第一批拆解出的核心任務，請問這樣的大小顆粒度與邏輯符合預期嗎？」，確認後再繼續。
 - 產生工單完畢後，請主動提醒使用者檢視各表單中的「人為補充與確認」區塊，以便及早補齊缺失的實作資訊。
-- 完成拆分後，提示使用者：「工單已準備就緒，可指定工單檔案並依其 Assignee 觸發對應的 Developer Skill 啟動開發（開發者動工前依 `team_protocol.md` §1.7 先確認工單的 HITL 事項）。」
+- 完成拆分後，提示使用者：「工單已準備就緒，可指定工單檔案並依其 Assignee 觸發對應的 Developer Skill 啟動開發（開發者動工前依 `.agent/resources/team_protocol.md` §1.7 執行前的 Human-in-the-loop 確認 先確認工單的 HITL 事項）。」
 
 ## 📌 Status 管理職責
 
 Scrum Master 負責工單初始狀態的設定與 Pending → Ready 的推進：
 - **建立工單時**：以**前置工單依賴**為準——若有**未完成的前置工單**擋住 → Status 設為 `Pending`；若無前置依賴 → Status 設為 `Ready`（**即使工單仍有「❓ 需要確認的事項」建議值也標 Ready**，開放問題不阻擋 Ready）。
 - **依賴解除後**：前置工單全數完成後，將被擋住的工單從 `Pending` 改為 `Ready`。
-- **⚠️ 開放問題不再決定 Pending/Ready**：工單內「❓ 需要確認的事項」（含建議值）改由**執行者於執行前**強制向使用者確認（`team_protocol.md` §1.7），不再以此把工單卡在 `Pending`。
-- **操作方式**：直接修改工單 `.md` 檔案中的 `**🚥 任務狀態 (Status):**` 欄位。（詳見 `team_protocol.md` §1.5）
+- **⚠️ 開放問題不再決定 Pending/Ready**：工單內「❓ 需要確認的事項」（含建議值）改由**執行者於執行前**強制向使用者確認（`.agent/resources/team_protocol.md` §1.7 執行前的 Human-in-the-loop 確認），不再以此把工單卡在 `Pending`。
+- **操作方式**：直接修改工單 `.md` 檔案中的 `**🚥 任務狀態 (Status):**` 欄位。（詳見 `.agent/resources/team_protocol.md` §1.5 狀態更新操作方式）
 
 ### 📌.0 日期欄位維護 (Date Tracking)
 
@@ -160,3 +160,4 @@ Scrum Master 身為 Backlog 的唯一全域管理者，必須確保 `docs/develo
    ```
    腳本輸出至 stdout，Agent 可讀取後再依需求調整（如處理 ⚠️ 瓶頸標示、冰箱區塊等手動維護的內容）。
 6. **定期校對**：當使用者要求校對 Backlog 時，執行 `scan_backlog.py --format json` 取得最新狀態，比對 BACKLOG.md 的內容，修正任何不一致的記錄。
+7. **確認你讀到的是腳本的原始輸出**：上面這些指令的輸出**走的是 shell**，而 shell 通常不在中間層的保護名單內（`.agent/resources/team_protocol.md` §1.12 取證通道保真）——跑 `scan_backlog.py` 之前先做一次自檢。BACKLOG 是「專案現況唯一來源」，而它整份都是機器生成的表格，**表格正是最容易被靜默改寫的形狀**。統計摘要被改寫時，錯的不是一張表，是全專案對自己進度的認知。

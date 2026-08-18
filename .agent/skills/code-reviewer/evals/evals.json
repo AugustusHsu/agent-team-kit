@@ -33,11 +33,11 @@
     {
       "id": 3,
       "prompt": "我在審 ABC-DEV-FE-005 的時候發現它把原本好好的搜尋功能弄壞了，這算另一個 bug 要另外開單嗎？",
-      "expected_output": "依 §1.8 判定：成因工單仍在 In Review 未結案，應判 CHANGES REQUESTED 退回原工單，不另開工單。",
+      "expected_output": "依 §1.8 新發現缺陷的收容優先序 判定：成因工單仍在 In Review 未結案，應判 CHANGES REQUESTED 退回原工單，不另開工單。",
       "files": [],
       "expectations": [
         "明確回答不另開工單，判定 CHANGES REQUESTED 並退回 ABC-DEV-FE-005",
-        "引用 team_protocol.md §1.8 作為判斷依據",
+        "引用 `.agent/resources/team_protocol.md` §1.8 新發現缺陷的收容優先序 作為判斷依據",
         "說明退回時要直接改寫導致缺陷的 AC，並把不成立的已勾選項目改回未勾選",
         "要求補上涵蓋此回歸的新 AC 與回歸測試",
         "工單 Status 由 In Review 退回 In Progress"

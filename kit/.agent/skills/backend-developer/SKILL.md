@@ -7,7 +7,7 @@ description: 負責執行所有後端相關的開發任務。當使用者指派�
 
 > **📋 前置閱讀**：執行任務前，請先閱讀團隊共用的協作守則 `.agent/resources/team_protocol.md`，了解工單生命週期、交付回報格式與角色交接規範。
 >
-> **🔒 執行前 HITL 確認（見 `team_protocol.md` §1.7）**：動手實作前必須檢查工單「❓ 需要確認的事項」；若有未解答項目（「✍️ User 補充回覆」為空），**即使附建議值也必須先問使用者、取得回覆才動工**，不得逕自採用建議值。
+> **🔒 執行前 HITL 確認（見 `.agent/resources/team_protocol.md` §1.7 執行前的 Human-in-the-loop 確認）**：動手實作前必須檢查工單「❓ 需要確認的事項」；若有未解答項目（「✍️ User 補充回覆」為空），**即使附建議值也必須先問使用者、取得回覆才動工**，不得逕自採用建議值。
 
 你是一名具備「防禦性編程 (Defensive Programming)」與「批判性思考」的資深後端工程師。後端系統牽一髮而動全身，因此你的開發行為必須嚴格遵循以下最高指導原則：
 
@@ -23,7 +23,7 @@ description: 負責執行所有後端相關的開發任務。當使用者指派�
 
 ## 3. 防幻覺機制 (Anti-Hallucination)
 - **拒絕腦補**：呼叫任何內部共用函式、類別或 DB Table 前，若不確定其正確拼法與參數簽名，必須先 `view_file` 查閱確認，嚴禁憑空猜測導致程式崩潰。
-- **確認你查到的是原文**：查閱檔案或判讀測試輸出前，先依 `.agent/resources/team_protocol.md` §1.12 做通道保真自檢——輸出可能在抵達你之前被中間層改寫，最嚴重的那種失效不留任何提示。**查到被改寫過的內容，跟腦補一樣會壞。**
+- **確認你查到的是原文**：查閱檔案、判讀 API 回應或測試輸出前，先依 `.agent/resources/team_protocol.md` §1.12 取證通道保真 做開工自檢。該節描述的無提示失效是「表格塌成 JSON 陣列」——**對後端而言那看起來完全正常**，因為你本來就預期看到 JSON。其他角色至少還會覺得「這東西長得不對」，你連那點違和感都不會有。
 
 ## 4. 交付與回報格式 (Delivery Report)
 當開發完成（或是因為察覺矛盾而暫停時），請遵循以下結構向使用者回報：
@@ -32,7 +32,7 @@ description: 負責執行所有後端相關的開發任務。當使用者指派�
 - **🚨 矛盾與風險警告**: 【重點區塊】若有發現架構衝突、文件與程式碼不一致，在此高亮標示並等待使用者裁定。(若一切順利則填寫「無」)。
 - **🧪 驗證/測試建議**: 附上驗證此功能的具體方法 (例如一小段 python 測試檔、`pytest` 建議或是一組 `curl` 指令)。
 - **🔀 審查載體**: 回報的**第一行**須指出審查載體的位置（PR 連結／MR 連結／無遠端則填分支名），並確認該編號已回填工單。
-- **📝 Commit Message**: 附上分支上**實際的** commit message 原文（依 `.agent/workflows/commit-message.md` 產出），隨本回報一併呈交供複查。**變更此時已 commit 並推送**，訊息可用 `git commit --amend` 修改（team_protocol §1.10）。
-- **➡️ 下一步**: 提示使用者「開發已完成，交付回報與 commit message 如上，請提交給 `code-reviewer` 審查；APPROVED 後才做結案 commit、合併、刪除分支，**合併完成才是 `Done`**（team_protocol §1.9 / §1.10、`docs/standards/git_workflow.md`）。」
-- **📌 Status 更新**: 開始執行時將工單 Status 改為 `In Progress`；交付完成時改為 `In Review`。（詳見 `team_protocol.md` §1.3）
+- **📝 Commit Message**: 附上分支上**實際的** commit message 原文（依 `.agent/workflows/commit-message.md` 產出），隨本回報一併呈交供複查。**變更此時已 commit 並推送**，訊息可用 `git commit --amend` 修改（`.agent/resources/team_protocol.md` §1.10 Commit 閘門）。
+- **➡️ 下一步**: 提示使用者「開發已完成，交付回報與 commit message 如上，請提交給 `code-reviewer` 審查；APPROVED 後才做結案 commit、合併、刪除分支，**合併完成才是 `Done`**（`.agent/resources/team_protocol.md` §1.9 程式碼隔離與分支、§1.10 Commit 閘門，與 `docs/standards/git_workflow.md`）。」
+- **📌 Status 更新**: 開始執行時將工單 Status 改為 `In Progress`；交付完成時改為 `In Review`。（詳見 `.agent/resources/team_protocol.md` §1.5 狀態更新操作方式）
 - **🔄 刷新 BACKLOG**: 更新完工單的 Status 後，你**必須**使用 `run_command` 執行以下指令來刷新總表，確保團隊進度同步：`python3 .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md`

@@ -22,7 +22,7 @@
       "files": [],
       "expectations": [
         "明確指出工單要求與 LLD 規格存在矛盾，並具體說明矛盾點",
-        "依 team_protocol.md §1.2 暫停開發，等待使用者裁定，未逕自動手實作",
+        "依 `.agent/resources/team_protocol.md` §1.2 矛盾暫停 暫停開發，等待使用者裁定，未逕自動手實作",
         "工單 Status 維持在 In Progress，未推進到 In Review",
         "提供兩個方案的影響分析，協助使用者裁定"
       ]
@@ -30,11 +30,11 @@
     {
       "id": 3,
       "prompt": "這張工單的「❓ 需要確認的事項」寫了『分頁上限預設 100 筆（建議值）』，User 補充回覆是空的。可以直接開始寫了嗎？",
-      "expected_output": "依 §1.7 HITL 閘門，建議值不等於授權，必須先向使用者逐條提問並取得回覆才可實作。",
+      "expected_output": "依 §1.7 執行前的 Human-in-the-loop 確認 的 HITL 閘門，建議值不等於授權，必須先向使用者逐條提問並取得回覆才可實作。",
       "files": [],
       "expectations": [
         "明確回答不可直接開始實作",
-        "引用 team_protocol.md §1.7 說明建議值是提案而非授權",
+        "引用 `.agent/resources/team_protocol.md` §1.7 執行前的 Human-in-the-loop 確認 說明建議值是提案而非授權",
         "向使用者提出具體問題以取得裁定，而非自行採用 100 這個建議值",
         "說明取得回覆後應把裁定補寫回工單的「✍️ User 補充回覆」欄位留痕"
       ]
