@@ -1,7 +1,7 @@
 # 📋 待辦總表 (Backlog)
 
 > **工單來源目錄**：`docs/features/*/tasks/`
-> **工單總數**：26 張
+> **工單總數**：32 張
 
 ---
 
@@ -9,7 +9,13 @@
 
 > 包含狀態為 `In Progress` 或 `Ready` 的工單。
 
-*(無)*
+| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
+|---|---------|------|------|-------------------|---------------|
+| 1 | PEV-DEV-AGENT-025 | 13 份 skill 全面盤點與對齊 | process_evolution | tech-lead | 🟢 Ready |
+| 2 | PEV-DEV-AGENT-029 | 移除 kit 出貨內容裡硬編碼的 uv run | process_evolution | devops-engineer | 🟢 Ready |
+| 3 | PEV-DEV-AGENT-030 | 修正 DN 取號指令：改從檔名取號 | process_evolution | scrum-master | 🟢 Ready |
+
+**小計**：3 張（In Progress: 0 / Ready: 3）
 
 ---
 
@@ -25,7 +31,13 @@
 
 > 包含狀態為 `Pending` 的工單，等待前置條件完成或人為確認後方可開始。
 
-*(無)*
+| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
+|---|---------|------|------|-------------------|---------------|
+| 1 | PEV-DEV-AGENT-026 | skill 與規範一致性的自動檢查：覆蓋率 ＋ 引用標題比對 | process_evolution | backend-developer | ⏳ Pending |
+| 2 | PEV-DEV-AGENT-027 | qa-automation-engineer 的技術棧內容拆成第 2 層 | process_evolution | system-architect | ⏳ Pending |
+| 3 | PEV-DEV-AGENT-028 | 立 skill 撰寫標準：skill_conventions.md | process_evolution | system-architect | ⏳ Pending |
+
+**小計**：3 張
 
 ---
 
@@ -65,8 +77,10 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| ✅ Done | 24 | 100.0% |
-| **總計** | **24** | **100%** |
+| 🟢 Ready | 3 | 10.0% |
+| ⏳ Pending | 3 | 10.0% |
+| ✅ Done | 24 | 80.0% |
+| **總計** | **30** | **100%** |
 
 ### worktree_guard
 
@@ -87,10 +101,11 @@
 | [DN-001](../design_notes/DN-001_design_note_mechanism.md) | 🎓 Graduated | Design Note 機制本身的設計 | — |
 | [DN-002](../design_notes/DN-002_discord_notification_layer.md) | 🌱 Seed | Discord 作為通知與批准層 | DN-001（本檔的格式）；DN-007（CI 閘門，2026-08-17 開出，解除本欄長期懸空） |
 | [DN-003](../design_notes/DN-003_git_workflow_and_pr_gate.md) | 🎓 Graduated | Git 流程與 PR 閘門 | DN-001（格式） |
-| [DN-004](../design_notes/DN-004_skill_system_realignment.md) | 🌱 Seed | Skill 體系與現行流程的重新對齊 | DN-001（本檔的格式）；DN-003（git 流程，其落地會先改動 6 份 skill）； |
+| [DN-004](../design_notes/DN-004_skill_system_realignment.md) | 🎓 Graduated | Skill 體系與現行流程的重新對齊 | DN-001（本檔的格式）；DN-003（git 流程，其落地會先改動 6 份 skill） |
 | [DN-005](../design_notes/DN-005_parallel_task_decomposition.md) | 🌱 Seed | 並行開發的任務拆解與變更傳播 | DN-001（本檔的格式）；DN-003（git 流程，本 DN 視其為「基本層」並在其上擴充） |
 | [DN-006](../design_notes/DN-006_branch_topology_and_isolation.md) | 🌱 Seed | 分支拓撲與並行隔離 | DN-001（本檔的格式）；DN-003（已畢業的單線 git 流程，本 DN 在其上擴充） |
 | [DN-007](../design_notes/DN-007_ci_gate.md) | 🎓 Graduated | CI 閘門：kit 要不要出貨自動檢查，以及檢查什麼 | DN-001（本檔的格式）；DN-003（已畢業，`git_workflow.md` 是本檔要補的那份規範） |
+| [DN-008](../design_notes/DN-008_review_panel_and_context_isolation.md) | 🌱 Seed | 審查的執行形態：panel 模式與 context 隔離 | DN-001（本檔的格式）；DN-005（§2.1 的 panel 是它 §4「放大審查粒度」訴求的落點）；DN-006（§4.2 的重疊區強制人工審查與 panel 方向相反，判準要一起定；隔離載體的選擇與它的合併點耦合） |
 
 ---
 
