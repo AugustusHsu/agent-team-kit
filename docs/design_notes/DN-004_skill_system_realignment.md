@@ -1,11 +1,13 @@
 # [DN-004] Skill 體系與現行流程的重新對齊
 
-**🚥 狀態 (Status):** 🔍 Exploring
+> 🎓 已畢業（2026-08-18）→ `PEV-DEV-AGENT-025`～`030`。本檔凍結，不再更新。
+
+**🚥 狀態 (Status):** 🎓 Graduated
 **📅 建立 (Created):** 2026-08-16
 **🔗 依賴 (Depends on):** DN-001（本檔的格式）；DN-003（git 流程，其落地會先改動 6 份 skill）
 **📌 來源 (Origin):** 使用者指令（2026-08-16）——「目前 skill 已經很久沒更新了，
 對於目前流程跟狀況套用 skill 的狀況也需要重新設計」
-**🎓 畢業去向 (Landing):** 待填
+**🎓 畢業去向 (Landing):** `PEV-DEV-AGENT-025`～`030`（見 §6）
 
 > 📌 **2026-08-18 拆分。** 原 §3（審查 panel 模式）與 §5（審查與開發的 context 隔離）
 > 已拆出至 [DN-008](DN-008_review_panel_and_context_isolation.md)。
