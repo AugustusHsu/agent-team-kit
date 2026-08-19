@@ -1,7 +1,7 @@
 # 📋 待辦總表 (Backlog)
 
 > **工單來源目錄**：`docs/features/*/tasks/`
-> **工單總數**：33 張
+> **工單總數**：34 張
 
 ---
 
@@ -12,8 +12,9 @@
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
 |---|---------|------|------|-------------------|---------------|
 | 1 | PEV-DEV-AGENT-031 | precheck 新增 Assignee 合法性檢查 | process_evolution | devops-engineer | 🟢 Ready |
+| 2 | PEV-DEV-AGENT-032 | 一輪多張工單的合併拓撲寫進 git_workflow.md §7 | process_evolution | devops-engineer | 🟢 Ready |
 
-**小計**：1 張（In Progress: 0 / Ready: 1）
+**小計**：2 張（In Progress: 0 / Ready: 2）
 
 ---
 
@@ -75,10 +76,10 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟢 Ready | 1 | 3.2% |
-| ⏳ Pending | 3 | 9.7% |
-| ✅ Done | 27 | 87.1% |
-| **總計** | **31** | **100%** |
+| 🟢 Ready | 2 | 6.2% |
+| ⏳ Pending | 3 | 9.4% |
+| ✅ Done | 27 | 84.4% |
+| **總計** | **32** | **100%** |
 
 ### worktree_guard
 
