@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** —（硬依賴 `PEV-DEV-AGENT-025`，同檔）
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** system-architect
-**🚥 任務狀態 (Status):** Pending
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-18T21:40+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-21T21:30+08:00
+**🔀 審查載體編號 (PR/MR):** —（見 `../reviews/PEV-DEV-AGENT-027.md`，git_workflow.md §8.3 降級）
 
 ## 1. 任務描述 (Description)
 
@@ -44,19 +44,19 @@ kit 定義到「這裡要填什麼」，實際內容由每個專案在自己的�
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：§2「不可自行引入其他框架」那句移除。
-- [ ] AC-02：107 行 Pytest／Cypress 程式碼範例移出 skill 本體。
-- [ ] AC-03：skill 內留下**明確的第 2 層落點說明**——寫清楚專案要填什麼、
+- [x] AC-01：§2「不可自行引入其他框架」那句移除。
+- [x] AC-02：107 行 Pytest／Cypress 程式碼範例移出 skill 本體。
+- [x] AC-03：skill 內留下**明確的第 2 層落點說明**——寫清楚專案要填什麼、
       不填的後果是什麼。比照 §1.12 第 2 層的寫法（「缺了本節在該專案就是空的」）。
-- [ ] AC-04：`grep -rniE 'pytest|cypress' kit/.agent/skills/qa-automation-engineer/SKILL.md`
+- [x] AC-04：`grep -rniE 'pytest|cypress' kit/.agent/skills/qa-automation-engineer/SKILL.md`
       剩下的每一筆都是「舉例性質」而非「規定性質」，逐筆列進審查紀錄佐證。
-- [ ] AC-05：抽完後 skill 仍能獨立指導一次完整交付——審查時實跑一次
+- [x] AC-05：抽完後 skill 仍能獨立指導一次完整交付——審查時實跑一次
       「假設專案用 Jest」的情境，確認 skill 沒有任何一句擋住它。
       這是 AC-01 的正向驗證，不是形式檢查。
-- [ ] AC-06：本 repo 自己的第 2 層一併填上（dogfooding：本 repo 用 Pytest），
+- [x] AC-06：本 repo 自己的第 2 層一併填上（dogfooding：本 repo 用 Pytest），
       否則本 repo 的 `qa-automation-engineer` 會變成空的。
-- [ ] AC-07：`uv run pytest` 全綠；`python3 .agent/scripts/precheck.py` 6 項全綠。
-- [ ] AC-08：`BACKLOG.md` 重新生成，含本工單。
+- [x] AC-07：`uv run pytest` 全綠；`python3 .agent/scripts/precheck.py` 6 項全綠。
+- [x] AC-08：`BACKLOG.md` 重新生成，含本工單。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 

@@ -204,6 +204,105 @@ def test_指路檔章節索引與正版同步(kit_root: Path):
     assert not 缺漏, "指路檔的章節索引漏了：" + "、".join(缺漏)
 
 
+# --- skill 與守則的一致性（PEV-DEV-AGENT-026）-------------------------------
+# 兩條檢查都只驗證「有沒有正確引用」，不驗證「引用之後有沒有照做」——
+# 後者是語意判斷，不該進閘門。
+
+引用路徑 = re.compile(r"team_protocol\.md|git_workflow\.md")
+
+
+def _守則章節(kit_root: Path) -> dict[str, str]:
+    """§X.Y → 標題主體。括號裡的英文與 emoji 是修飾，不納入比對。
+
+    這是誤報緩解的唯一機制：把 `取證通道保真 (🔬 Evidence Channel Fidelity)`
+    收斂成 `取證通道保真`，於是補英文、加 emoji 這類純修飾改動不會轉紅。
+    """
+    正版 = (kit_root / ".agent/resources/team_protocol.md").read_text(encoding="utf-8")
+    return {
+        m.group(1): m.group(2).split("(")[0].strip()
+        for m in re.finditer(r"^### (\d+\.\d+) (.+)$", 正版, flags=re.MULTILINE)
+    }
+
+
+def _適用全角色的章節(kit_root: Path) -> list[str]:
+    """標了「適用全角色」的章節編號。範圍是該章節標題到下一個 ### 為止。"""
+    正版 = (kit_root / ".agent/resources/team_protocol.md").read_text(encoding="utf-8")
+    區塊 = re.split(r"^### (\d+\.\d+) ", 正版, flags=re.MULTILINE)
+    # split 後為 [前言, 編號, 內容, 編號, 內容, ...]
+    return [區塊[i] for i in range(1, len(區塊), 2) if "適用全角色" in 區塊[i + 1]]
+
+
+def test_適用全角色的章節被十三份_skill_全部引用(kit_root: Path):
+    """標「適用全角色」卻只有半數 skill 引用的章節，等於對另外半數不存在。
+
+    §1.12 就是實例：它是 PEV-DEV-AGENT-023 從 §2.3（只綁審查者）升級成全角色的，
+    升級當下要手動補 13 份 skill——漏掉任何一份都不會有執行期錯誤。
+
+    ⚠️ 已知限制（邊界）：本檢查依賴**規範作者記得寫「適用全角色」那四個字**。
+    沒標記的章節抓不到，因此它防的是「規範標了但 skill 沒跟上」，
+    **不是**「規範作者忘了標記適用範圍」。後者沒有機器判準——
+    一個章節該不該適用全角色是設計決定，不是可從文字推導的事實。
+    """
+    章節 = _適用全角色的章節(kit_root)
+    assert 章節, "team_protocol.md 找不到任何標「適用全角色」的章節，測試本身可能過期了"
+
+    缺漏 = []
+    for d in skill_dirs(kit_root):
+        內容 = (d / "SKILL.md").read_text(encoding="utf-8")
+        for 編號 in 章節:
+            # (?!\d) 不可省：否則找 §1.1 時 §1.12 會誤判為命中
+            if not re.search(rf"§{re.escape(編號)}(?!\d)", 內容):
+                缺漏.append(f"{d.name}/SKILL.md 沒有引用 §{編號}（該節標了「適用全角色」）")
+    assert not 缺漏, "適用全角色的章節沒被全部 skill 引用：\n" + "\n".join(缺漏)
+
+
+def test_skill_引用守則的編號與標題都要對得上(kit_root: Path):
+    """只比對編號是不夠的——編號幾乎總是還在，錯的是它現在指向誰。
+
+    DN-004 §4 附錄用丟棄式原型實跑過：在「§1.9 後插入一節、後續各往下推一格」的
+    重編號情境中，4 筆 `§1.12` 引用當場指到「文檔權威階序」而非「取證通道保真」，
+    而只比對編號的版本**仍然全綠**。加上標題比對後同一情境抓到全部 4 筆。
+
+    比對方式是**反向**的：不去猜「標題在原文裡到哪裡結束」（結尾符號有
+    `）`、`。`、`、`、` 的「…」` 等多種，猜不完），而是取真實標題去比對
+    `§X.Y ` 後面是不是以它開頭。
+
+    只驗 `team_protocol.md` 的引用。歸屬方式是往前找最近提到的檔名，因為
+    `§1.9 程式碼隔離與分支、§1.10 Commit 閘門` 這種寫法只在第一個編號前寫了檔名。
+    指向 `git_workflow.md` 的引用不在本檢查範圍（AC-02），它們的正版在另一份文件。
+    """
+    章節 = _守則章節(kit_root)
+    問題 = []
+
+    for d in skill_dirs(kit_root):
+        內容 = (d / "SKILL.md").read_text(encoding="utf-8")
+        for m in re.finditer(r"§(\d+\.\d+)", 內容):
+            編號 = m.group(1)
+            前文 = 內容[: m.start()]
+            最近檔名 = 引用路徑.findall(前文)
+            if not 最近檔名 or 最近檔名[-1] != "team_protocol.md":
+                continue
+
+            行號 = 前文.count("\n") + 1
+            位置 = f"{d.name}/SKILL.md:{行號}"
+            if 編號 not in 章節:
+                問題.append(f"{位置} 引用了不存在的 §{編號}")
+                continue
+
+            尾巴 = 內容[m.end() :]
+            # 編號後面沒接空白 = 只引用編號、沒宣稱標題，那就只驗編號存在
+            if 尾巴[:1] not in (" ", "　"):
+                continue
+            期望 = 章節[編號]
+            實際 = 尾巴.lstrip(" 　")
+            if not 實際.startswith(期望):
+                問題.append(
+                    f"{位置} §{編號} 的標題對不上："
+                    f"期望「{期望}」，實際「{實際.splitlines()[0][: len(期望) + 8]}」"
+                )
+
+    assert not 問題, "skill 對守則的引用與正版不符：\n" + "\n".join(問題)
+
 
 def test_kit_不得殘留已廢除的流程規則(kit_root: Path):
     """規範反轉後，舊敘述會躺在沒人想到要改的角落，而且不會有任何執行期錯誤。

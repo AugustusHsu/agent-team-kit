@@ -1,4 +1,4 @@
-"""precheck.py 的六項第 1 層流程檢查。
+"""precheck.py 的七項第 1 層流程檢查。
 
 每一項都有負向對照（造出違規輸入，確認會紅），另有兩支防假紅燈的迴歸：
 檢查器誤把合法內容判成違規，比漏抓更糟——它會逼作者改成不自然的寫法來閃避。
@@ -25,12 +25,13 @@ def _工單(
     closed="2026-01-02T09:00+08:00",
     內文="",
     打勾=None,
+    assignee="backend-developer",
 ):
     return (
         "# [Task ID: MOD-DEV-BE-001] 測試工單\n\n"
         "**🔗 依附母任務 (Parent Task ID):** —\n"
         "**🏷️ 任務類型 (Task Type):** queue_agent\n"
-        "**👤 負責人 (Assignee):** backend-engineer\n"
+        f"**👤 負責人 (Assignee):** {assignee}\n"
         f"**🚥 任務狀態 (Status):** {status}\n"
         f"**📅 建立時間 (Created):** {created}\n"
         f"**✅ 完成時間 (Closed):** {closed}\n"
@@ -163,6 +164,31 @@ def test_ac_全打勾但未結案會紅(乾淨專案: Path):
     assert "In Review" in result.stdout
 
 
+def test_assignee_不是實際存在的角色會紅(乾淨專案: Path):
+    """PEV-DEV-AGENT-012／013 的形狀：Assignee 寫 `backend-engineer`，
+    但 `.agent/skills/` 底下那個角色叫 `backend-developer`——差一個字，
+    工單於是永遠等不到正確的角色接手，而其餘六項檢查全綠。
+
+    訊息要同時說出四件事，少一件就得回去翻檔案：
+    哪張工單、哪一行、填了什麼、合法值有哪些。
+    """
+    (乾淨專案 / TASK).write_text(
+        _工單(status="In Progress", closed="—", assignee="backend-engineer"),
+        encoding="utf-8",
+    )
+    重生(乾淨專案)
+    result = 跑(乾淨專案)
+    assert result.returncode != 0
+    行 = [line for line in result.stdout.splitlines() if "backend-engineer" in line]
+    assert 行, "訊息沒提到填錯的值：\n" + result.stdout
+    訊息 = "\n".join(行)
+    assert TASK in 訊息, "沒指出是哪張工單"
+    assert "backend-developer" in 訊息, "沒列出合法值，看不出該改成什麼"
+    行號 = int(訊息.split(TASK + ":")[1].split("：")[0].split()[0])
+    原文 = (乾淨專案 / TASK).read_text(encoding="utf-8").splitlines()
+    assert "負責人 (Assignee)" in 原文[行號 - 1], f"回報行號 {行號} 指到 {原文[行號 - 1]!r}"
+
+
 # ── 防假紅燈的迴歸 ──────────────────────────────────────────────
 
 
@@ -252,3 +278,44 @@ def test_死連結行號指得回原始檔案(乾淨專案: Path):
     )
     原文 = (乾淨專案 / TASK).read_text(encoding="utf-8").splitlines()
     assert "[壞的](沒有.md)" in 原文[行號 - 1], f"回報行號 {行號} 指到 {原文[行號 - 1]!r}"
+
+
+def test_合法角色讀自_skills_目錄而不是寫死清單(乾淨專案: Path):
+    """kit 可以裝到任何專案，專案可以自己加角色。寫死清單的實作會在這裡轉紅——
+    而且是最糟的那種紅：專案愈認真擴充自己的團隊，紅得愈厲害。
+    """
+    新角色 = 乾淨專案 / ".agent/skills/data-engineer"
+    新角色.mkdir()
+    (新角色 / "SKILL.md").write_text("# 專案自訂角色\n", encoding="utf-8")
+    (乾淨專案 / TASK).write_text(
+        _工單(status="In Progress", closed="—", assignee="data-engineer"),
+        encoding="utf-8",
+    )
+    重生(乾淨專案)
+    result = 跑(乾淨專案)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_留空與_manual_user_的_assignee_不算違規(乾淨專案: Path):
+    """`—` 是還沒指派，`manual_user` 是工單範本明列的「使用者親自處理」。
+    兩者都不是打錯字，判紅只會逼人隨便填一個角色進去閃避。
+    """
+    for 值 in ("—", "manual_user"):
+        (乾淨專案 / TASK).write_text(
+            _工單(status="In Progress", closed="—", assignee=值), encoding="utf-8"
+        )
+        重生(乾淨專案)
+        result = 跑(乾淨專案)
+        assert result.returncode == 0, f"{值}：\n" + result.stdout + result.stderr
+
+
+def test_已結案工單的錯誤_assignee_不算違規(乾淨專案: Path):
+    """team_protocol.md §1.11：已結案工單是歷史紀錄，不改它、也不引用它。
+
+    涵蓋全部工單會製造一個只能靠違反 §1.11 才解得掉的紅燈——本 repo 的
+    `012`／`013` 正是這個形狀：Assignee 確實填錯，但兩張都已 Done。
+    """
+    (乾淨專案 / TASK).write_text(_工單(assignee="backend-engineer"), encoding="utf-8")
+    重生(乾淨專案)
+    result = 跑(乾淨專案)
+    assert result.returncode == 0, result.stdout + result.stderr

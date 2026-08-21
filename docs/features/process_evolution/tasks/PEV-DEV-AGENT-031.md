@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** —
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** devops-engineer
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-19T00:40+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-21T21:32+08:00
+**🔀 審查載體編號 (PR/MR):** —（見 `../reviews/PEV-DEV-AGENT-031.md`，git_workflow.md §8.3 降級）
 
 ## 1. 任務描述 (Description)
 
@@ -84,21 +84,21 @@ Assignee 必須是下列之一，否則報錯：
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：`check_assignee_valid` 實作於 `kit/.agent/scripts/precheck.py` 並註冊進 `CHECKS`。
-- [ ] AC-02：合法值讀自 `.agent/skills/` 的實際目錄，**不得寫死角色清單**——
+- [x] AC-01：`check_assignee_valid` 實作於 `kit/.agent/scripts/precheck.py` 並註冊進 `CHECKS`。
+- [x] AC-02：合法值讀自 `.agent/skills/` 的實際目錄，**不得寫死角色清單**——
       寫死的話使用者專案新增自訂 skill 就會誤報。
-- [ ] AC-03：只檢查未結案工單，沿用 `AC_EXEMPT_STATUSES`（§2.2 的裁定）。
+- [x] AC-03：只檢查未結案工單，沿用 `AC_EXEMPT_STATUSES`（§2.2 的裁定）。
       **不修改 012／013**（§1.11 已結案工單不改）。
-- [ ] AC-04：**負向對照實跑，輸出留進審查紀錄**——把某張未結案工單的 Assignee
+- [x] AC-04：**負向對照實跑，輸出留進審查紀錄**——把某張未結案工單的 Assignee
       改成不存在的角色 → 該項轉紅且訊息指名**哪張工單、哪一行、填了什麼、合法值有哪些**；
       還原 → 轉綠。只寫「不合法」不算通過。
-- [ ] AC-05：docstring、`--list` 輸出、`git_workflow.md` §8.1 三處的「六項」全部同步為七項
+- [x] AC-05：docstring、`--list` 輸出、`git_workflow.md` §8.1 三處的「六項」全部同步為七項
       （§2.3 的連動表）。
-- [ ] AC-06：`tests/test_precheck.py` 新增正向與負向測試各至少一個；
+- [x] AC-06：`tests/test_precheck.py` 新增正向與負向測試各至少一個；
       `uv run pytest` 全綠，**通過數應為 135 + 新增數**，並在審查紀錄寫出新的數字。
-- [ ] AC-07：`./install.sh . --upgrade` 已跑，根目錄安裝實例同步。
-- [ ] AC-08：`python3 .agent/scripts/precheck.py` **七項**全綠。
-- [ ] AC-09：`BACKLOG.md` 重新生成，含本工單。
+- [x] AC-07：`./install.sh . --upgrade` 已跑，根目錄安裝實例同步。
+- [x] AC-08：`python3 .agent/scripts/precheck.py` **七項**全綠。
+- [x] AC-09：`BACKLOG.md` 重新生成，含本工單。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 

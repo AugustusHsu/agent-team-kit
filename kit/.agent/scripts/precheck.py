@@ -5,13 +5,14 @@
 檢查「流程有沒有被遵守」，不跑專案自己的單元測試——後者是第 2 層，
 只有專案自己知道要跑什麼。本腳本的輸入全在 repo 內，跟技術棧無關。
 
-六項檢查（見 docs/standards/git_workflow.md §8）：
+七項檢查（見 docs/standards/git_workflow.md §8）：
   1. BACKLOG 是否過期——重跑產生器比對現檔
   2. 工單 Status 值是否合法
   3. Created / Closed 是否為 ISO 8601，且 Closed 不早於 Created
   4. 文件相對連結是否指向存在的檔案
   5. Status 為 Done 卻沒填 Closed
   6. AC 全數打勾卻還沒結案
+  7. 未結案工單的 Assignee 是否對應得到實際存在的 skill
 
 使用方式:
   python3 .agent/scripts/precheck.py            # 全部檢查
@@ -50,6 +51,9 @@ CHECKBOX_RE = re.compile(r"^\s*[-*] \[([ xX])\]", re.MULTILINE)
 # 允許 AC 全打勾卻不是 Done 的狀態。Canceled 的工單常常是外部前提消失，
 # 該做的都做了才被喊停，逼它把勾拿掉只會是造假。
 AC_EXEMPT_STATUSES = {"Done", "Canceled"}
+
+# 工單範本明列的非角色 Assignee：使用者親自處理。留空（EMPTY_VALUES）另行放行。
+MANUAL_ASSIGNEE = "manual_user"
 
 
 class Finding:
@@ -245,6 +249,71 @@ def check_ac_matches_status(root):
     return findings
 
 
+def available_roles(root):
+    """合法角色讀自 `.agent/skills/` 的實際目錄，回傳目錄名集合；沒有該目錄回傳 None。
+
+    **不寫死清單**：kit 的定位是可安裝到任何專案，而專案可以自己加 skill。
+    寫死的話，使用者新增一個自訂角色就會被判成不合法——那種誤報會讓人
+    直接關掉整項檢查，比沒有這項檢查更糟。
+    """
+    skills = root / ".agent" / "skills"
+    if not skills.is_dir():
+        return None
+    return {entry.name for entry in skills.iterdir() if entry.is_dir()}
+
+
+def assignee_lineno(task):
+    """Assignee 欄位所在行號；找不到時回 0（呼叫端會退回只指檔案）。"""
+    text = Path(task["file"]).read_text(encoding="utf-8")
+    for lineno, line in enumerate(text.splitlines(), start=1):
+        if "負責人 (Assignee)" in line:
+            return lineno
+    return 0
+
+
+def check_assignee_valid(root):
+    """Assignee 填了不存在的角色——那張工單於是永遠不會被正確的角色接手。
+
+    這是最容易自動檢查、也最不容易人工發現的一類缺陷：打錯不會有任何執行期錯誤，
+    BACKLOG 照樣生成、其餘六項照樣全綠。PEV-DEV-AGENT-012／013 把
+    `backend-developer` 寫成 `backend-engineer`，一路存活到 025 做全角色盤點才撞見。
+
+    **只檢查未結案工單**：team_protocol.md §1.11 規定已結案工單是歷史紀錄，
+    不改它也不引用它。涵蓋全部工單的話，012／013 會製造一個
+    只能靠違反 §1.11 才解得掉的紅燈。沿用 AC_EXEMPT_STATUSES，不另立一套。
+
+    邊界：只驗「這個角色存在嗎」，不驗「這個角色適合這張工單嗎」——
+    後者是判斷不是事實，不該進閘門。
+    """
+    roles = available_roles(root)
+    if roles is None:
+        # 沒有 .agent/skills/ 就沒有判準。這不是錯誤：kit 尚未安裝完成時
+        # 報一整排紅燈只會蓋掉真正的問題。
+        return []
+
+    legal = sorted(roles | {MANUAL_ASSIGNEE})
+    findings = []
+    for task in iter_tasks(root):
+        if task.get("status") in AC_EXEMPT_STATUSES:
+            continue
+        assignee = task.get("assignee")
+        if is_empty(assignee):
+            continue
+        value = str(assignee).strip()
+        if value in roles or value == MANUAL_ASSIGNEE:
+            continue
+        lineno = assignee_lineno(task)
+        location = f"{rel(root, task)}:{lineno}" if lineno else rel(root, task)
+        findings.append(
+            Finding(
+                location,
+                f"Assignee 不是實際存在的角色：{value!r}；"
+                f"合法值為 {legal}，或留空填 —",
+            )
+        )
+    return findings
+
+
 def aware(value):
     return value if value.tzinfo else value.replace(tzinfo=sb.TZ_TAIPEI)
 
@@ -270,6 +339,7 @@ CHECKS = [
     ("文件是否有死連結", check_dead_links),
     ("結案工單是否填了 Closed", check_closed_filled),
     ("AC 全打勾的工單是否已結案", check_ac_matches_status),
+    ("未結案工單的 Assignee 是否合法", check_assignee_valid),
 ]
 
 
