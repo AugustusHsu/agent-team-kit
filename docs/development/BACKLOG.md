@@ -1,7 +1,7 @@
 # 📋 待辦總表 (Backlog)
 
 > **工單來源目錄**：`docs/features/*/tasks/`
-> **工單總數**：34 張
+> **工單總數**：35 張
 
 ---
 
@@ -12,8 +12,9 @@
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
 |---|---------|------|------|-------------------|---------------|
 | 1 | PEV-DEV-AGENT-028 | 立 skill 撰寫標準：skill_conventions.md | process_evolution | system-architect | 🟢 Ready |
+| 2 | PEV-DEV-AGENT-032-FIX-001 | 更正 git_workflow.md §7.3 的反查對照表 | process_evolution | devops-engineer | 🟢 Ready |
 
-**小計**：1 張（In Progress: 0 / Ready: 1）
+**小計**：2 張（In Progress: 0 / Ready: 2）
 
 ---
 
@@ -69,9 +70,9 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟢 Ready | 1 | 3.1% |
-| ✅ Done | 31 | 96.9% |
-| **總計** | **32** | **100%** |
+| 🟢 Ready | 2 | 6.1% |
+| ✅ Done | 31 | 93.9% |
+| **總計** | **33** | **100%** |
 
 ### worktree_guard
 
