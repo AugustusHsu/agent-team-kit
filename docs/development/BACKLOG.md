@@ -11,9 +11,11 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
 |---|---------|------|------|-------------------|---------------|
-| 1 | PEV-DEV-AGENT-031 | precheck 新增 Assignee 合法性檢查 | process_evolution | devops-engineer | 🟢 Ready |
+| 1 | PEV-DEV-AGENT-026 | skill 與規範一致性的自動檢查：覆蓋率 ＋ 引用標題比對 | process_evolution | backend-developer | 🟢 Ready |
+| 2 | PEV-DEV-AGENT-027 | qa-automation-engineer 的技術棧內容拆成第 2 層 | process_evolution | system-architect | 🟢 Ready |
+| 3 | PEV-DEV-AGENT-031 | precheck 新增 Assignee 合法性檢查 | process_evolution | devops-engineer | 🟢 Ready |
 
-**小計**：1 張（In Progress: 0 / Ready: 1）
+**小計**：3 張（In Progress: 0 / Ready: 3）
 
 ---
 
@@ -31,11 +33,9 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
 |---|---------|------|------|-------------------|---------------|
-| 1 | PEV-DEV-AGENT-026 | skill 與規範一致性的自動檢查：覆蓋率 ＋ 引用標題比對 | process_evolution | backend-developer | ⏳ Pending |
-| 2 | PEV-DEV-AGENT-027 | qa-automation-engineer 的技術棧內容拆成第 2 層 | process_evolution | system-architect | ⏳ Pending |
-| 3 | PEV-DEV-AGENT-028 | 立 skill 撰寫標準：skill_conventions.md | process_evolution | system-architect | ⏳ Pending |
+| 1 | PEV-DEV-AGENT-028 | 立 skill 撰寫標準：skill_conventions.md | process_evolution | system-architect | ⏳ Pending |
 
-**小計**：3 張
+**小計**：1 張
 
 ---
 
@@ -75,8 +75,8 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟢 Ready | 1 | 3.1% |
-| ⏳ Pending | 3 | 9.4% |
+| 🟢 Ready | 3 | 9.4% |
+| ⏳ Pending | 1 | 3.1% |
 | ✅ Done | 28 | 87.5% |
 | **總計** | **32** | **100%** |
 

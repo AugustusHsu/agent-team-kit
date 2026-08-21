@@ -3,7 +3,7 @@
 **🔗 依附母任務 (Parent Task ID):** —（硬依賴 `PEV-DEV-AGENT-025`）
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** backend-developer
-**🚥 任務狀態 (Status):** Pending
+**🚥 任務狀態 (Status):** Ready
 **📅 建立時間 (Created):** 2026-08-18T21:40+08:00
 **✅ 完成時間 (Closed):** —
 **🔀 審查載體編號 (PR/MR):** —
