@@ -78,6 +78,24 @@ Read／Glob／Grep／Write／Edit／WebSearch／WebFetch，**刻意不保護 Bas
 省下金額的 1.2%，其餘來自無損的 tool schema 去重與 prefix cache。
 回滾就是移除 `~/.bashrc` 那行（備份 `~/.bashrc.bak-headroom-20260818`）再重啟 proxy。
 
+## 測試技術棧（`qa-automation-engineer` 第 2 層）
+
+該 Skill 只定義測試工程的原則，框架與路徑由本節補。缺這節它在本 repo 就是空的。
+
+- **框架與工具鏈**：Pytest（`uv` 管依賴，dev group 只有 `pytest>=8`）。
+  **不裝任何外部套件**——`kit/` 出貨的三支腳本只用標準函式庫，測試也跟著只用標準函式庫，
+  這樣才驗得到「使用者專案不必安裝任何東西」。
+  **全套件 0 處 mock**：一律用 `tmp_path` 造真實檔案、`subprocess` 實跑腳本再驗輸出，
+  因為要測的正是「腳本在真實檔案系統上做對了沒」，mock 掉就什麼都沒驗到。
+- **執行指令**：`uv run pytest`（`testpaths=["tests"]`、`addopts="-q"` 已寫在 `pyproject.toml`）。
+  單檔用 `uv run pytest tests/test_install.py`，單項用 `-k <中文測試名>`。
+  **沒有分層指令，也沒有覆蓋率設定**——套件小，全跑不到一秒。
+- **存放路徑與命名**：`tests/test_<被測腳本名>.py`，一支腳本對一支測試檔，**不分 unit／integration**。
+  共用 fixture 在 `tests/conftest.py`；`tests/fixture_project/` 是安裝測試用的假專案骨架。
+- **風格專屬**：測試函式名與 assert 訊息一律用**繁體中文**（`test_安裝後檔案與_kit_完全一致`），
+  docstring 寫「為什麼這條要存在」而不是複述程式碼。
+  參數化用 `pytest_generate_tests`，不用 `@pytest.mark.parametrize`。
+
 ## Commit
 
 工單分支（含 worktree）上的 commit 直接做，不用先問。**合併回整合分支或主線前**，
