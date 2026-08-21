@@ -11,11 +11,10 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
 |---|---------|------|------|-------------------|---------------|
-| 1 | PEV-DEV-AGENT-026 | skill 與規範一致性的自動檢查：覆蓋率 ＋ 引用標題比對 | process_evolution | backend-developer | 🟢 Ready |
-| 2 | PEV-DEV-AGENT-027 | qa-automation-engineer 的技術棧內容拆成第 2 層 | process_evolution | system-architect | 🟢 Ready |
-| 3 | PEV-DEV-AGENT-031 | precheck 新增 Assignee 合法性檢查 | process_evolution | devops-engineer | 🟢 Ready |
+| 1 | PEV-DEV-AGENT-027 | qa-automation-engineer 的技術棧內容拆成第 2 層 | process_evolution | system-architect | 🟢 Ready |
+| 2 | PEV-DEV-AGENT-031 | precheck 新增 Assignee 合法性檢查 | process_evolution | devops-engineer | 🟢 Ready |
 
-**小計**：3 張（In Progress: 0 / Ready: 3）
+**小計**：2 張（In Progress: 0 / Ready: 2）
 
 ---
 
@@ -45,20 +44,20 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) | 完成時間 |
 |---|---------|------|------|-------------------|---------------|----------|
-| 1 | PEV-DEV-AGENT-032 | 一輪多張工單的合併拓撲寫進 git_workflow.md §7 | process_evolution | devops-engineer | ✅ Done | 2026-08-19T14:53+08:00 |
-| 2 | PEV-DEV-AGENT-025 | 13 份 skill 全面盤點與對齊 | process_evolution | tech-lead | ✅ Done | 2026-08-18T23:55+08:00 |
-| 3 | PEV-DEV-AGENT-029 | 移除 kit 出貨內容裡硬編碼的 uv run | process_evolution | devops-engineer | ✅ Done | 2026-08-18T23:40+08:00 |
-| 4 | PEV-DEV-AGENT-030 | 修正 DN 取號指令：改從檔名取號 | process_evolution | scrum-master | ✅ Done | 2026-08-18T23:35+08:00 |
-| 5 | PEV-DEV-AGENT-024 | 填上 §1.12 第 2 層：把本 repo 的取證通道設定寫進 CLAUDE.md | process_evolution | devops-engineer | ✅ Done | 2026-08-18T08:20+08:00 |
-| 6 | PEV-DEV-AGENT-023 | 取證通道保真：從「審查者換讀法」升級成全角色的開工自檢 | process_evolution | backend-developer | ✅ Done | 2026-08-18T07:27+08:00 |
-| 7 | PEV-DEV-AGENT-022 | precheck 與 kit 自身測試收斂：同一個盲點兩份實作，再補兩項漏掉的檢查 | process_evolution | backend-developer | ✅ Done | 2026-08-18T06:35+08:00 |
-| 8 | PEV-DEV-AGENT-021 | commit 規範送不到 Agent 手上：CLAUDE.md 只指路，沒帶格式 | process_evolution | devops-engineer | ✅ Done | 2026-08-18T06:05+08:00 |
-| 9 | PEV-DEV-AGENT-002 | README 補上 git 流程能力對照表，讓換 git server 的人一眼看懂 | process_evolution | devops-engineer | ✅ Done | 2026-08-18T05:45+08:00 |
-| 10 | PEV-DEV-AGENT-020 | 清帳：冰箱卡點更新，舊 design_note 轉為歷史索引 | process_evolution | scrum-master | ✅ Done | 2026-08-18T05:31+08:00 |
+| 1 | PEV-DEV-AGENT-026 | skill 與規範一致性的自動檢查：覆蓋率 ＋ 引用標題比對 | process_evolution | backend-developer | ✅ Done | 2026-08-21T21:03+08:00 |
+| 2 | PEV-DEV-AGENT-032 | 一輪多張工單的合併拓撲寫進 git_workflow.md §7 | process_evolution | devops-engineer | ✅ Done | 2026-08-19T14:53+08:00 |
+| 3 | PEV-DEV-AGENT-025 | 13 份 skill 全面盤點與對齊 | process_evolution | tech-lead | ✅ Done | 2026-08-18T23:55+08:00 |
+| 4 | PEV-DEV-AGENT-029 | 移除 kit 出貨內容裡硬編碼的 uv run | process_evolution | devops-engineer | ✅ Done | 2026-08-18T23:40+08:00 |
+| 5 | PEV-DEV-AGENT-030 | 修正 DN 取號指令：改從檔名取號 | process_evolution | scrum-master | ✅ Done | 2026-08-18T23:35+08:00 |
+| 6 | PEV-DEV-AGENT-024 | 填上 §1.12 第 2 層：把本 repo 的取證通道設定寫進 CLAUDE.md | process_evolution | devops-engineer | ✅ Done | 2026-08-18T08:20+08:00 |
+| 7 | PEV-DEV-AGENT-023 | 取證通道保真：從「審查者換讀法」升級成全角色的開工自檢 | process_evolution | backend-developer | ✅ Done | 2026-08-18T07:27+08:00 |
+| 8 | PEV-DEV-AGENT-022 | precheck 與 kit 自身測試收斂：同一個盲點兩份實作，再補兩項漏掉的檢查 | process_evolution | backend-developer | ✅ Done | 2026-08-18T06:35+08:00 |
+| 9 | PEV-DEV-AGENT-021 | commit 規範送不到 Agent 手上：CLAUDE.md 只指路，沒帶格式 | process_evolution | devops-engineer | ✅ Done | 2026-08-18T06:05+08:00 |
+| 10 | PEV-DEV-AGENT-002 | README 補上 git 流程能力對照表，讓換 git server 的人一眼看懂 | process_evolution | devops-engineer | ✅ Done | 2026-08-18T05:45+08:00 |
 
 **小計**：10 張（Done: 10 / Canceled: 0）
 
-> 📦 另有 20 張已歸檔工單未顯示。
+> 📦 另有 21 張已歸檔工單未顯示。
 
 ---
 
@@ -75,9 +74,9 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟢 Ready | 3 | 9.4% |
+| 🟢 Ready | 2 | 6.2% |
 | ⏳ Pending | 1 | 3.1% |
-| ✅ Done | 28 | 87.5% |
+| ✅ Done | 29 | 90.6% |
 | **總計** | **32** | **100%** |
 
 ### worktree_guard

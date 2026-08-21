@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** —（硬依賴 `PEV-DEV-AGENT-025`）
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** backend-developer
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-18T21:40+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-21T21:03+08:00
+**🔀 審查載體編號 (PR/MR):** —（見 `../reviews/PEV-DEV-AGENT-026.md`，git_workflow.md §8.3 降級）
 
 ## 1. 任務描述 (Description)
 
@@ -43,23 +43,23 @@ A 對現況命中 0 筆；在「§1.9 後插入一節、1.10/1.11/1.12 各往下
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：檢查 B 實作於 `tests/test_kit_integrity.py`——掃出 `team_protocol.md`
+- [x] AC-01：檢查 B 實作於 `tests/test_kit_integrity.py`——掃出 `team_protocol.md`
       中標「適用全角色」的章節，斷言 13 份 skill 全部引用。
-- [ ] AC-02：檢查 A+ 實作於同檔——skill 內每筆 `§X.Y 標題` 引用，
+- [x] AC-02：檢查 A+ 實作於同檔——skill 內每筆 `§X.Y 標題` 引用，
       編號需存在於 `team_protocol.md` 且標題主體相符。
-- [ ] AC-03：**負向對照四項全部實跑，輸出留進審查紀錄**：
+- [x] AC-03：**負向對照四項全部實跑，輸出留進審查紀錄**：
       - 拿掉任一份 skill 的 §1.12 引用 → B 轉紅
       - 把某筆引用改成 `§9.9` → A+ 轉紅
       - 模擬章節重編號（插入一節、後續往下推）→ A+ 轉紅
       - 全部還原 → 兩項皆綠
-- [ ] AC-04：失敗訊息要指名**哪一份 skill、哪一行、期望什麼**，
+- [x] AC-04：失敗訊息要指名**哪一份 skill、哪一行、期望什麼**，
       不得只說「不一致」。改壞後的實際輸出留進審查紀錄佐證。
-- [ ] AC-05：檢查 B 的已知限制寫進測試的 docstring——它依賴規範作者記得寫
+- [x] AC-05：檢查 B 的已知限制寫進測試的 docstring——它依賴規範作者記得寫
       「適用全角色」四個字，沒寫的章節抓不到。防的是「規範寫了但 skill 沒跟上」，
       不是「規範作者忘了標記適用範圍」。
-- [ ] AC-06：**不落在 `precheck.py`**（見 §2 理由）。
-- [ ] AC-07：`uv run pytest` 全綠；`python3 .agent/scripts/precheck.py` 6 項全綠。
-- [ ] AC-08：`BACKLOG.md` 重新生成，含本工單。
+- [x] AC-06：**不落在 `precheck.py`**（見 §2 理由）。
+- [x] AC-07：`uv run pytest` 全綠；`python3 .agent/scripts/precheck.py` 6 項全綠。
+- [x] AC-08：`BACKLOG.md` 重新生成，含本工單。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
