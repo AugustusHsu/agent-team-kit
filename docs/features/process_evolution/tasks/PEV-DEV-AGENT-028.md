@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** —（硬依賴 `PEV-DEV-AGENT-025`／`026`／`027`）
 **🏷️ 任務類型 (Task Type):** docs_generation
 **👤 負責人 (Assignee):** system-architect
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-18T21:40+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-22T02:20+08:00
+**🔀 審查載體編號 (PR/MR):** —（見 ../reviews/PEV-DEV-AGENT-028.md，git_workflow.md §8.3 降級）
 
 ## 1. 任務描述 (Description)
 
@@ -80,17 +80,19 @@ product-manager、qa-test-planner、security-engineer、system-architect、tech-
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：`kit/docs/standards/skill_conventions.md` 建立，涵蓋 §2 表列五項。
-- [ ] AC-02：**同步登記進 `kit/docs/DOCS_MAP.md`**，否則
+- [x] AC-01：`kit/docs/standards/skill_conventions.md` 建立，涵蓋 §2 表列七項（原寫「五項」，`027` 補了「自我引用格式」後為七列，
+      依 `team_protocol.md` §1.8「`Ready` → 直接修正規格」於執行時更正）。
+- [x] AC-02：**同步登記進 `kit/docs/DOCS_MAP.md`**，否則
       `test_standards_文件都登記在_DOCS_MAP` 會失敗（登記檢查只涵蓋 `standards/`）。
-- [ ] AC-03：每一條規則都要能回答「不寫這條會出什麼錯」，並引用
+- [x] AC-03：每一條規則都要能回答「不寫這條會出什麼錯」，並引用
       `025`～`027` 的實際案例；寫不出案例的規則不收。
-- [ ] AC-04：**不與 `team_protocol.md` 重複表述**——同一條規則不得有兩份表述
+- [x] AC-04：**不與 `team_protocol.md` 重複表述**——同一條規則不得有兩份表述
       （§1.11 文檔權威階序）。重疊處只指路。
-- [ ] AC-05：13 份 skill 逐份對照新標準，落差列進審查紀錄；
+- [x] AC-05：13 份 skill 逐份對照新標準，落差列進審查紀錄；
       **本張不修**（修的話 `025` 就白做了），落差另開工單或收進標準的「已知例外」。
-- [ ] AC-06：`uv run pytest` 全綠；`python3 .agent/scripts/precheck.py` 6 項全綠。
-- [ ] AC-07：`BACKLOG.md` 重新生成，含本工單。
+- [x] AC-06：`uv run pytest` 全綠；`python3 .agent/scripts/precheck.py` 七項全綠
+      （原寫「6 項」，`031` 新增 Assignee 檢查後為七項，同上更正）。
+- [x] AC-07：`BACKLOG.md` 重新生成，含本工單。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
