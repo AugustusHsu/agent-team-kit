@@ -290,15 +290,22 @@ PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
 - **第一行**：共用前綴只寫一次，形如 `[ABC-DEV-BE-003／002／001]`。
 - **Body**：**每張工單各一行、寫完整 ID**，沿用 `- **<TaskID>**：<做了什麼>`。
 
-Body 的完整 ID **不是為了好看，是反查的唯一入口**。第一行縮寫時實測：
+Body 的完整 ID **不是為了好看，是主線視角下反查的唯一入口**。第一行縮寫時實測：
 
 | 查法 | 結果 |
 |---|---|
-| `git log --grep=ABC-DEV-BE-002` | ✅ 找得到那顆 merge commit |
-| `git log --oneline \| grep ABC-DEV-BE-002` | ❌ **找不到**——`--oneline` 只給第一行 |
+| `git log --grep=ABC-DEV-BE-002` | ✅ 找得到 merge commit **與工單自己那顆 commit** |
+| `git log --oneline \| grep ABC-DEV-BE-002` | ✅ 找得到工單自己那顆——`--no-ff` 保留了它 |
+| `git log --oneline --first-parent \| grep ABC-DEV-BE-002` | ❌ **找不到**——側支在這個視角下全部隱形 |
 
-`--oneline` 截掉 Body，所以慣用的 `--oneline | grep <TaskID>` 在本形狀下會**查無此工單**。
-Body 若也沒寫完整 ID，`--grep` 這條路一併斷掉，那張工單就再也反查不到——
+前兩列查得到，是因為 `--no-ff` 保留了側支，而工單自己那顆 commit 的第一行
+帶著完整 Task ID（§4）。**即使工單分支已經 `branch -d` 回收**，該 commit 仍在
+merge 之後的可達歷史裡，兩種查法都掃得到。
+
+真正失效的是第三列。`git log --oneline --first-parent` 是 §7.2 的一輪一行，
+也是 §8.3 在沒有 PR 時明文建議的主線讀法——該視角下只剩 merge commit 那一行。
+Body 若不列完整 ID，這一行就只有縮寫，**「這張工單屬於哪一輪」再也無從得知**：
+§7.1 把一輪收成一顆 merge 之後，Body 是唯一還記得住工單粒度的地方。
 §6.1「不能只靠 reflog 補救」的理由在這裡同樣成立。
 
 合併訊息一樣要先經使用者當次複查同意（§6.1）。

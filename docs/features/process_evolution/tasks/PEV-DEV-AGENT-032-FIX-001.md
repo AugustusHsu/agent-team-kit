@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** —（回歸來源工單：`PEV-DEV-AGENT-032`）
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** devops-engineer
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-22T01:12+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-22T01:52+08:00
+**🔀 審查載體編號 (PR/MR):** —（見 ../reviews/PEV-DEV-AGENT-032-FIX-001.md，git_workflow.md §8.3 降級）
 
 ## 1. 任務描述 (Description)
 
@@ -119,20 +119,20 @@ ba4d7e8 fix: [ABC-DEV-BE-002] 第二張          ← §7.3 說「--grep 這條�
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：§7.3 對照表改為 §2.1 的三列，`--first-parent` 那列明列出來。
-- [ ] AC-02：`:300-302` 的推論段改寫——刪掉「查無此工單」與「`--grep` 一併斷掉」
+- [x] AC-01：§7.3 對照表改為 §2.1 的三列，`--first-parent` 那列明列出來。
+- [x] AC-02：`:300-302` 的推論段改寫——刪掉「查無此工單」與「`--grep` 一併斷掉」
       兩個與實測不符的敘述，換成 §1.4 的正確理由（`--first-parent` 是 §8.3 的主線讀法）。
-- [ ] AC-03：§7.3 的**兩條規定維持不變**（第一行縮寫、Body 逐張列完整 ID），
+- [x] AC-03：§7.3 的**兩條規定維持不變**（第一行縮寫、Body 逐張列完整 ID），
       diff 裡不得出現放寬。
-- [ ] AC-04：**沙盒實測重跑一次並把輸出留進審查紀錄**——三種查法各自的結果，
+- [x] AC-04：**沙盒實測重跑一次並把輸出留進審查紀錄**——三種查法各自的結果，
       外加「Body 不列完整 ID」的對照組。只引用本張 §1.2 不算通過。
-- [ ] AC-05：`PEV-DEV-AGENT-032.md` 審查紀錄 §5.2 的 C／D 矛盾要處理。
+- [x] AC-05：`PEV-DEV-AGENT-032.md` 審查紀錄 §5.2 的 C／D 矛盾要處理。
       **不得改寫該檔的既有內容**（`team_protocol.md` §1.11 已結案工單是歷史紀錄），
       處置方式（例如在本張的審查紀錄裡記明）由執行時裁定並寫出理由。
-- [ ] AC-06：`grep -c '\[平台相關\]' kit/docs/standards/git_workflow.md` 仍為 9。
-- [ ] AC-07：`./install.sh . --upgrade` 已跑，待合併 0；`uv run pytest` 全綠；
+- [x] AC-06：`grep -c '\[平台相關\]' kit/docs/standards/git_workflow.md` 仍為 9。
+- [x] AC-07：`./install.sh . --upgrade` 已跑，待合併 0；`uv run pytest` 全綠；
       `python3 .agent/scripts/precheck.py` 七項全綠。
-- [ ] AC-08：`BACKLOG.md` 重新生成，含本工單。
+- [x] AC-08：`BACKLOG.md` 重新生成，含本工單。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
