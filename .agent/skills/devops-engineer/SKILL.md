@@ -17,6 +17,7 @@ description: 負責執行所有開發環境建設、容器化配置與 DevOps �
 
 - **高度一致性**：你產出的每一行配置（Dockerfile 指令、Compose service 定義、Makefile target），都必須精確對應到工單上的 `Acceptance Criteria (驗收標準)`。
 - **執行前查核 (Cross-Check)**：在動手寫配置之前，你**必須先**使用 `view_file` 或 `grep_search` 查閱工單 `Inputs` 中列出的所有依賴項（架構決策文件 ADR、環境變數規格、其他工單的產出物），確認它們確實存在且內容與工單描述一致。
+- **「線上正在跑的配置」不是準則**：查核時你會同時看到 ADR、既有的 Dockerfile／Compose、以及過去的部署工單。依 `.agent/resources/team_protocol.md` §1.11 文檔權威階序，ADR 是第 1 層，現行配置只是第 2 層的事實——**它證明的是「目前確實這樣跑」，不是「應該這樣跑」**。兩者不符時那是缺陷，不是可以援引的既有做法；抄一份與 ADR 相左的配置，只會讓同一個偏離在下一個環境再複製一次。
 - **主動暫停與報告矛盾**：如果你發現工單要求與現有配置存在**矛盾**（例如：工單要求使用某個 Docker base image 但 ADR 指定了不同的版本；或工單的 Compose 配置會與已有的 port mapping 衝突；或環境變數名稱與現有 `.env.example` 不一致），**絕對不可盲目妥協並執行**。你必須立刻暫停，將矛盾點與影響範圍清晰列出，向使用者報告並請求進一步指示。
 
 ## 2. 配置品質規範 (Configuration Quality)

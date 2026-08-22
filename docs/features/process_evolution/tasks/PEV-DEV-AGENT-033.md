@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** —（硬依賴 `PEV-DEV-AGENT-028`）
 **🏷️ 任務類型 (Task Type):** docs_generation
 **👤 負責人 (Assignee):** tech-lead
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-22T02:10+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-22T04:05+08:00
+**🔀 審查載體編號 (PR/MR):** 分支 PEV-DEV-AGENT-033
 
 ## 1. 任務描述 (Description)
 
@@ -68,21 +68,21 @@
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：§1.10 補進缺的 8 份，每份的敘述**針對該角色**，不是共用段落。
-- [ ] AC-02：§1.11 補進 13 份，同上。
-- [ ] AC-03：引用一律用標準第 1 節的格式（檔名＋編號＋標題），
+- [x] AC-01：§1.10 補進缺的 8 份，每份的敘述**針對該角色**，不是共用段落。
+- [x] AC-02：§1.11 補進 13 份，同上。
+- [x] AC-03：引用一律用標準第 1 節的格式（檔名＋編號＋標題），
       `test_skill_引用守則的編號與標題都要對得上` 全綠。
-- [ ] AC-04：`frontend-developer/SKILL.md:37` 改寫為技術棧中立，
+- [x] AC-04：`frontend-developer/SKILL.md:37` 改寫為技術棧中立，
       `description` 欄位不動；審查紀錄要寫出改寫後對非 React 專案為何不再是錯誤指令。
-- [ ] AC-05：**補齊之後**才在守則 §1.10／§1.11 標「適用全角色」，
+- [x] AC-05：**補齊之後**才在守則 §1.10／§1.11 標「適用全角色」，
       且標記前後各跑一次 `uv run pytest`，兩次輸出都留進審查紀錄
       （標記前應已全綠——若標記前就紅，代表補寫沒做完）。
-- [ ] AC-06：超過 150 行的 skill 檔頭都有超限理由。
-- [ ] AC-07：任兩份 skill 的新增段落不得逐字重複；審查紀錄附最長共同子字串的實測。
+- [x] AC-06：超過 150 行的 skill 檔頭都有超限理由。
+- [x] AC-07：任兩份 skill 的新增段落不得逐字重複；審查紀錄附最長共同子字串的實測。
       **這是人工判準**（標準第 6 節），數字只作參考、不設閘門。
-- [ ] AC-08：`uv run pytest` 全綠；`python3 .agent/scripts/precheck.py` 七項全綠；
+- [x] AC-08：`uv run pytest` 全綠；`python3 .agent/scripts/precheck.py` 七項全綠；
       `./install.sh . --upgrade` 待合併 0。
-- [ ] AC-09：`BACKLOG.md` 重新生成，含本工單。
+- [x] AC-09：`BACKLOG.md` 重新生成，含本工單。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 

@@ -157,6 +157,8 @@ Pending → Ready → In Progress → In Review → Done
 
 ### 1.10 Commit 閘門 (🔒 HITL Gate before Commit)
 
+**適用全角色。**「有產出就會 commit」對十三份 skill 都成立——上游側的 BRD／PRD／HLD／wireframe 同樣是檔案，同樣要進版控；差別只在改的是什麼，不在要不要過閘門。
+
 **閘門在「離開工單分支」的那一刻，不在每一顆 commit。**
 性質同 §1.7，差別在 §1.7 把關「開工前」，本節把關「進入主線前」。
 
@@ -194,6 +196,8 @@ commit message 的格式、Emoji 對照與**禁止寫入的內容**（AI 署名 
 > [`docs/standards/git_workflow.md`](../../docs/standards/git_workflow.md) §3.1／§4。
 
 ### 1.11 文檔權威階序 (📚 Source of Truth Hierarchy)
+
+**適用全角色。** 每個角色都得回答「現在的規格是什麼」，而各自最容易錯認的那一層並不相同——施工側常把程式碼現況當準則，上游側常把已結案工單或未收斂的 Design Note 當定案。
 
 查證「現在的規格是什麼」時，權威由高至低：
 
