@@ -5,6 +5,8 @@ description: 當使用者需要「安排 Sprint 規劃」、「拆解任務 (Bre
 
 # Scrum Master 工作指南
 
+> **📏 篇幅例外**：本檔 172 行，超過 `docs/standards/skill_conventions.md` 第 7 節的 150 行軟上限。**理由**：Scrum Master 是唯一貫穿工單生命週期全程的角色——開單前置查核、狀態機遷移、子母任務相依、BACKLOG 重生、退回處置各自都有不可省略的操作步驟。拆檔會讓「開單當下該查什麼」與「收尾該做什麼」分離，而這兩件事必須在同一次閱讀裡都在場。
+
 > **📋 前置閱讀**：執行任務前，請先閱讀團隊共用的協作守則 `.agent/resources/team_protocol.md`，了解工單生命週期、角色交接規範與命名約定。
 
 身為專案的 Scrum Master AI Agent，你的核心職責是將任何形式的「需求 (BRD/PRD)」、「系統架構設計 (HLD/LLD)」或「使用者的口頭對話指派」，精確地轉化為系統可追蹤的**結構型工單 (Task Tickets)**。
@@ -161,3 +163,10 @@ Scrum Master 身為 Backlog 的唯一全域管理者，必須確保 `docs/develo
    腳本輸出至 stdout，Agent 可讀取後再依需求調整（如處理 ⚠️ 瓶頸標示、冰箱區塊等手動維護的內容）。
 6. **定期校對**：當使用者要求校對 Backlog 時，執行 `scan_backlog.py --format json` 取得最新狀態，比對 BACKLOG.md 的內容，修正任何不一致的記錄。
 7. **確認你讀到的是腳本的原始輸出**：上面這些指令的輸出**走的是 shell**，而 shell 通常不在中間層的保護名單內（`.agent/resources/team_protocol.md` §1.12 取證通道保真）——跑 `scan_backlog.py` 之前先做一次自檢。BACKLOG 是「專案現況唯一來源」，而它整份都是機器生成的表格，**表格正是最容易被靜默改寫的形狀**。統計摘要被改寫時，錯的不是一張表，是全專案對自己進度的認知。
+
+---
+
+## 開單取材與流程檔案的提交
+
+- **工單 `Inputs` 只能指向第 1 層**：開單時最順手的動作，是把上一張相似工單整段複製過來當 Inputs。依 `.agent/resources/team_protocol.md` §1.11 文檔權威階序，那是第 4 層——已結案工單**不改、也不引用**；需要引用進行中的工作時，只引開放工單並註明其 Status。Design Note 不在階序內，同樣不得作為 Inputs，它記錄的是還沒收斂的探索。
+- **改一格 Status 也是改檔案**：Scrum Master 是全團隊最常「順手改一格就提交」的角色，而那些改動往往不在任何工單分支上。依 `.agent/resources/team_protocol.md` §1.10 Commit 閘門，豁免只涵蓋工單分支上的中間 commit；**直接在整合分支或主線上動工單檔與 `BACKLOG.md`，一律需要事前同意**。
