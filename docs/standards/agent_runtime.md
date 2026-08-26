@@ -200,6 +200,35 @@ GitHub 也不是一個布林值：
 人工確認使用 `--manual-profile ID=STATUS` 或 `--manual-integration ID=STATUS`，同樣有 adapter
 定義的到期時間。所有探針禁止 push、開 PR、傳訊息、修改 Connector 或購買／續訂。
 
+## 12. Route、explain 與失效重路由
+
+基本路由與單一候選解釋：
+
+```bash
+python3 .agent/scripts/agent_runtime.py route --task-profile implementation_local
+python3 .agent/scripts/agent_runtime.py explain \
+  --task-profile implementation_local --execution-profile codex-cli
+```
+
+route 的資料流固定為 §4 的六階段。每個 execution profile 都保留：是否合格、Availability、
+排除理由、分數與每個加減分因子。硬性能力或政策不合格時 `score` 必須是 `null`，不能讓偏好
+或高分把它救回來。初始 registry 尚未提供可比較的實際價格／latency／context 數值，因此三者
+明列 `metadata_unknown: 0`；**誠實的零分比憑供應商印象偷排更可解釋**。
+
+Availability 的例外只有一個：fresh cache 到期後，純本機唯讀任務可把 `unknown` 留在候選中，
+但扣分；有 repo write、shell、測試、外部連線或長時間副作用的任務一律排除 unknown。
+
+使用者可用 `--override-profile` 在**合格候選**間改選；覆寫不能繞過硬能力或資料政策。預設
+scope 是單次。`round`／`project` 必須同時寫 `--override-expires-at`（時間或明確事件），
+避免永久偏好在訂閱失效後仍靜默作用。
+
+中途失效時 route 接受原 Task ID、branch、HEAD、AC、驗證與 failure type，排除失效 profile
+後產生 handoff record。工單與 Assignee 不變。即使使用者開啟自動接手，也只有**純讀且無外部
+副作用**的任務可以自動；其餘輸出 `requires_user_confirmation: true`。
+
+人類輸出適合當下判讀；`--json` 是工單與審查載體保存決策證據的介面。零候選回傳非零狀態，
+並逐一列出缺少能力／政策／可用性原因，不選 unknown 或違規 cloud 填空。
+
 ## 相關文件
 
 - `.agent/resources/agent_runtime/task_profiles.json`——任務輪廓唯一正版

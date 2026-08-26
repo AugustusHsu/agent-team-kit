@@ -937,6 +937,293 @@ def _add_health_arguments(command):
     command.add_argument("--json", action="store_true")
 
 
+def _profile_by_id(tasks, profile_id):
+    for profile in tasks["profiles"]:
+        if profile["id"] == profile_id:
+            return profile
+    raise RuntimeConfigError(f"route:$.task_profile：未知 task profile {profile_id!r}")
+
+
+def _effective_availability(item, now):
+    if not item:
+        return "unknown", "沒有本機 probe state"
+    disabled = item.get("disabled_until")
+    if disabled:
+        try:
+            if datetime.fromisoformat(disabled) > now.astimezone(timezone.utc):
+                return "unavailable", f"使用者停用到 {disabled}"
+        except ValueError:
+            return "unavailable", "disabled_until 格式損壞"
+    if not _is_fresh(item, now):
+        return "unknown", f"cache 已於 {item.get('expires_at', '未知時間')} 到期"
+    return item.get("status", "unknown"), item.get("evidence", {}).get("summary", "沒有摘要")
+
+
+def _policy_allows(policy, data_class, data_classes):
+    if policy == "forbid":
+        return False
+    if policy == "allow":
+        return True
+    # conditional：public／internal 可自動通過；sensitive／restricted 必須另有 allow。
+    return data_classes.index(data_class) < data_classes.index("sensitive")
+
+
+def _is_pure_local_read(required):
+    side_effects = {
+        "repo_write",
+        "shell_execute",
+        "test_execute",
+        "external_connectors",
+        "github_access",
+        "visual_interaction",
+        "long_running",
+        "noninteractive",
+    }
+    return not (set(required) & side_effects)
+
+
+def _score_candidate(manifest, task, availability, preferred):
+    """簡單且可逐項解釋的層內分數；它永遠不讓已排除候選復活。"""
+    details = []
+    score = 100
+    availability_score = {"verified": 30, "degraded": 10, "unknown": -20}[availability]
+    score += availability_score
+    details.append({"factor": "availability", "delta": availability_score})
+    if manifest["id"] in preferred:
+        preference_score = max(1, 20 - preferred.index(manifest["id"]))
+        score += preference_score
+        details.append({"factor": "project_preference", "delta": preference_score})
+    optional = len(set(task["optional_capabilities"]) & set(manifest["capabilities"]))
+    score += optional
+    details.append({"factor": "optional_capabilities", "delta": optional})
+    # registry 尚未宣告可比較的實際價格／latency；誠實記 0，不用供應商印象偷排。
+    details.extend(
+        [
+            {"factor": "cost_metadata_unknown", "delta": 0},
+            {"factor": "latency_metadata_unknown", "delta": 0},
+            {"factor": "context_metadata_unknown", "delta": 0},
+        ]
+    )
+    return score, details
+
+
+def route_decision(
+    root,
+    task_profile_id,
+    data_class=None,
+    required_overrides=None,
+    override_profile=None,
+    failed_profile=None,
+    now=None,
+    env=None,
+):
+    """純函數式路由核心：相同 registry／policy／state 輸入必定得到相同結果。"""
+    tasks, adapters = load_registry(root)
+    policy = effective_policy(root)
+    state, _ = load_state(root, env)
+    task = _profile_by_id(tasks, task_profile_id)
+    now = now or datetime.now(timezone.utc)
+    data_class = data_class or task["default_data_class"]
+    if data_class not in tasks["data_classes"]:
+        raise RuntimeConfigError(f"route:$.data_class：未知資料級別 {data_class!r}")
+    required = list(dict.fromkeys([*task["required_capabilities"], *(required_overrides or [])]))
+    unknown_capabilities = sorted(set(required) - set(tasks["capabilities"]))
+    if unknown_capabilities:
+        raise RuntimeConfigError(f"route:$.require_capability：未知能力 {unknown_capabilities}")
+    preferred = policy["preferred_profiles"]
+    candidates = []
+    for profile_id in sorted(adapters):
+        manifest = adapters[profile_id]
+        excluded = []
+        notes = []
+        if profile_id not in policy["enabled_profiles"]:
+            excluded.append("未在專案政策啟用")
+        if profile_id == failed_profile:
+            excluded.append("本次失效 profile 已停用並等待重新探測")
+        missing = sorted(set(required) - set(manifest["capabilities"]))
+        if missing:
+            excluded.append(f"缺少硬性能力：{missing}")
+        if manifest["execution_location"] == "cloud":
+            if not _policy_allows(task["cloud_policy"], data_class, tasks["data_classes"]):
+                excluded.append(f"task cloud policy={task['cloud_policy']} 不允許 {data_class}")
+            if not _policy_allows(policy["cloud_policy"], data_class, tasks["data_classes"]):
+                excluded.append(f"project cloud policy={policy['cloud_policy']} 不允許 {data_class}")
+        if "external_connectors" in required:
+            if not _policy_allows(task["connector_policy"], data_class, tasks["data_classes"]):
+                excluded.append(f"task connector policy={task['connector_policy']} 不允許 {data_class}")
+            if not _policy_allows(policy["connector_policy"], data_class, tasks["data_classes"]):
+                excluded.append(f"project connector policy={policy['connector_policy']} 不允許 {data_class}")
+        availability, availability_reason = _effective_availability(
+            state["profiles"].get(profile_id), now
+        )
+        notes.append(f"availability={availability}：{availability_reason}")
+        if availability == "unavailable":
+            excluded.append("目前已確認 unavailable")
+        elif availability == "unknown":
+            allow_unknown = (
+                manifest["execution_location"] == "local" and _is_pure_local_read(required)
+            )
+            if not allow_unknown:
+                excluded.append("沒有 fresh verified／degraded 證據")
+            else:
+                notes.append("純本機唯讀任務依政策容許 unknown 候選，但會受分數懲罰")
+        eligible = not excluded
+        score = None
+        score_details = []
+        if eligible:
+            score, score_details = _score_candidate(
+                manifest, task, availability, preferred
+            )
+        candidates.append(
+            {
+                "id": profile_id,
+                "eligible": eligible,
+                "availability": availability,
+                "score": score,
+                "score_details": score_details,
+                "excluded_reasons": excluded,
+                "notes": notes,
+            }
+        )
+    eligible = [item for item in candidates if item["eligible"]]
+    eligible.sort(key=lambda item: (-item["score"], item["id"]))
+    selected = eligible[0]["id"] if eligible else None
+    override = None
+    if override_profile:
+        item = next((candidate for candidate in candidates if candidate["id"] == override_profile), None)
+        if item is None:
+            raise RuntimeConfigError(f"route:$.override_profile：未知 profile {override_profile!r}")
+        if not item["eligible"]:
+            raise RuntimeConfigError(
+                f"route:$.override_profile：{override_profile!r} 不合格，"
+                + "；".join(item["excluded_reasons"])
+            )
+        selected = override_profile
+        override = {"profile": override_profile, "applied": True}
+    return {
+        "task_profile": task_profile_id,
+        "data_class": data_class,
+        "required_capabilities": required,
+        "selected_profile": selected,
+        "candidates": candidates,
+        "override": override,
+    }
+
+
+def _handoff_from_args(args, selected_profile, required_capabilities):
+    if not args.failed_profile:
+        return None
+    required = {
+        "task_id": args.task_id,
+        "branch": args.branch,
+        "head": args.head,
+        "failure_type": args.failure_type,
+    }
+    missing = [key for key, value in required.items() if not value]
+    if missing:
+        raise RuntimeConfigError(
+            "reroute：使用 --failed-profile 時還缺 " + "、".join(f"--{key.replace('_', '-')}" for key in missing)
+        )
+    auto_allowed = (
+        args.allow_auto_read_handoff
+        and not args.external_side_effects
+        and selected_profile is not None
+        and _is_pure_local_read(required_capabilities)
+    )
+    return {
+        **required,
+        "completed_ac": args.completed_ac,
+        "pending_ac": args.pending_ac,
+        "validations": args.validation,
+        "failed_profile": args.failed_profile,
+        "suggested_profile": selected_profile,
+        "external_side_effects": args.external_side_effects,
+        "auto_handoff_allowed": auto_allowed,
+        "requires_user_confirmation": not auto_allowed,
+    }
+
+
+def _validate_override_args(args):
+    if not args.override_profile:
+        if args.override_scope != "single" or args.override_expires_at:
+            raise RuntimeConfigError("route：override scope／到期條件需要同時提供 --override-profile")
+        return None
+    if args.override_scope != "single" and not args.override_expires_at:
+        raise RuntimeConfigError(
+            "route：round／project override 必須明示 --override-expires-at 或到期條件"
+        )
+    return {
+        "profile": args.override_profile,
+        "scope": args.override_scope,
+        "expires_at": args.override_expires_at,
+    }
+
+
+def route_runtime(args, env=None, now=None):
+    root = args.root.resolve()
+    override = _validate_override_args(args)
+    decision = route_decision(
+        root,
+        args.task_profile,
+        data_class=args.data_class,
+        required_overrides=args.require_capability,
+        override_profile=args.override_profile,
+        failed_profile=args.failed_profile,
+        now=now,
+        env=env,
+    )
+    if override:
+        decision["override"] = {**override, "applied": True}
+    decision["handoff"] = _handoff_from_args(
+        args, decision["selected_profile"], decision["required_capabilities"]
+    )
+    if args.json:
+        print(json.dumps(decision, ensure_ascii=False, indent=2))
+    else:
+        print(f"task profile：{decision['task_profile']}（{decision['data_class']}）")
+        print(f"建議 execution profile：{decision['selected_profile'] or '無合格候選'}")
+        for item in decision["candidates"]:
+            if item["eligible"]:
+                print(f"  ✅ {item['id']} score={item['score']} availability={item['availability']}")
+            else:
+                print(f"  ❌ {item['id']} — {'；'.join(item['excluded_reasons'])}")
+    return decision
+
+
+def explain_runtime(args, env=None, now=None):
+    decision = route_decision(
+        args.root.resolve(),
+        args.task_profile,
+        data_class=args.data_class,
+        required_overrides=args.require_capability,
+        now=now,
+        env=env,
+    )
+    item = next(
+        (candidate for candidate in decision["candidates"] if candidate["id"] == args.execution_profile),
+        None,
+    )
+    if item is None:
+        raise RuntimeConfigError(f"explain：未知 execution profile {args.execution_profile!r}")
+    output = {
+        "task_profile": decision["task_profile"],
+        "data_class": decision["data_class"],
+        "required_capabilities": decision["required_capabilities"],
+        "execution_profile": item,
+    }
+    if args.json:
+        print(json.dumps(output, ensure_ascii=False, indent=2))
+    else:
+        print(f"{item['id']}：{'合格' if item['eligible'] else '不合格'}")
+        for reason in item["excluded_reasons"]:
+            print(f"  排除：{reason}")
+        for note in item["notes"]:
+            print(f"  證據：{note}")
+        for detail in item["score_details"]:
+            print(f"  分數：{detail['factor']} {detail['delta']:+d}")
+    return output
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description="跨代理 runtime 管理器")
     parser.add_argument(
@@ -963,6 +1250,30 @@ def build_parser():
     refresh = commands.add_parser("refresh", help="重跑過期或指定的探針")
     _add_health_arguments(refresh)
     refresh.add_argument("--force", action="store_true", help="忽略 TTL，重跑選定探針")
+    route = commands.add_parser("route", help="依能力、政策與可用性選擇 execution profile")
+    route.add_argument("--task-profile", required=True)
+    route.add_argument("--data-class")
+    route.add_argument("--require-capability", action="append", default=[])
+    route.add_argument("--override-profile")
+    route.add_argument("--override-scope", choices=["single", "round", "project"], default="single")
+    route.add_argument("--override-expires-at")
+    route.add_argument("--failed-profile")
+    route.add_argument("--task-id")
+    route.add_argument("--branch")
+    route.add_argument("--head")
+    route.add_argument("--completed-ac", action="append", default=[])
+    route.add_argument("--pending-ac", action="append", default=[])
+    route.add_argument("--validation", action="append", default=[])
+    route.add_argument("--failure-type")
+    route.add_argument("--external-side-effects", action="store_true")
+    route.add_argument("--allow-auto-read-handoff", action="store_true")
+    route.add_argument("--json", action="store_true")
+    explain = commands.add_parser("explain", help="解釋單一 execution profile 為何合格或被排除")
+    explain.add_argument("--task-profile", required=True)
+    explain.add_argument("--execution-profile", required=True)
+    explain.add_argument("--data-class")
+    explain.add_argument("--require-capability", action="append", default=[])
+    explain.add_argument("--json", action="store_true")
     return parser
 
 
@@ -974,6 +1285,12 @@ def main(argv=None):
             init_runtime(args)
         elif args.command in {"doctor", "refresh"}:
             health_runtime(args)
+        elif args.command == "route":
+            decision = route_runtime(args)
+            if decision["selected_profile"] is None:
+                return 3
+        elif args.command == "explain":
+            explain_runtime(args)
     except RuntimeConfigError as error:
         print(f"❌ {error}", file=sys.stderr)
         return 2

@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** DN-009／DN-011（硬依賴 `PEV-DEV-AGENT-038`）
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** backend-developer
-**🚥 任務狀態 (Status):** Pending
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-26T19:53+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-27T00:01+08:00
+**🔀 審查載體編號 (PR/MR):** 分支 `PEV-DEV-AGENT-039`（見 `../reviews/PEV-DEV-AGENT-039.md`）
 
 ## 1. 任務描述 (Description)
 
@@ -23,15 +23,15 @@
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：缺硬性能力或違反資料政策的 profile 永遠不進排序。
-- [ ] AC-02：只有一個供應商時仍跑路由並驗能力；不可把「已登入」當成全部能力成立。
-- [ ] AC-03：層內簡單評分完全可解釋，輸出每個候選的得分與排除理由。
-- [ ] AC-04：override 預設單次；整輪／永久必須明示 scope 與到期條件。
-- [ ] AC-05：零候選時列出缺少能力，不靜默選擇 `unknown` 或 cloud 違規候選。
-- [ ] AC-06：中途失效產生 handoff 候選，包含 Task ID、branch、HEAD、AC、驗證與失效類型。
-- [ ] AC-07：有外部副作用的任務只提出建議並等待；純讀子任務才可由政策允許自動接手。
-- [ ] AC-08：相同輸入必得相同決策；測試覆蓋單供應商、雙供應商、過期 cache、禁止 cloud。
-- [ ] AC-09：pytest、precheck 全綠；BACKLOG 已重生。
+- [x] AC-01：缺硬性能力或違反資料政策的 profile 永遠不進排序。
+- [x] AC-02：只有一個供應商時仍跑路由並驗能力；不可把「已登入」當成全部能力成立。
+- [x] AC-03：層內簡單評分完全可解釋，輸出每個候選的得分與排除理由。
+- [x] AC-04：override 預設單次；整輪／永久必須明示 scope 與到期條件。
+- [x] AC-05：零候選時列出缺少能力，不靜默選擇 `unknown` 或 cloud 違規候選。
+- [x] AC-06：中途失效產生 handoff 候選，包含 Task ID、branch、HEAD、AC、驗證與失效類型。
+- [x] AC-07：有外部副作用的任務只提出建議並等待；純讀子任務才可由政策允許自動接手。
+- [x] AC-08：相同輸入必得相同決策；測試覆蓋單供應商、雙供應商、過期 cache、禁止 cloud。
+- [x] AC-09：pytest、precheck 全綠；BACKLOG 已重生。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
