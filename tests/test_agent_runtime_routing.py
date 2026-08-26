@@ -48,6 +48,7 @@ def _init_args(root: Path):
 def _route_args(root: Path, **overrides):
     values = {
         "root": root,
+        "task_file": None,
         "task_profile": "implementation_local",
         "data_class": None,
         "require_capability": [],
@@ -64,6 +65,7 @@ def _route_args(root: Path, **overrides):
         "failure_type": None,
         "external_side_effects": False,
         "allow_auto_read_handoff": False,
+        "explain": False,
         "json": False,
     }
     values.update(overrides)
@@ -330,3 +332,49 @@ def test_route_cli_同時提供_json_與零候選非零_exit(bare_install: Path,
     )
     assert impossible.returncode == 3
     assert json.loads(impossible.stdout)["selected_profile"] is None
+
+
+def test_舊工單可由_task_type_映射並用_route_explain_顯示來源(kit_root: Path, tmp_path: Path):
+    runtime, root, env, now, adapters, state, path = _準備(kit_root, tmp_path)
+    _改政策(root, enabled_profiles=["codex-cli"])
+    state["profiles"]["codex-cli"] = _狀態(runtime, adapters["codex-cli"], now)
+    _寫狀態(runtime, path, state)
+    task = root / "legacy-task.md"
+    task.write_text(
+        "# [Task ID: LEG-DEV-BE-001] 舊工單\n\n"
+        "**🏷️ 任務類型 (Task Type):** queue_backend\n"
+        "**👤 負責人 (Assignee):** backend-developer\n",
+        encoding="utf-8",
+    )
+    args = _route_args(root, task_file=Path("legacy-task.md"), task_profile=None, explain=True)
+    decision = runtime.route_runtime(args, env=env, now=now)
+    assert decision["task_profile"] == "implementation_local"
+    assert decision["task_profile_source"] == "Task Type mapping：queue_backend"
+    assert decision["selected_profile"] == "codex-cli"
+
+
+def test_工單與審查模板保留完整路由證據但_assignee_仍是角色(kit_root: Path):
+    task = (
+        kit_root / "docs/features/_TEMPLATE/tasks/_EXAMPLE-DEV-BE-001.md"
+    ).read_text(encoding="utf-8")
+    review = (
+        kit_root / "docs/features/_TEMPLATE/reviews/_REVIEW_TEMPLATE.md"
+    ).read_text(encoding="utf-8")
+    protocol = (kit_root / ".agent/resources/team_protocol.md").read_text(encoding="utf-8")
+    for field in (
+        "Task Profile",
+        "Required Capabilities",
+        "Data Class",
+        "Execution Override",
+    ):
+        assert field in task
+    for evidence in (
+        "選中 Execution Profile",
+        "候選與排除理由",
+        "Probe 證據時間",
+        "使用過期 cache",
+        "中途交接",
+    ):
+        assert evidence in review
+    assert "`Assignee` 仍然只填**角色**" in protocol
+    assert "不得填 Claude／Codex 等供應商" in protocol

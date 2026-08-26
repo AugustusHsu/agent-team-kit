@@ -106,6 +106,12 @@ execution profiles；有就加入候選，沒有也不使基本開發流程失�
 工單由 Task Type 取得預設 task profile，只在例外時寫 capability／data override。
 使用者覆寫預設只對**單次路由**有效；整輪或專案永久覆寫必須明示 scope 與到期條件。
 
+出貨工單模板的四個 optional 欄位是 `Task Profile`、`Required Capabilities`、`Data Class`、
+`Execution Override`。全部留 `—` 就是正常路徑；舊工單連欄位都沒有也合法，由
+`task_profiles.json::task_type_defaults` 映射。Execution Override 語法為
+`profile=<id>; scope=<single|round|project>; expires=<時間或事件>`，其中 single 可省略 expires。
+`Assignee` 始終是角色，這四欄也不得把供應商改造成角色。
+
 實際路由證據寫進審查載體，至少包含：
 
 - task profile 與所有 override；

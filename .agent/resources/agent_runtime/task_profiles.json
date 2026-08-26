@@ -28,6 +28,15 @@
     "sensitive",
     "restricted"
   ],
+  "task_type_defaults": {
+    "queue_frontend": "implementation_local",
+    "queue_backend": "implementation_local",
+    "queue_agent": "implementation_local",
+    "queue_qa": "test_verification",
+    "queue_data": "implementation_local",
+    "docs_generation": "design_research",
+    "manual_user": null
+  },
   "profiles": [
     {
       "id": "design_research",

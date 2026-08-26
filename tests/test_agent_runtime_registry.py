@@ -104,6 +104,8 @@ def test_task_profile_registry_符合資料契約(kit_root: Path):
         "automation_batch",
         "external_integration",
     ]
+    assert data["task_type_defaults"]["queue_agent"] == "implementation_local"
+    assert data["task_type_defaults"]["manual_user"] is None
 
 
 def test_registry_未知欄位會指出_json_路徑(kit_root: Path):

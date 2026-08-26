@@ -26,6 +26,12 @@ LOCAL_OVERRIDE_REL = Path(".agent/agent-runtime.local.json")
 ENTRY_TEMPLATES = ("AGENTS.md", "CLAUDE.md")
 POLICIES = {"allow", "conditional", "forbid"}
 STATUSES = {"verified", "degraded", "unavailable", "unknown"}
+TASK_RUNTIME_FIELDS = {
+    "task_profile": "任務輪廓 (Task Profile)",
+    "required_capabilities": "必備能力覆寫 (Required Capabilities)",
+    "data_class": "資料分級 (Data Class)",
+    "execution_override": "Execution 覆寫 (Execution Override)",
+}
 PROBE_TIMEOUT_SECONDS = 15
 
 # 這是 probe ID → 無副作用命令的 registry，不是 provider if/else。adapter manifest 只引用 ID；
@@ -257,6 +263,13 @@ def load_registry(root):
         if unknown:
             raise RuntimeConfigError(
                 f"{base / 'adapters' / (profile_id + '.json')}:$.capabilities：未知能力 {unknown}"
+            )
+    profile_ids = {profile["id"] for profile in tasks["profiles"]}
+    for task_type, profile_id in tasks["task_type_defaults"].items():
+        if profile_id is not None and profile_id not in profile_ids:
+            raise RuntimeConfigError(
+                f"{base / 'task_profiles.json'}:$.task_type_defaults.{task_type}："
+                f"引用未知 task profile {profile_id!r}"
             )
     return tasks, adapters
 
@@ -944,6 +957,80 @@ def _profile_by_id(tasks, profile_id):
     raise RuntimeConfigError(f"route:$.task_profile：未知 task profile {profile_id!r}")
 
 
+def _markdown_field(text, label):
+    match = re.search(rf"^\*\*[^\n]*{re.escape(label)}:\*\*\s*(.*?)\s*$", text, re.MULTILINE)
+    return match.group(1).strip() if match else None
+
+
+def _empty_runtime_value(value):
+    return value is None or value.strip() in {"", "-", "—", "–", "None", "N/A", "TBD"}
+
+
+def parse_execution_override(value, location="task"):
+    if _empty_runtime_value(value):
+        return None
+    result = {}
+    for part in value.split(";"):
+        if "=" not in part:
+            raise RuntimeConfigError(f"{location}:Execution Override：每段必須是 key=value")
+        key, item = (piece.strip() for piece in part.split("=", 1))
+        if key not in {"profile", "scope", "expires"}:
+            raise RuntimeConfigError(f"{location}:Execution Override：未知欄位 {key!r}")
+        result[key] = item
+    if "profile" not in result:
+        raise RuntimeConfigError(f"{location}:Execution Override：缺少 profile")
+    result.setdefault("scope", "single")
+    if result["scope"] not in {"single", "round", "project"}:
+        raise RuntimeConfigError(
+            f"{location}:Execution Override：scope 必須是 single／round／project"
+        )
+    if result["scope"] != "single" and not result.get("expires"):
+        raise RuntimeConfigError(
+            f"{location}:Execution Override：round／project 必須提供 expires"
+        )
+    return result
+
+
+def parse_task_routing(path, tasks):
+    """讀新欄位；舊工單沒有欄位時由 Task Type 的 registry mapping 提供預設。"""
+    text = path.read_text(encoding="utf-8")
+    task_type = _markdown_field(text, "任務類型 (Task Type)")
+    explicit_profile = _markdown_field(text, TASK_RUNTIME_FIELDS["task_profile"])
+    if _empty_runtime_value(explicit_profile):
+        if task_type not in tasks["task_type_defaults"]:
+            raise RuntimeConfigError(f"{path}:Task Type：沒有預設 task profile：{task_type!r}")
+        task_profile = tasks["task_type_defaults"][task_type]
+        source = f"Task Type mapping：{task_type}"
+    else:
+        task_profile = explicit_profile
+        source = "工單明示"
+    if task_profile is None:
+        raise RuntimeConfigError(f"{path}:Task Type {task_type!r} 是人工工作，不進 agent route")
+    _profile_by_id(tasks, task_profile)
+    capabilities_value = _markdown_field(text, TASK_RUNTIME_FIELDS["required_capabilities"])
+    capabilities = []
+    if not _empty_runtime_value(capabilities_value):
+        capabilities = [item.strip() for item in capabilities_value.split(",") if item.strip()]
+    unknown = sorted(set(capabilities) - set(tasks["capabilities"]))
+    if unknown:
+        raise RuntimeConfigError(f"{path}:Required Capabilities：未知能力 {unknown}")
+    data_class = _markdown_field(text, TASK_RUNTIME_FIELDS["data_class"])
+    if _empty_runtime_value(data_class):
+        data_class = None
+    elif data_class not in tasks["data_classes"]:
+        raise RuntimeConfigError(f"{path}:Data Class：未知資料級別 {data_class!r}")
+    override_value = _markdown_field(text, TASK_RUNTIME_FIELDS["execution_override"])
+    override = parse_execution_override(override_value, str(path))
+    return {
+        "task_type": task_type,
+        "task_profile": task_profile,
+        "task_profile_source": source,
+        "required_capabilities": capabilities,
+        "data_class": data_class,
+        "execution_override": override,
+    }
+
+
 def _effective_availability(item, now):
     if not item:
         return "unknown", "沒有本機 probe state"
@@ -1161,6 +1248,22 @@ def _validate_override_args(args):
 
 def route_runtime(args, env=None, now=None):
     root = args.root.resolve()
+    task_fields = None
+    if args.task_file:
+        tasks, _ = load_registry(root)
+        task_path = args.task_file if args.task_file.is_absolute() else root / args.task_file
+        task_fields = parse_task_routing(task_path, tasks)
+        args.task_profile = task_fields["task_profile"]
+        args.data_class = args.data_class or task_fields["data_class"]
+        args.require_capability = [
+            *task_fields["required_capabilities"],
+            *args.require_capability,
+        ]
+        if task_fields["execution_override"] and not args.override_profile:
+            task_override = task_fields["execution_override"]
+            args.override_profile = task_override["profile"]
+            args.override_scope = task_override["scope"]
+            args.override_expires_at = task_override.get("expires")
     override = _validate_override_args(args)
     decision = route_decision(
         root,
@@ -1174,6 +1277,10 @@ def route_runtime(args, env=None, now=None):
     )
     if override:
         decision["override"] = {**override, "applied": True}
+    decision["task_profile_source"] = (
+        task_fields["task_profile_source"] if task_fields else "CLI 明示"
+    )
+    decision["task_file"] = str(args.task_file) if args.task_file else None
     decision["handoff"] = _handoff_from_args(
         args, decision["selected_profile"], decision["required_capabilities"]
     )
@@ -1181,6 +1288,8 @@ def route_runtime(args, env=None, now=None):
         print(json.dumps(decision, ensure_ascii=False, indent=2))
     else:
         print(f"task profile：{decision['task_profile']}（{decision['data_class']}）")
+        if args.explain:
+            print(f"來源：{decision['task_profile_source']}")
         print(f"建議 execution profile：{decision['selected_profile'] or '無合格候選'}")
         for item in decision["candidates"]:
             if item["eligible"]:
@@ -1251,7 +1360,9 @@ def build_parser():
     _add_health_arguments(refresh)
     refresh.add_argument("--force", action="store_true", help="忽略 TTL，重跑選定探針")
     route = commands.add_parser("route", help="依能力、政策與可用性選擇 execution profile")
-    route.add_argument("--task-profile", required=True)
+    route_source = route.add_mutually_exclusive_group(required=True)
+    route_source.add_argument("--task-profile")
+    route_source.add_argument("--task-file", type=Path)
     route.add_argument("--data-class")
     route.add_argument("--require-capability", action="append", default=[])
     route.add_argument("--override-profile")
@@ -1267,6 +1378,7 @@ def build_parser():
     route.add_argument("--failure-type")
     route.add_argument("--external-side-effects", action="store_true")
     route.add_argument("--allow-auto-read-handoff", action="store_true")
+    route.add_argument("--explain", action="store_true", help="顯示 task profile 的來源")
     route.add_argument("--json", action="store_true")
     explain = commands.add_parser("explain", help="解釋單一 execution profile 為何合格或被排除")
     explain.add_argument("--task-profile", required=True)

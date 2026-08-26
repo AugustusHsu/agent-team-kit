@@ -3,7 +3,7 @@
   "title": "agent-team-kit task profile registry",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "capabilities", "data_classes", "profiles"],
+  "required": ["schema_version", "capabilities", "data_classes", "task_type_defaults", "profiles"],
   "properties": {
     "schema_version": {"const": 1},
     "capabilities": {
@@ -16,6 +16,11 @@
       "minItems": 1,
       "uniqueItems": true,
       "items": {"type": "string", "minLength": 1}
+    },
+    "task_type_defaults": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": ["string", "null"]}
     },
     "profiles": {
       "type": "array",

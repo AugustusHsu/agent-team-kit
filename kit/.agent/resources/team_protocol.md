@@ -302,6 +302,9 @@ CI runner 沒有 agent 的 context，shell 輸出必然保真，該檢查會永�
 ### 2.1 Scrum Master → Developer
 - Scrum Master 產出的每張工單必須遵循 `.agent/resources/task_template.md` 格式。
 - 工單中的 `Inputs` 區塊必須包含可存取的檔案路徑或資源連結（非抽象描述）。
+- `Assignee` 仍然只填**角色**，不得填 Claude／Codex 等供應商。Task Profile 通常由
+  Task Type 依 `.agent/resources/agent_runtime/task_profiles.json` 映射；工單只在例外時填
+  capability／data／execution override。舊工單沒有新欄位仍合法。
 - 工單的 `Ready`/`Pending` 以**前置工單依賴**是否解除為準，**不**以 Human-in-the-loop 是否回覆為準。工單內「❓ 需要確認的事項」即使附建議值，仍須於**執行前**由執行者強制向使用者確認（見 §1.7），不得逕自採用建議值。
 
 ### 2.2 Developer → Code Reviewer
@@ -351,6 +354,9 @@ CI runner 沒有 agent 的 context，shell 輸出必然保真，該檢查會永�
     審查檔不會被誤認成工單。
   - **既有工單不追溯遷移**：已結案工單依 §1.11「不改它，也不引用它」，
     本條只對新的審查輪次生效。
+- **實際路由證據寫進審查檔，不寫回 Assignee。** 至少記 task profile／override、選中的
+  execution profile、候選排除理由、probe 時間、是否使用過期 cache 與中途交接。
+  `docs/standards/agent_runtime.md` §7／§12 是正版；只寫「這次用 Codex」不構成可重建證據。
 
 ---
 
