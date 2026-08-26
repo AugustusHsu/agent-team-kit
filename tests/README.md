@@ -23,6 +23,7 @@ uv run pytest -k install   # 只跑 install.sh 相關
 | `test_scan_backlog.py` | metadata 解析、狀態正規化、四大區塊分類、近期結案切分、三種 `--format` |
 | `test_check_versions.py` | 階段一自我驗證與一致性驗證、無 PyYAML 時的備用解析器 |
 | `test_migrate_dates.py` | 預設預覽模式不改檔案、模組篩選 |
+| `test_agent_runtime_migrate.py` | Claude／Codex 雙入口遷移的預覽、候選與不覆寫邊界 |
 | `test_kit_integrity.py` | SKILL frontmatter、evals schema、死連結、`team_protocol.md` 只有一份 |
 
 ## `fixture_project/`

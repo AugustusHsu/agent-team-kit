@@ -9,4 +9,7 @@ __pycache__/
 # worktree 目錄內含 .git 檔案，被 add 進去會變成詭異的 gitlink
 .claude/worktrees/
 .claude/settings.local.json
-.claude/.headroom_wrap_marker.json
+
+# 跨代理 runtime 與 Codex 的本機狀態；portable 政策只放 .agent/agent-runtime.json
+.agent/agent-runtime.local.json
+.codex/

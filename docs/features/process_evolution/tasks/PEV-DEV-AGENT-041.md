@@ -3,15 +3,19 @@
 **🔗 依附母任務 (Parent Task ID):** DN-010／DN-011（硬依賴 `PEV-DEV-AGENT-040`）
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** devops-engineer
-**🚥 任務狀態 (Status):** Pending
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-26T19:53+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-27T00:27+08:00
+**🔀 審查載體編號 (PR/MR):** `../reviews/PEV-DEV-AGENT-041.md`（無遠端 PR，見 git_workflow.md §8.3）
 
 ## 1. 任務描述 (Description)
 
 用新 `migrate` 流程處理本 repo 已存在的 `CLAUDE.md`、未追蹤 `AGENTS.md` 與 `.codex/`，
-保留專案規則與使用者本機功能，同時移除跨供應商污染、絕對路徑與重複真相。
+保留專案規則與仍需使用的本機功能，同時移除跨供應商污染、絕對路徑與重複真相。
+
+> ✅ **裁定（2026-08-27，使用者）：** 本專案不再使用 headroom；遷移時移除所有現行
+> headroom hook、proxy URL 與入口說明，不保留或搬移該功能。已結案工單與已畢業 DN
+> 仍依 §1.11 保持歷史原貌，不把刪除歷史證據誤當成移除現行設定。
 
 ## 2. 規格：輸入與輸出 (Inputs & Outputs)
 
@@ -23,15 +27,15 @@ GitHub 狀態要分別記錄：remote URL、SSH 功能、`gh api user`、Codex C
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：`migrate --dry-run` 先產生候選與差異，沒有改動工作區。
-- [ ] AC-02：正式遷移後 `AGENTS.md` 為共同真相，`CLAUDE.md` 只保留匯入與 Claude 專屬內容。
-- [ ] AC-03：現有專案規則無遺漏；必備規則集合測試全綠。
-- [ ] AC-04：`.codex/` 只版控 portable allowlist；`ANTHROPIC_BASE_URL` 與個人絕對 hook 不進 commit。
-- [ ] AC-05：本機 headroom 等個人功能有明確保留／搬移說明，不因清理設定而靜默失效。
-- [ ] AC-06：doctor 實跑 Claude Code、Codex CLI、Git remote、SSH、GitHub API；Connector 無法驗則 unknown。
-- [ ] AC-07：路由政策同時允許 Claude Code 與 Codex，本機至少一個 profile verified。
-- [ ] AC-08：repo 內無 token、cookie、SSH key 或家目錄絕對路徑被納入版控。
-- [ ] AC-09：pytest、precheck、installer dry-run 全綠；BACKLOG 已重生。
+- [x] AC-01：`migrate --dry-run` 先產生候選與差異，沒有改動工作區。
+- [x] AC-02：正式遷移後 `AGENTS.md` 為共同真相，`CLAUDE.md` 只保留匯入與 Claude 專屬內容。
+- [x] AC-03：現有專案規則無遺漏；必備規則集合測試全綠。
+- [x] AC-04：`.codex/` 只版控 portable allowlist；`ANTHROPIC_BASE_URL` 與個人絕對 hook 不進 commit。
+- [x] AC-05：本機 headroom hook、proxy URL 與現行入口說明已移除；其他個人設定不受牽連。
+- [x] AC-06：doctor 實跑 Claude Code、Codex CLI、Git remote、SSH、GitHub API；Connector 無法驗則 unknown。
+- [x] AC-07：路由政策同時允許 Claude Code 與 Codex，本機至少一個 profile verified。
+- [x] AC-08：repo 內無 token、cookie、SSH key 或家目錄絕對路徑被納入版控。
+- [x] AC-09：pytest、precheck、installer dry-run 全綠；BACKLOG 已重生。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 

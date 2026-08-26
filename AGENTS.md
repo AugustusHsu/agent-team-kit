@@ -1,107 +1,84 @@
-# 專案 AGENTS.md 模板
+# agent-team-kit
 
-> 這是 Claude Code、Codex 與其他代理共同遵守的專案入口。
-> 建立或更新專案入口時，先讀 `.agent/templates/AGENTS.md` 的最新版結構，
-> 再把下列佔位內容改成該專案的真實資訊。
-
-## 核心判準：只放每次工作都值得載入的規則
-
-入口檔會反覆進入代理的 context。只寫「無法從程式碼與 git history 直接看出來，
-而且不寫會讓代理做錯事」的資訊。
-
-- 會造成錯誤行為 → 寫，並壓到最短。
-- 只是知道了不錯 → 放到索引或按需文件，不放入口。
-- **目標長度 200 行內**；超過要說明常駐成本為什麼值得。
-
-## 該寫什麼
-
-| 類別 | 例子 |
-|---|---|
-| 指令 | build／test／lint／run 的實際指令 |
-| 非顯而易見的架構 | 真正入口、出貨來源、生成物與唯讀安裝實例 |
-| 專案特有陷阱 | 改 X 必須同步 Y、某測試的必要前置 |
-| 專案慣例 | 從程式碼看不出的命名、交付與錯誤處理規則 |
-| 明確禁止事項 | 不可手改的檔案、不可自動執行的外部副作用 |
-
-不要複製目錄樹、依賴清單、完整 API、通用最佳實務、歷史沿革或已結案工單。
-
-## 跟 HANDOFF.md 的分工
-
-| 文件 | 生命週期 | 放什麼 |
-|---|---|---|
-| `AGENTS.md` | 每次工作 | 穩定、高價值、影響行為的共同規則 |
-| 供應商 adapter | 該供應商工作時 | 只有該供應商理解的設定與指路 |
-| `HANDOFF.md` | 接手時讀一次 | 詳細脈絡、決策過程、待辦與暫時狀態 |
-
-不要把 HANDOFF 的一次性脈絡搬進共同入口。
-
-## 建議結構
-
-```markdown
-# <專案名>
-
-<一到兩句：這是什麼、解決什麼問題>
+把「AI 虛擬團隊 + 工單驅動開發」的角色、流程與腳本打包成可安裝到任何專案的套件。
 
 ## 指令
-<build / test / lint / run>
+
+```bash
+uv run pytest                                    # 全套件測試，離線執行
+./install.sh <目標專案路徑>                       # 首次安裝
+./install.sh <目標專案路徑> --upgrade --dry-run   # 升級既有安裝，先看會動到什麼
+
+# 重新生成 BACKLOG（改完工單狀態一定要跑）
+uv run python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md
+```
+
+⚠️ `scan_backlog.py` 預設是 `--format json` 且只印到 stdout；不加
+`--format backlog --output` 不會寫入 `BACKLOG.md`。
 
 ## 架構
-<只寫從檔案結構看不出的耦合與正版位置>
+
+`kit/` 的結構就是安裝後的樣子；`install.sh` 原封不動複製，不改名也不改寫。
+`tests/` 只測這個套件，不會被安裝。根目錄 `docs/features/` 是本 repo 自己的工單，
+別跟出貨骨架 `kit/docs/features/` 混用；模組前綴登記在 `docs/features/README.md`。
 
 ## 陷阱
-<每條都要是會造成真實錯誤的問題>
 
-## Commit
-<依下節保留必要閘門>
-```
-
-段落沒內容就刪掉，不留空標題。
-
-## Commit 規則必須內嵌
-
-`.agent/workflows/commit-message.md` 只有被主動查閱時才進 context；只放指路會使代理順手
-commit 時根本看不到閘門。入口至少保留：
-
-```markdown
-## Commit
-工單分支上的 commit 直接做，不用先問。**合併回整合分支或主線前**須把訊息原文給使用者
-複查並取得當次同意；上一次同意不算。禁止 AI 署名 trailer。
-格式：`<emoji> <type>(<scope>): <繁中標題>`，空行後 Body 用 `- **標題**：說明` 條列。
-其餘規則見 `.agent/workflows/commit-message.md`。
-```
-
-閘門在「離開工單分支」，不是每一顆中間 commit。正版在
-`.agent/resources/team_protocol.md` §1.10 Commit 閘門。
-
-## 文檔導航只寫索引
-
-若有 `docs/`／`spec/`：
-
-1. 寫明索引檔位置，要求先讀索引，不盲掃目錄；
-2. 寫命名規則，讓代理能直接組路徑；
-3. 大檔先定位段落再局部讀；
-4. 標出產生物、封存與不應主動讀的目錄。
-
-不要把文檔正文搬進入口或記憶庫。
+- `install.sh` 複製工作區而非 git 追蹤內容。`kit/` 的本機產生物排除清單同時在
+  `install.sh` 與 `tests/test_install.py::_是本機產生物()`，兩邊必須同步。
+- 在 `kit/docs/standards/` 新增文件要同步登記 `kit/docs/DOCS_MAP.md`。
+- 推翻流程規範時，要把舊說法加進 `tests/test_kit_integrity.py` 的
+  `已廢除的流程規則` 表。
+- 安裝會額外產生 `.agent/.kit-manifest`；安裝一致性測試的預期是「kit + manifest」。
+- `is_seed_file()` 的清單改動要同步 `tests/test_install.py::test_升級保留種子檔`。
+- `kit/.agent/resources/team_protocol.md` 改章節結構時，要同步
+  `kit/docs/standards/team_protocol.md` 的索引。
 
 ## 多代理執行
 
-- `Assignee` 是專業角色，不是 Claude／Codex 等供應商。
-- 任務需要的能力依 `docs/standards/agent_runtime.md` 表達。
-- CLI 是可攜基線；App、Cloud、Connector 是選配 execution profiles。
-- token、登入、訂閱、個人 hook 與絕對路徑不得寫進本檔。
-- 中途換代理不重開工單；保留 branch、HEAD、AC 與最後可信驗證再交接。
+- `Assignee` 是專業角色，不是 Claude／Codex 供應商。
+- 本專案同時支援 Claude Code CLI、Codex CLI 與 Codex App；選擇依
+  `docs/standards/agent_runtime.md` 與 `.agent/agent-runtime.json`，不靠記憶猜測。
+- 初始化或能力改變後執行 `.agent/scripts/agent_runtime.py init`、`doctor` 與 `route`；
+  token、登入、訂閱、個人 hook、絕對路徑只留在本機層，不得版控。
+- 中途換代理不重開工單；交接保留 Task ID、branch／worktree、HEAD、完成與待辦 AC、
+  最後可信驗證及外部副作用。
 
-## 取證通道第 2 層
+## 取證通道（`team_protocol.md` §1.12 第 2 層）
 
-依 `.agent/resources/team_protocol.md` §1.12 取證通道保真，記錄本專案實際使用的中間層、
-開啟保真的方式、驗證探針、成本與回滾。共同層只寫需求；供應商特有設定留在 adapter。
+本專案不配置 context 壓縮 proxy 或其他會改寫工具輸出的中間層。每個 session 第一次取證前
+仍依 §1.12 跑五行探針；只有表格與前後散文逐字保留才算通過。若執行環境日後新增中間層，
+必須先在本節補上保真方式、驗證與回滾成本。
 
-## 測試技術棧第 2 層
+## 測試技術棧（`qa-automation-engineer` 第 2 層）
 
-依 `qa-automation-engineer` 的分層規則，記錄框架、執行指令、路徑、命名、fixture／mock
-與分層策略。缺這節，技術棧中立的測試 skill 在本專案就是空的。
+- **框架與工具鏈**：Pytest；`uv` 管依賴。`kit/` 出貨的五支 Python 腳本只用標準函式庫，
+  測試也不加額外 runtime 套件。全套件零 mock：用 `tmp_path` 造真實檔案、`subprocess`
+  實跑腳本，避免把真正要驗的檔案系統行為 mock 掉。
+- **執行**：`uv run pytest`；單檔 `uv run pytest tests/test_install.py`；單項 `-k <中文測試名>`。
+  沒有分層指令與覆蓋率設定。
+- **路徑與命名**：`tests/test_<被測腳本名>.py`；共用 fixture 在 `tests/conftest.py`，
+  `tests/fixture_project/` 是安裝測試的假專案。
+- **風格**：測試函式名與 assert 訊息用繁體中文；docstring 寫存在理由；參數化用
+  `pytest_generate_tests`，不用 `@pytest.mark.parametrize`。
 
-## 寫完後
+## Commit
 
-回報入口的大約行數／tokens、刪掉哪些低價值資訊，以及哪些內容留在供應商 adapter。
+工單分支（含 worktree）上的 commit 直接做，不用先問。合併回整合分支或主線前，
+必須把合併訊息原文給使用者複查並取得當次同意；上一次同意不算。直接在整合分支上
+commit 仍須事前同意。絕不主動 push，禁止 AI 署名 trailer。
+
+格式：`<emoji> <type>(<scope>): <繁中標題>`，空行後 Body 用
+`- **標題**：說明` 條列；其餘規則見 `kit/.agent/workflows/commit-message.md`。
+
+## 本專案自己的開發流程
+
+本 repo 用自己的出貨流程開發自己。根目錄 `.agent/`、`docs/DOCS_MAP.md`、
+`docs/development/`、`docs/standards/`、`docs/features/_TEMPLATE/` 是安裝實例，視為唯讀；
+要改流程規範先改 `kit/`，再跑 `./install.sh . --upgrade`。
+
+種子檔 `AGENTS.md`、`CLAUDE.md`、`.gitignore`、`docs/development/BACKLOG.md`、
+`docs/features/README.md` 由專案維護，升級不覆蓋。
+
+worktree 可以用，但用完必須 `git worktree remove`，其中的 commit 必須合併回分支，
+收尾後 `git worktree list` 只能剩主工作目錄。worktree 只隔離工作區，不解決檔案所有權。

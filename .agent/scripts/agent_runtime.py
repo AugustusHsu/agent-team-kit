@@ -8,6 +8,7 @@
 """
 
 import argparse
+import difflib
 import hashlib
 import json
 import os
@@ -100,6 +101,12 @@ PROBE_DEFINITIONS = {
 
 # GitHub 能力刻意拆開；SSH read 成功不能推出 API write 或 Codex Connector 成功。
 GITHUB_INTEGRATIONS = {
+    "git_remote_url": {
+        "command": ["git", "remote", "get-url", "origin"],
+        "online": False,
+        "summary": "Git remote URL 可讀",
+        "ttl_seconds": 1800,
+    },
     "git_remote_read": {
         "command": ["git", "ls-remote", "--heads", "origin"],
         "online": True,
@@ -116,6 +123,15 @@ GITHUB_INTEGRATIONS = {
         "online": True,
         "summary": "GitHub API read 通過",
         "ttl_seconds": 1800,
+    },
+    "github_ssh_read": {
+        "command": ["ssh", "-T", "git@github.com"],
+        "online": True,
+        "summary": "GitHub SSH 驗證通過",
+        "ttl_seconds": 1800,
+        "marker": "successfully authenticated",
+        # GitHub 驗證成功仍刻意回 1，因為它不提供 shell；必須再驗 marker。
+        "success_returncodes": [0, 1],
     },
     "github_api_write": {
         "manual": True,
@@ -230,6 +246,18 @@ def write_json(path, data):
 def write_json_candidate(path, data):
     """既有候選也可能已被使用者修改；內容不同就遞增尾碼，絕不覆寫。"""
     content = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    candidate = path
+    index = 2
+    while candidate.exists() and candidate.read_text(encoding="utf-8") != content:
+        candidate = Path(f"{path}.{index}")
+        index += 1
+    if not candidate.exists():
+        candidate.write_text(content, encoding="utf-8")
+    return candidate
+
+
+def write_text_candidate(path, content):
+    """文字候選也遵守不覆寫原檔與既有候選的規則。"""
     candidate = path
     index = 2
     while candidate.exists() and candidate.read_text(encoding="utf-8") != content:
@@ -431,7 +459,8 @@ def run_probe(definition, ttl_seconds, now, root, env=None, timeout=PROBE_TIMEOU
             "timeout",
         )
     combined = f"{result.stdout}\n{result.stderr}"
-    if result.returncode != 0:
+    success_returncodes = definition.get("success_returncodes", [0])
+    if result.returncode not in success_returncodes:
         category = _error_class(combined)
         return _probe_record(
             "unavailable",
@@ -592,6 +621,77 @@ def _candidate_entry_files(root):
             candidate.write_text(content, encoding="utf-8")
         created.append(candidate.name)
     return created
+
+
+def _migration_sources(root, common_source=None):
+    """產生雙入口的期望內容；既有規則優先於通用模板。"""
+    agents = root / "AGENTS.md"
+    claude = root / "CLAUDE.md"
+    templates = root / ".agent/templates"
+    if common_source:
+        common = common_source.read_text(encoding="utf-8")
+        common_origin = common_source
+    elif agents.exists():
+        common = agents.read_text(encoding="utf-8")
+        common_origin = agents
+    elif claude.exists():
+        common = claude.read_text(encoding="utf-8")
+        common_origin = claude
+    else:
+        common_origin = templates / "AGENTS.md"
+        common = common_origin.read_text(encoding="utf-8")
+    claude_origin = templates / "CLAUDE.md"
+    return {
+        agents: (common, common_origin),
+        claude: (claude_origin.read_text(encoding="utf-8"), claude_origin),
+    }
+
+
+def _unified_diff(path, before, after):
+    return "".join(
+        difflib.unified_diff(
+            before.splitlines(keepends=True),
+            after.splitlines(keepends=True),
+            fromfile=str(path),
+            tofile=f"{path}.new",
+        )
+    )
+
+
+def migrate_runtime(args):
+    """預覽或寫出安全候選；永不直接覆寫既有入口。"""
+    root = args.root.resolve()
+    results = []
+    for target, (desired, source) in _migration_sources(root, args.common_source).items():
+        current = target.read_text(encoding="utf-8") if target.exists() else ""
+        changed = current != desired
+        candidate = None
+        if changed and not args.dry_run:
+            candidate = write_text_candidate(Path(f"{target}.new"), desired)
+        results.append(
+            {
+                "target": str(target),
+                "source": str(source),
+                "changed": changed,
+                "candidate": str(candidate) if candidate else None,
+                "diff": _unified_diff(target, current, desired) if changed else "",
+            }
+        )
+    output = {"dry_run": args.dry_run, "entries": results}
+    if args.json:
+        print(json.dumps(output, ensure_ascii=False, indent=2))
+    else:
+        mode = "預覽" if args.dry_run else "候選已產生"
+        print(f"✅ migrate {mode}；原始入口未覆寫")
+        for item in results:
+            if not item["changed"]:
+                print(f"   已一致：{item['target']}")
+                continue
+            destination = item["candidate"] or f"{item['target']}.new（預覽）"
+            print(f"   來源：{item['source']}")
+            print(f"   候選：{destination}")
+            print(item["diff"], end="")
+    return output
 
 
 def _choose_interactively(adapters, input_fn=input):
@@ -1353,6 +1453,14 @@ def build_parser():
     init.add_argument("--cloud-policy", choices=sorted(POLICIES))
     init.add_argument("--connector-policy", choices=sorted(POLICIES))
     init.add_argument("--json", action="store_true")
+    migrate = commands.add_parser("migrate", help="安全遷移既有 Claude／Codex 專案入口")
+    migrate.add_argument("--dry-run", action="store_true", help="只顯示候選與差異，不寫檔")
+    migrate.add_argument(
+        "--common-source",
+        type=Path,
+        help="共同規則來源；省略時依序採用 AGENTS.md、CLAUDE.md、內建模板",
+    )
+    migrate.add_argument("--json", action="store_true")
     doctor = commands.add_parser("doctor", help="檢查安裝、設定與無副作用功能探針")
     _add_health_arguments(doctor)
     doctor.set_defaults(force=True)
@@ -1395,6 +1503,8 @@ def main(argv=None):
     try:
         if args.command == "init":
             init_runtime(args)
+        elif args.command == "migrate":
+            migrate_runtime(args)
         elif args.command in {"doctor", "refresh"}:
             health_runtime(args)
         elif args.command == "route":

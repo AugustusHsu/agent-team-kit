@@ -91,6 +91,12 @@ def _正常_clis(fake_bin: Path):
     )
     _寫執行檔(fake_bin / "git", 'echo "$*" >> "$PROBE_LOG"\necho remote-ok\n')
     _寫執行檔(fake_bin / "gh", 'echo "$*" >> "$PROBE_LOG"\necho test-user\n')
+    _寫執行檔(
+        fake_bin / "ssh",
+        'echo "$*" >> "$PROBE_LOG"\n'
+        'echo "Hi test-user! You have successfully authenticated, but GitHub does not provide shell access." >&2\n'
+        'exit 1\n',
+    )
 
 
 def test_offline_doctor_不執行任何_online_read_probe(kit_root: Path, tmp_path: Path):
@@ -128,7 +134,7 @@ def test_metadata_失敗但功能成功會保留兩份證據並標_degraded(kit_
     assert item["probes"]["functional"]["status"] == "verified"
 
 
-def test_github_六種能力分開且讀成功不推出寫入或_connector(kit_root: Path, tmp_path: Path):
+def test_github_八種能力分開且讀成功不推出寫入或_connector(kit_root: Path, tmp_path: Path):
     runtime, root, fake_bin, env = _準備(kit_root, tmp_path)
     _正常_clis(fake_bin)
     env["PROBE_LOG"] = str(tmp_path / "probes.log")
@@ -136,8 +142,10 @@ def test_github_六種能力分開且讀成功不推出寫入或_connector(kit_r
         _health_args(root, online=True, profile=["codex-cli"]), env=env
     )
     integrations = output["integrations"]
+    assert integrations["git_remote_url"]["status"] == "verified"
     assert integrations["git_remote_read"]["status"] == "verified"
     assert integrations["github_api_read"]["status"] == "verified"
+    assert integrations["github_ssh_read"]["status"] == "verified"
     for key in ("git_remote_write", "github_api_write", "codex_cloud_connector", "automated_review"):
         assert integrations[key]["status"] == "unknown", key
 
