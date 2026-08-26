@@ -6,6 +6,15 @@
 # 即使專案不採用 worktree 流程，Claude Code 仍可能建立，故保留本規則。
 .claude/worktrees/
 
+# --- 多代理本機狀態（共同政策可版控，本機狀態不可）---
+.agent/agent-runtime.local.json
+
+# Codex 專案設定採 allowlist：portable config／actions 可提交，個人 hook 與暫存狀態不提交
+.codex/*
+!.codex/config.toml
+!.codex/actions/
+!.codex/actions/**
+
 # --- 接手文件 ---
 # 每次對話的暫時狀態，不進版控
 HANDOFF.md

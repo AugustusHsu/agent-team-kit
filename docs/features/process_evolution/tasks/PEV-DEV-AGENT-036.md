@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** DN-010（硬依賴 `PEV-DEV-AGENT-035`）
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** devops-engineer
-**🚥 任務狀態 (Status):** Pending
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-26T19:53+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-26T23:36+08:00
+**🔀 審查載體編號 (PR/MR):** 分支 `PEV-DEV-AGENT-036`（見 `../reviews/PEV-DEV-AGENT-036.md`）
 
 ## 1. 任務描述 (Description)
 
@@ -23,14 +23,14 @@
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：首次安裝產生雙入口，內容逐位元組等於 kit，manifest 涵蓋兩者。
-- [ ] AC-02：升級保留使用者改過的 `AGENTS.md` 與 `CLAUDE.md`，模板本身仍可更新。
-- [ ] AC-03：舊安裝只有 `CLAUDE.md` 時 dry-run 不寫入，正式升級不覆蓋且提示 `migrate`。
-- [ ] AC-04：`is_seed_file()` 與 `test_升級保留種子檔` 同步更新。
-- [ ] AC-05：本機狀態與個人 hook 不會被 installer 出貨或意外納入版控。
-- [ ] AC-06：安裝完成訊息改成執行多代理初始化，不再只要求填 `CLAUDE.md`。
-- [ ] AC-07：首次安裝、升級、dry-run、無 manifest 舊版四種負向／正向情境實跑留證。
-- [ ] AC-08：pytest、precheck 全綠；BACKLOG 已重生。
+- [x] AC-01：首次安裝產生雙入口，內容逐位元組等於 kit，manifest 涵蓋兩者。
+- [x] AC-02：升級保留使用者改過的 `AGENTS.md` 與 `CLAUDE.md`，模板本身仍可更新。
+- [x] AC-03：舊安裝只有 `CLAUDE.md` 時 dry-run 不寫入，正式升級不覆蓋且提示 `migrate`。
+- [x] AC-04：`is_seed_file()` 與 `test_升級保留種子檔` 同步更新。
+- [x] AC-05：本機狀態與個人 hook 不會被 installer 出貨或意外納入版控。
+- [x] AC-06：安裝完成訊息改成執行多代理初始化，不再只要求填 `CLAUDE.md`。
+- [x] AC-07：首次安裝、升級、dry-run、無 manifest 舊版四種負向／正向情境實跑留證。
+- [x] AC-08：pytest、precheck 全綠；BACKLOG 已重生。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
