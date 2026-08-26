@@ -1,13 +1,13 @@
 # [DN-010] 跨代理入口與設定分層
 
-**🚥 狀態 (Status):** 🔍 Exploring
+**🚥 狀態 (Status):** 🎓 Graduated
 **📅 建立 (Created):** 2026-08-26
 **🔗 依賴 (Depends on):** DN-001（本檔的格式與畢業條件）；DN-009（供應商／執行面／可用性的名詞與邊界）
 **📌 來源 (Origin):** 使用者指令（2026-08-26）——確定混用 Claude Code 與 Codex，要求預設開發流程同時支援兩者，且未來可加入其他廠商
 **🤝 姊妹篇 (Sibling):** DN-009（多代理能力路由）；DN-011（初始化、健康檢查與生命週期）
 
-> 🔍 **Exploring 狀態。** 本檔決定「哪些設定是共同真相、哪些是供應商轉接、哪些只能留在本機」。
-> 不處理執行者怎麼選，也不處理探針何時重跑。
+> 🎓 **已畢業（2026-08-26）→ `PEV-DEV-AGENT-035`、`036`、`041`。**
+> 使用者同意依 §4 建議裁定；本檔凍結，不再更新。
 
 ## 1. 問題陳述
 
@@ -131,7 +131,21 @@ kit 只記環境變數名稱、所需 scope、功能探針與設定位置；toke
 | 4.8 | secrets 路徑是否統一 | 一個 kit secrets 檔／各供應商原生／混合 | 憑證維持原生；只有 kit 自己新增的跨供應商秘密才進共同 secrets 檔 |
 | 4.9 | GitHub Connector 是否初始化必選 | 必選／依執行面選配 | 選配；本機開發不該因 cloud Connector 缺席而失敗，只有選到 cloud profile 才是硬前提 |
 
+> ✅ **裁定（2026-08-26，使用者）：** 4.1～4.9 全數採建議欄：`AGENTS.md` 是共同入口，
+> `CLAUDE.md` 匯入它並只補 Claude 專屬內容；兩者都是種子檔；可升級模板放
+> `.agent/templates/`；`.codex/` 採 allowlist；`.claude/` 沿原生 scope；一致性驗必備規則集合；
+> 第三家以 adapter manifest 擴充；憑證維持供應商原生；GitHub Connector 依執行面選配。
+
 ## 5. 畢業去向（畢業時才填）
 
-預期屬 **D（改流程／基礎建設）**。結論會落到跨代理設定標準、入口模板、installer 種子檔與
-安裝測試、provider adapter 目錄及 GitHub 能力設定；實際工單待 §4 裁定後開出。
+屬 **D（改流程／基礎建設）**：
+
+| 工單 | 落點 |
+|---|---|
+| `PEV-DEV-AGENT-035` | 雙入口模板與 Claude／Codex adapter manifests |
+| `PEV-DEV-AGENT-036` | installer 種子檔、模板升級與安裝測試 |
+| `PEV-DEV-AGENT-041` | 本 repo 的安全遷移與 GitHub／Codex 專案設定 |
+
+**AC 可寫性驗證：** 以 `035` 為例，可驗證共同規則只存在 `AGENTS.md`、`CLAUDE.md`
+使用 `@AGENTS.md`、adapter 不含 token／絕對路徑、第三個 adapter 不需修改核心 schema。
+**使用者簽核：** ✅ 2026-08-26。

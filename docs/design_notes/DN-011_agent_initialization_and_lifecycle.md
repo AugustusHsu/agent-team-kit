@@ -1,13 +1,13 @@
 # [DN-011] 多代理初始化、健康檢查與生命週期
 
-**🚥 狀態 (Status):** 🔍 Exploring
+**🚥 狀態 (Status):** 🎓 Graduated
 **📅 建立 (Created):** 2026-08-26
 **🔗 依賴 (Depends on):** DN-001（本檔的格式與畢業條件）；DN-009（路由模型與可用性語意）；DN-010（共同／供應商／使用者設定分層）
 **📌 來源 (Origin):** 使用者指令（2026-08-26）——要求預設流程套用到專案時有初始化／套用流程，並能處理訂閱新增、過期、只剩單一供應商與各種功能的後續管理
 **🤝 姊妹篇 (Sibling):** DN-009（多代理能力路由）；DN-010（跨代理入口與設定分層）
 
-> 🔍 **Exploring 狀態。** 本檔處理「何時產生設定、何時重驗、狀態壞掉怎麼恢復」。
-> 路由判準不在此重述，入口內容也不在此決定。
+> 🎓 **已畢業（2026-08-26）→ `PEV-DEV-AGENT-037`～`042`。**
+> 使用者同意依 §4 建議裁定；本檔凍結，不再更新。
 
 ## 1. 問題陳述
 
@@ -155,7 +155,24 @@
 | 4.9 | `precheck.py` 要檢查什麼 | 連本機狀態一起查／只查版控政策／不加入 | 只查 schema、引用與機密未入版控；本機訂閱狀態不能成為 CI 結果的一部分 |
 | 4.10 | 初始化完成的最低門檻 | 至少一個 profile verified／所有宣告 profile verified | 至少一個能完成本機開發的 profile；其餘可 `unknown`，但 route 不得選它 |
 
+> ✅ **裁定（2026-08-26，使用者）：** 4.1～4.10 全數採建議欄：以單一 stdlib-only
+> `agent_runtime.py` 提供子命令；狀態分使用者全域與 repo-local；`init` 同時支援互動與 flags；
+> TTL 由 adapter 決定；過期 cache 依風險降級；App Connector 不製造副作用；到期日選填；
+> 中途失效預設停下等使用者；precheck 只驗版控政策；至少一個本機 profile verified 才算完成。
+
 ## 5. 畢業去向（畢業時才填）
 
-預期屬 **D（改流程／基礎建設）**。結論會落到初始化／健康檢查標準、管理腳本、adapter probe、
-本機狀態 schema、installer 完成訊息、遷移指南與測試；實際工單待 §4 裁定後開出。
+屬 **D（改流程／基礎建設）**：
+
+| 工單 | 落點 |
+|---|---|
+| `PEV-DEV-AGENT-037` | runtime state、provider registry 與 `init` |
+| `PEV-DEV-AGENT-038` | `doctor`／`refresh`、Claude／Codex／GitHub probes |
+| `PEV-DEV-AGENT-039` | `route`／`explain`、覆寫與失效重路由 |
+| `PEV-DEV-AGENT-040` | schema／機密的 precheck 與審查證據 |
+| `PEV-DEV-AGENT-041` | `migrate` 與本 repo dogfooding |
+| `PEV-DEV-AGENT-042` | 混合代理端到端驗證 |
+
+**AC 可寫性驗證：** 以 `037` 為例，可驗證 `init` 可互動也可非互動重跑、狀態檔不含
+憑證、未達至少一個本機 profile verified 時明確失敗、重跑不破壞使用者設定。
+**使用者簽核：** ✅ 2026-08-26。
