@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** DN-011（硬依賴 `PEV-DEV-AGENT-037`）
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** devops-engineer
-**🚥 任務狀態 (Status):** Pending
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-26T19:53+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-26T23:55+08:00
+**🔀 審查載體編號 (PR/MR):** 分支 `PEV-DEV-AGENT-038`（見 `../reviews/PEV-DEV-AGENT-038.md`）
 
 ## 1. 任務描述 (Description)
 
@@ -23,15 +23,15 @@ Codex App Connector 無可靠 API 時記 `unknown + manual_confirmation`，不�
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：零網路檢查與可選 online read probe 分開，`--offline` 不嘗試連線。
-- [ ] AC-02：Claude Code CLI、Codex CLI 的安裝／版本／auth metadata 都有 adapter probe。
-- [ ] AC-03：功能 probe 與 metadata 矛盾時保留兩份證據並標 `degraded`，不任選其一。
-- [ ] AC-04：GitHub 四類能力分開回報；SSH 成功不能推出 Codex Cloud Connector 成功。
-- [ ] AC-05：App Connector 不可觀察時回 `unknown`，可由使用者人工確認且有到期時間。
-- [ ] AC-06：TTL 由 adapter 決定；`refresh` 只重跑過期或指定 probe。
-- [ ] AC-07：探針不得 push、開 PR、傳訊息、修改 Connector、購買或續訂。
-- [ ] AC-08：用假 executable／fixture 覆蓋成功、未安裝、auth 失效、quota、permission、timeout。
-- [ ] AC-09：pytest、precheck 全綠；BACKLOG 已重生。
+- [x] AC-01：零網路檢查與可選 online read probe 分開，`--offline` 不嘗試連線。
+- [x] AC-02：Claude Code CLI、Codex CLI 的安裝／版本／auth metadata 都有 adapter probe。
+- [x] AC-03：功能 probe 與 metadata 矛盾時保留兩份證據並標 `degraded`，不任選其一。
+- [x] AC-04：GitHub 四類能力分開回報；SSH 成功不能推出 Codex Cloud Connector 成功。
+- [x] AC-05：App Connector 不可觀察時回 `unknown`，可由使用者人工確認且有到期時間。
+- [x] AC-06：TTL 由 adapter 決定；`refresh` 只重跑過期或指定 probe。
+- [x] AC-07：探針不得 push、開 PR、傳訊息、修改 Connector、購買或續訂。
+- [x] AC-08：用假 executable／fixture 覆蓋成功、未安裝、auth 失效、quota、permission、timeout。
+- [x] AC-09：pytest、precheck 全綠；BACKLOG 已重生。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 

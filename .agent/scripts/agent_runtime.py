@@ -26,6 +26,107 @@ LOCAL_OVERRIDE_REL = Path(".agent/agent-runtime.local.json")
 ENTRY_TEMPLATES = ("AGENTS.md", "CLAUDE.md")
 POLICIES = {"allow", "conditional", "forbid"}
 STATUSES = {"verified", "degraded", "unavailable", "unknown"}
+PROBE_TIMEOUT_SECONDS = 15
+
+# 這是 probe ID → 無副作用命令的 registry，不是 provider if/else。adapter manifest 只引用 ID；
+# 第三家供應商可新增 manifest 與 probe record，不需改 task profile 或路由器。
+PROBE_DEFINITIONS = {
+    "claude_version": {
+        "command": ["claude", "--version"],
+        "online": False,
+        "summary": "Claude Code CLI 版本檢查通過",
+    },
+    "claude_auth_status": {
+        "command": ["claude", "auth", "status", "--json"],
+        "online": False,
+        "summary": "Claude Code auth metadata 可讀",
+    },
+    "claude_readonly_prompt": {
+        "command": [
+            "claude",
+            "-p",
+            "Reply exactly AGENT_RUNTIME_PROBE_OK and do not use tools.",
+            "--output-format",
+            "text",
+            "--permission-mode",
+            "plan",
+        ],
+        "online": True,
+        "summary": "Claude Code 唯讀功能探針通過",
+        "marker": "AGENT_RUNTIME_PROBE_OK",
+    },
+    "codex_version": {
+        "command": ["codex", "--version"],
+        "online": False,
+        "summary": "Codex CLI 版本檢查通過",
+    },
+    "codex_login_status": {
+        "command": ["codex", "login", "status"],
+        "online": False,
+        "summary": "Codex CLI login metadata 可讀",
+    },
+    "codex_readonly_exec": {
+        "command": [
+            "codex",
+            "exec",
+            "--ephemeral",
+            "--sandbox",
+            "read-only",
+            "--skip-git-repo-check",
+            "--color",
+            "never",
+            "Reply exactly AGENT_RUNTIME_PROBE_OK and do not use tools.",
+        ],
+        "online": True,
+        "summary": "Codex CLI 唯讀功能探針通過",
+        "marker": "AGENT_RUNTIME_PROBE_OK",
+    },
+    "codex_app_manual": {"manual": True, "summary": "Codex App 安裝狀態需人工確認"},
+    "chatgpt_session_manual": {"manual": True, "summary": "ChatGPT session 需人工確認"},
+    "codex_app_local_manual": {"manual": True, "summary": "Codex App Local 需人工確認"},
+    "codex_app_worktree_manual": {"manual": True, "summary": "Codex App Worktree 需人工確認"},
+    "codex_cloud_manual": {"manual": True, "summary": "Codex Cloud 需人工確認"},
+    "codex_github_connector_manual": {
+        "manual": True,
+        "summary": "Codex Cloud Connector 需人工確認",
+    },
+}
+
+# GitHub 能力刻意拆開；SSH read 成功不能推出 API write 或 Codex Connector 成功。
+GITHUB_INTEGRATIONS = {
+    "git_remote_read": {
+        "command": ["git", "ls-remote", "--heads", "origin"],
+        "online": True,
+        "summary": "Git remote read 通過",
+        "ttl_seconds": 1800,
+    },
+    "git_remote_write": {
+        "manual": True,
+        "summary": "Git remote write 不以 push 作健康檢查",
+        "ttl_seconds": 1800,
+    },
+    "github_api_read": {
+        "command": ["gh", "api", "user", "--jq", ".login"],
+        "online": True,
+        "summary": "GitHub API read 通過",
+        "ttl_seconds": 1800,
+    },
+    "github_api_write": {
+        "manual": True,
+        "summary": "GitHub API write 不以外部寫入作健康檢查",
+        "ttl_seconds": 1800,
+    },
+    "codex_cloud_connector": {
+        "manual": True,
+        "summary": "Codex Cloud Connector 目前不可自動觀察",
+        "ttl_seconds": 1800,
+    },
+    "automated_review": {
+        "manual": True,
+        "summary": "automated review 需人工確認平台設定",
+        "ttl_seconds": 1800,
+    },
+}
 
 
 class RuntimeConfigError(Exception):
@@ -168,7 +269,7 @@ def xdg_state_path(env=None):
 
 
 def empty_state():
-    return {"schema_version": SCHEMA_VERSION, "profiles": {}}
+    return {"schema_version": SCHEMA_VERSION, "profiles": {}, "integrations": {}}
 
 
 def load_state(root, env=None):
@@ -176,7 +277,9 @@ def load_state(root, env=None):
     if not path.exists():
         return empty_state(), path
     schema = runtime_root(root) / "runtime_state.schema.json"
-    return load_json(path, schema), path
+    state = load_json(path, schema)
+    state.setdefault("integrations", {})
+    return state, path
 
 
 def load_policy(root):
@@ -248,6 +351,177 @@ def _safe_summary(value):
     if secret.search(text):
         raise RuntimeConfigError("evidence summary 疑似含 credential；請只寫錯誤分類與短摘要")
     return text
+
+
+def _error_class(text):
+    """把命令錯誤壓成穩定分類；原始 stderr／stdout 不寫進 state。"""
+    lowered = text.lower()
+    patterns = (
+        ("quota", ("quota", "rate limit", "usage limit", "insufficient credits")),
+        ("permission", ("permission denied", "forbidden", "status 403", "http 403")),
+        ("auth", ("unauthorized", "not logged in", "login required", "status 401", "http 401")),
+        ("network", ("network", "dns", "connection refused", "connection reset", "timed out")),
+    )
+    for category, needles in patterns:
+        if any(needle in lowered for needle in needles):
+            return category
+    return "command_failed"
+
+
+def _probe_record(status, kind, summary, now, ttl_seconds, error_class=None):
+    checked = now.astimezone(timezone.utc).replace(microsecond=0)
+    return {
+        "status": status,
+        "checked_at": checked.isoformat(),
+        "expires_at": (checked + timedelta(seconds=ttl_seconds)).isoformat(),
+        "evidence": {"kind": kind, "summary": _safe_summary(summary)},
+        "error_class": error_class,
+    }
+
+
+def run_probe(definition, ttl_seconds, now, root, env=None, timeout=PROBE_TIMEOUT_SECONDS):
+    """執行一個無副作用 probe；回傳可安全寫入 state 的摘要，不含完整命令輸出。"""
+    if definition.get("manual"):
+        return _probe_record(
+            "unknown",
+            "manual_confirmation_required",
+            definition["summary"],
+            now,
+            ttl_seconds,
+        )
+    command = definition["command"]
+    try:
+        result = subprocess.run(
+            command,
+            cwd=root,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+    except FileNotFoundError:
+        return _probe_record(
+            "unavailable",
+            "command_probe",
+            f"{command[0]} 未安裝或不在 PATH",
+            now,
+            ttl_seconds,
+            "not_installed",
+        )
+    except subprocess.TimeoutExpired:
+        return _probe_record(
+            "unavailable",
+            "command_probe",
+            f"{command[0]} probe 超過 {timeout:g} 秒",
+            now,
+            ttl_seconds,
+            "timeout",
+        )
+    combined = f"{result.stdout}\n{result.stderr}"
+    if result.returncode != 0:
+        category = _error_class(combined)
+        return _probe_record(
+            "unavailable",
+            "command_probe",
+            f"{definition['summary']}失敗（{category}）",
+            now,
+            ttl_seconds,
+            category,
+        )
+    marker = definition.get("marker")
+    if marker and marker not in combined:
+        return _probe_record(
+            "unavailable",
+            "command_probe",
+            f"{definition['summary']}但缺少預期標記",
+            now,
+            ttl_seconds,
+            "capability_mismatch",
+        )
+    return _probe_record(
+        "verified",
+        "command_probe",
+        definition["summary"],
+        now,
+        ttl_seconds,
+    )
+
+
+def _is_fresh(record, now):
+    if not record:
+        return False
+    try:
+        return datetime.fromisoformat(record["expires_at"]) > now.astimezone(timezone.utc)
+    except (KeyError, TypeError, ValueError):
+        return False
+
+
+def _aggregate_profile(profile_id, probes, now):
+    """保留各 probe 後再彙總；metadata 與功能矛盾時明確標 degraded。"""
+    install = probes.get("install", {})
+    auth = probes.get("auth", {})
+    functional = probes.get("functional", {})
+    statuses = {key: value.get("status") for key, value in probes.items()}
+    if functional.get("status") == "verified" and auth.get("status") == "unavailable":
+        status, error = "degraded", "evidence_conflict"
+        summary = f"{profile_id} 功能探針成功，但 auth metadata 失敗"
+    elif install.get("status") == "unavailable":
+        status, error = "unavailable", install.get("error_class")
+        summary = f"{profile_id} 安裝探針失敗"
+    elif functional.get("status") == "verified":
+        status, error = "verified", None
+        summary = f"{profile_id} 功能探針已驗證"
+    elif any(value == "degraded" for value in statuses.values()):
+        status, error = "degraded", "partial_failure"
+        summary = f"{profile_id} 僅部分能力可用"
+    elif any(value == "unavailable" for value in statuses.values()):
+        failed = next(value for value in probes.values() if value.get("status") == "unavailable")
+        status, error = "unavailable", failed.get("error_class")
+        summary = f"{profile_id} probe 失敗"
+    else:
+        status, error = "unknown", None
+        summary = f"{profile_id} 尚無有效功能探針"
+    expirations = [
+        datetime.fromisoformat(value["expires_at"])
+        for value in probes.values()
+        if value.get("expires_at")
+    ]
+    expires = min(expirations) if expirations else now.astimezone(timezone.utc)
+    checked = now.astimezone(timezone.utc).replace(microsecond=0)
+    return {
+        "status": status,
+        "checked_at": checked.isoformat(),
+        "expires_at": expires.isoformat(),
+        "evidence": {"kind": "probe_aggregate", "summary": _safe_summary(summary)},
+        "error_class": error,
+        "disabled_until": None,
+        "probes": probes,
+    }
+
+
+def _manual_record(status, summary, now, ttl_seconds):
+    if status not in STATUSES:
+        raise RuntimeConfigError(f"人工確認狀態必須是 {sorted(STATUSES)}，收到 {status!r}")
+    return _probe_record(
+        status,
+        "manual_confirmation",
+        summary,
+        now,
+        ttl_seconds,
+        None if status in {"verified", "unknown"} else "manual_status",
+    )
+
+
+def _parse_assignments(values, label):
+    result = {}
+    for value in values:
+        if "=" not in value:
+            raise RuntimeConfigError(f"{label}：格式應為 ID=STATUS，收到 {value!r}")
+        key, status = value.split("=", 1)
+        if not key or status not in STATUSES:
+            raise RuntimeConfigError(f"{label}：格式應為 ID={sorted(STATUSES)}")
+        result[key] = status
+    return result
 
 
 def _verified_entry(profile, now):
@@ -464,6 +738,205 @@ def init_runtime(args, input_fn=input, env=None, now=None):
     return result
 
 
+def _select_profiles(args, policy, adapters):
+    selected = args.profile or policy["enabled_profiles"]
+    unknown = sorted(set(selected) - set(adapters))
+    if unknown:
+        raise RuntimeConfigError(f"{args.command}:$.profile：未知 execution profile {unknown}")
+    return selected
+
+
+def _probe_should_run(existing, now, force, explicitly_selected):
+    if explicitly_selected or force:
+        return True
+    return not _is_fresh(existing, now)
+
+
+def _refresh_profile(
+    manifest,
+    previous,
+    now,
+    root,
+    env,
+    online,
+    force,
+    requested_probes,
+    timeout,
+):
+    probes = dict(previous.get("probes", {}))
+    for stage in ("install", "auth", "functional"):
+        probe_id = manifest["probes"][stage]
+        if requested_probes and probe_id not in requested_probes:
+            continue
+        definition = PROBE_DEFINITIONS.get(probe_id)
+        if definition is None:
+            raise RuntimeConfigError(
+                f"adapter {manifest['id']}:$.probes.{stage}：未知 probe ID {probe_id!r}"
+            )
+        existing = probes.get(stage)
+        if definition.get("online") and not online:
+            if existing is None:
+                probes[stage] = _probe_record(
+                    "unknown",
+                    "offline_skipped",
+                    f"{probe_id} 需要 online read，這次未執行",
+                    now,
+                    0,
+                )
+            continue
+        explicit = probe_id in requested_probes
+        if not _probe_should_run(existing, now, force, explicit):
+            continue
+        probes[stage] = run_probe(
+            definition,
+            manifest["ttl_seconds"][stage],
+            now,
+            root,
+            env,
+            timeout,
+        )
+    return _aggregate_profile(manifest["id"], probes, now)
+
+
+def _refresh_integrations(previous, now, root, env, online, force, requested, timeout):
+    result = dict(previous)
+    for integration_id, definition in GITHUB_INTEGRATIONS.items():
+        if requested and integration_id not in requested:
+            continue
+        existing = result.get(integration_id)
+        if definition.get("online") and not online:
+            if existing is None:
+                result[integration_id] = _probe_record(
+                    "unknown",
+                    "offline_skipped",
+                    f"{integration_id} 需要 online read，這次未執行",
+                    now,
+                    0,
+                )
+            continue
+        if not _probe_should_run(existing, now, force, integration_id in requested):
+            continue
+        result[integration_id] = run_probe(
+            definition,
+            definition["ttl_seconds"],
+            now,
+            root,
+            env,
+            timeout,
+        )
+    return result
+
+
+def health_runtime(args, env=None, now=None, timeout=PROBE_TIMEOUT_SECONDS):
+    """doctor／refresh 共用引擎；兩者差在是否強制重跑已在 TTL 內的 probe。"""
+    root = args.root.resolve()
+    tasks, adapters = load_registry(root)
+    del tasks  # 這張只驗 execution profiles；route 才會使用 task profiles。
+    policy = effective_policy(root)
+    state, state_path = load_state(root, env)
+    now = now or datetime.now(timezone.utc)
+    selected = _select_profiles(args, policy, adapters)
+    requested = set(args.probe)
+    known_probe_ids = {
+        probe_id for manifest in adapters.values() for probe_id in manifest["probes"].values()
+    }
+    unknown_probes = sorted(requested - known_probe_ids)
+    if unknown_probes:
+        raise RuntimeConfigError(f"{args.command}:$.probe：未知 probe ID {unknown_probes}")
+    force = args.command == "doctor" or args.force
+    for profile_id in selected:
+        previous = state["profiles"].get(profile_id, {})
+        state["profiles"][profile_id] = _refresh_profile(
+            adapters[profile_id],
+            previous,
+            now,
+            root,
+            env,
+            args.online,
+            force,
+            requested,
+            timeout,
+        )
+
+    manual_profiles = _parse_assignments(args.manual_profile, "--manual-profile")
+    for profile_id, status in manual_profiles.items():
+        if profile_id not in adapters:
+            raise RuntimeConfigError(f"--manual-profile：未知 execution profile {profile_id!r}")
+        ttl = adapters[profile_id]["ttl_seconds"]["functional"]
+        record = _manual_record(status, f"使用者人工確認 {profile_id}", now, ttl)
+        previous = state["profiles"].get(profile_id, {})
+        state["profiles"][profile_id] = {
+            **record,
+            "disabled_until": previous.get("disabled_until"),
+            "probes": previous.get("probes", {}),
+        }
+
+    requested_integrations = set(args.integration)
+    unknown_integrations = sorted(requested_integrations - set(GITHUB_INTEGRATIONS))
+    if unknown_integrations:
+        raise RuntimeConfigError(
+            f"{args.command}:$.integration：未知 GitHub integration {unknown_integrations}"
+        )
+    state["integrations"] = _refresh_integrations(
+        state.get("integrations", {}),
+        now,
+        root,
+        env,
+        args.online,
+        force,
+        requested_integrations,
+        timeout,
+    )
+    manual_integrations = _parse_assignments(args.manual_integration, "--manual-integration")
+    for integration_id, status in manual_integrations.items():
+        if integration_id not in GITHUB_INTEGRATIONS:
+            raise RuntimeConfigError(f"--manual-integration：未知 integration {integration_id!r}")
+        definition = GITHUB_INTEGRATIONS[integration_id]
+        state["integrations"][integration_id] = _manual_record(
+            status,
+            f"使用者人工確認 {integration_id}",
+            now,
+            definition["ttl_seconds"],
+        )
+
+    write_json(state_path, state)
+    output = {
+        "project_id": policy["project_id"],
+        "mode": "online-read" if args.online else "offline",
+        "profiles": {profile_id: state["profiles"][profile_id] for profile_id in selected},
+        "integrations": state["integrations"],
+        "state": str(state_path),
+    }
+    if args.json:
+        print(json.dumps(output, ensure_ascii=False, indent=2))
+    else:
+        print(f"agent runtime {args.command}（{output['mode']}）")
+        for profile_id, item in output["profiles"].items():
+            print(f"  {item['status']:11} {profile_id} — {item['evidence']['summary']}")
+        print("GitHub／外部整合：")
+        for integration_id, item in output["integrations"].items():
+            print(f"  {item['status']:11} {integration_id} — {item['evidence']['summary']}")
+    return output
+
+
+def _add_health_arguments(command):
+    network = command.add_mutually_exclusive_group()
+    network.add_argument("--online", action="store_true", help="允許無外部寫入的 online read probe")
+    network.add_argument(
+        "--offline",
+        action="store_false",
+        dest="online",
+        help="只跑零網路 probe（預設）",
+    )
+    command.set_defaults(online=False)
+    command.add_argument("--profile", action="append", default=[])
+    command.add_argument("--probe", action="append", default=[])
+    command.add_argument("--integration", action="append", default=[])
+    command.add_argument("--manual-profile", action="append", default=[], metavar="ID=STATUS")
+    command.add_argument("--manual-integration", action="append", default=[], metavar="ID=STATUS")
+    command.add_argument("--json", action="store_true")
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description="跨代理 runtime 管理器")
     parser.add_argument(
@@ -484,6 +957,12 @@ def build_parser():
     init.add_argument("--cloud-policy", choices=sorted(POLICIES))
     init.add_argument("--connector-policy", choices=sorted(POLICIES))
     init.add_argument("--json", action="store_true")
+    doctor = commands.add_parser("doctor", help="檢查安裝、設定與無副作用功能探針")
+    _add_health_arguments(doctor)
+    doctor.set_defaults(force=True)
+    refresh = commands.add_parser("refresh", help="重跑過期或指定的探針")
+    _add_health_arguments(refresh)
+    refresh.add_argument("--force", action="store_true", help="忽略 TTL，重跑選定探針")
     return parser
 
 
@@ -493,6 +972,8 @@ def main(argv=None):
     try:
         if args.command == "init":
             init_runtime(args)
+        elif args.command in {"doctor", "refresh"}:
+            health_runtime(args)
     except RuntimeConfigError as error:
         print(f"❌ {error}", file=sys.stderr)
         return 2

@@ -171,6 +171,35 @@ python3 .agent/scripts/agent_runtime.py init --non-interactive --config <path>
 覆寫，而是遞增尾碼。缺少 `AGENTS.md`／`CLAUDE.md` 時同樣只從 `.agent/templates/` 產生
 候選，避免在使用者確認前改變 agent 行為。
 
+## 11. Doctor、refresh 與無副作用探針
+
+`doctor` 重新檢查選定 profile；`refresh` 只重跑已過 TTL 或用 `--probe` 指定的項目。
+兩者預設都是 offline，只有明示 `--online` 才能執行唯讀網路探針：
+
+```bash
+python3 .agent/scripts/agent_runtime.py doctor --offline
+python3 .agent/scripts/agent_runtime.py doctor --online --profile codex-cli
+python3 .agent/scripts/agent_runtime.py refresh --probe codex_login_status
+```
+
+每個 profile 的 `install`／`auth`／`functional` 證據分開保存，再彙總成 Availability。
+若 auth metadata 說未登入，但最小功能探針成功，兩份證據都留下並標 `degraded`；不得刪掉
+其中一份來製造整齊結論。state 只存固定摘要與錯誤分類，不存完整 stdout／stderr。
+
+GitHub 也不是一個布林值：
+
+| 能力 | 自動探針 | 為何分開 |
+|---|---|---|
+| Git remote read | `git ls-remote`（online read） | 只證明 remote 可讀 |
+| Git remote write | 人工確認 | 健康檢查不得用 push 製造寫入 |
+| GitHub API read | `gh api user` | 與 git transport 是不同憑證路徑 |
+| GitHub API write | 人工確認 | 不以開 issue／PR 作探針 |
+| Codex Cloud Connector | 人工確認＋TTL | App 目前未必有可觀察 API |
+| automated review | 人工確認＋TTL | 屬 repo／平台設定，不能由 SSH 成功推出 |
+
+人工確認使用 `--manual-profile ID=STATUS` 或 `--manual-integration ID=STATUS`，同樣有 adapter
+定義的到期時間。所有探針禁止 push、開 PR、傳訊息、修改 Connector 或購買／續訂。
+
 ## 相關文件
 
 - `.agent/resources/agent_runtime/task_profiles.json`——任務輪廓唯一正版
