@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "id": "claude-code-cli",
+  "provider": "anthropic",
+  "surface": "cli",
+  "title": "Claude Code CLI",
+  "execution_location": "local",
+  "capabilities": [
+    "repo_read",
+    "repo_write",
+    "shell_execute",
+    "test_execute",
+    "web_research",
+    "source_citation",
+    "long_context",
+    "isolated_workspace",
+    "handoff",
+    "diff_read",
+    "fresh_context",
+    "evidence_capture",
+    "noninteractive",
+    "structured_output",
+    "timeout_control"
+  ],
+  "probes": {
+    "install": "claude_version",
+    "auth": "claude_auth_status",
+    "functional": "claude_readonly_prompt"
+  },
+  "ttl_seconds": {"install": 86400, "auth": 3600, "functional": 3600},
+  "project_config": ["AGENTS.md", "CLAUDE.md", ".claude/settings.json", ".mcp.json"],
+  "manual_capabilities": []
+}

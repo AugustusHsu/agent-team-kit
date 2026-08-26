@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent-team-kit execution profile manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "provider",
+    "surface",
+    "title",
+    "execution_location",
+    "capabilities",
+    "probes",
+    "ttl_seconds",
+    "project_config",
+    "manual_capabilities"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+    "provider": {"type": "string", "minLength": 1},
+    "surface": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "execution_location": {"enum": ["local", "cloud"]},
+    "capabilities": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "probes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["install", "auth", "functional"],
+      "properties": {
+        "install": {"type": "string", "minLength": 1},
+        "auth": {"type": "string", "minLength": 1},
+        "functional": {"type": "string", "minLength": 1}
+      }
+    },
+    "ttl_seconds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["install", "auth", "functional"],
+      "properties": {
+        "install": {"type": "integer", "minimum": 0},
+        "auth": {"type": "integer", "minimum": 0},
+        "functional": {"type": "integer", "minimum": 0}
+      }
+    },
+    "project_config": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "manual_capabilities": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+  }
+}
