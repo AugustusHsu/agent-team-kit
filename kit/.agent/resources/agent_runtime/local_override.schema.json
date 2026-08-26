@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent-team-kit repo-local runtime override",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "enabled_profiles": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "disabled_profiles": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "preferred_profiles": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "default_data_class": {"type": "string"},
+    "cloud_policy": {"enum": ["allow", "conditional", "forbid"]},
+    "connector_policy": {"enum": ["allow", "conditional", "forbid"]}
+  }
+}

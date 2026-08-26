@@ -137,9 +137,46 @@ execution profiles；有就加入候選，沒有也不使基本開發流程失�
 CI 驗證版控中的 schema 與引用；**不驗使用者是否登入、訂閱是否有效或 Connector 是否連上**。
 後者是本機生命週期狀態，不得讓同一個 commit 在不同人的 CI 得到不同結果。
 
+## 10. 設定分層與初始化
+
+三層資料各自只回答一種問題，不得把本機登入狀態寫回共同政策：
+
+| 層 | 路徑 | 是否版控 | 內容 |
+|---|---|---|---|
+| 共享政策 | `.agent/agent-runtime.json` | ✅ | portable project ID、啟用／偏好 profiles、資料與外連政策 |
+| 使用者狀態 | `${XDG_STATE_HOME:-~/.local/state}/agent-team-kit/agent-runtime.json` | ❌ | profile 可用性、短證據摘要、驗證與到期時間 |
+| 專案本機覆寫 | `.agent/agent-runtime.local.json` | ❌ | 此機器停用／偏好的 profiles 與較嚴格的本機政策 |
+
+共享政策裡的 `project_id` 跟著 repo，所有 worktree 因而使用同一 identity；使用者狀態則可在
+同一台機器跨 worktree 共用。override **不能**改 `project_id`，也不能加入 registry 不存在的
+profile。三層任一 JSON 損壞、schema 版本不支援或欄位拼錯，工具都應指出檔案與 JSON path，
+不得以預設值靜默帶過。
+
+首次設定：
+
+```bash
+# 互動模式
+python3 .agent/scripts/agent_runtime.py init
+
+# 可重跑的非互動模式
+python3 .agent/scripts/agent_runtime.py init --non-interactive \
+  --verified-profile codex-cli --prefer-profile codex-cli
+
+# 大量專案可改用版控外的 JSON 設定檔
+python3 .agent/scripts/agent_runtime.py init --non-interactive --config <path>
+```
+
+`init` 成功的最低門檻是至少一個能滿足 `implementation_local` 的本機 profile 尚在
+`verified` 有效期內。重跑若會改變已存在的共享政策，只產生 `.new` 候選；既有候選也不
+覆寫，而是遞增尾碼。缺少 `AGENTS.md`／`CLAUDE.md` 時同樣只從 `.agent/templates/` 產生
+候選，避免在使用者確認前改變 agent 行為。
+
 ## 相關文件
 
 - `.agent/resources/agent_runtime/task_profiles.json`——任務輪廓唯一正版
+- `.agent/resources/agent_runtime/adapters/*.json`——execution profile manifests
+- `.agent/resources/agent_runtime/*schema.json`——政策、狀態與 registry 的格式契約
+- `.agent/scripts/agent_runtime.py`——初始化與 runtime 管理介面
 - `.agent/resources/team_protocol.md`——角色、工單狀態與 commit 閘門
 - [git_workflow.md](git_workflow.md)——分支、隔離與合併拓撲
 - [skill_conventions.md](skill_conventions.md)——角色 skill 的撰寫邊界

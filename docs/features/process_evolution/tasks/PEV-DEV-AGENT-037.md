@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** DN-011（硬依賴 `PEV-DEV-AGENT-036`）
 **🏷️ 任務類型 (Task Type):** queue_agent
 **👤 負責人 (Assignee):** backend-developer
-**🚥 任務狀態 (Status):** Pending
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-26T19:53+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-26T23:46+08:00
+**🔀 審查載體編號 (PR/MR):** 分支 `PEV-DEV-AGENT-037`（見 `../reviews/PEV-DEV-AGENT-037.md`）
 
 ## 1. 任務描述 (Description)
 
@@ -23,14 +23,14 @@
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：`init` 同時支援互動模式與可重跑 flags／設定檔模式。
-- [ ] AC-02：至少一個本機開發 profile verified 才回傳成功，其餘可 `unknown`。
-- [ ] AC-03：重跑 `init` 不破壞使用者客製內容，差異以候選或 `.new` 呈現。
-- [ ] AC-04：global state 與 repo-local override 正確合併，worktree 使用同一 project identity。
-- [ ] AC-05：狀態輸出不含 token、cookie、SSH key、完整環境變數或命令 stdout。
-- [ ] AC-06：缺 manifest、schema 版本不支援、JSON 損壞時訊息能指出檔案與欄位。
-- [ ] AC-07：所有測試只用標準函式庫、tmp_path 與假 HOME／XDG，不碰真實帳號。
-- [ ] AC-08：pytest、precheck 全綠；installer 待合併 0；BACKLOG 已重生。
+- [x] AC-01：`init` 同時支援互動模式與可重跑 flags／設定檔模式。
+- [x] AC-02：至少一個本機開發 profile verified 才回傳成功，其餘可 `unknown`。
+- [x] AC-03：重跑 `init` 不破壞使用者客製內容，差異以候選或 `.new` 呈現。
+- [x] AC-04：global state 與 repo-local override 正確合併，worktree 使用同一 project identity。
+- [x] AC-05：狀態輸出不含 token、cookie、SSH key、完整環境變數或命令 stdout。
+- [x] AC-06：缺 manifest、schema 版本不支援、JSON 損壞時訊息能指出檔案與欄位。
+- [x] AC-07：所有測試只用標準函式庫、tmp_path 與假 HOME／XDG，不碰真實帳號。
+- [x] AC-08：pytest、precheck 全綠；installer 待合併 0；BACKLOG 已重生。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 

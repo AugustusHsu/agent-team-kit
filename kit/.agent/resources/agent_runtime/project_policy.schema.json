@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent-team-kit project runtime policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "project_id",
+    "project_name",
+    "enabled_profiles",
+    "preferred_profiles",
+    "default_data_class",
+    "cloud_policy",
+    "connector_policy"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "project_id": {"type": "string", "pattern": "^[a-f0-9]{32}$"},
+    "project_name": {"type": "string", "minLength": 1},
+    "enabled_profiles": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "preferred_profiles": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+    "default_data_class": {"type": "string"},
+    "cloud_policy": {"enum": ["allow", "conditional", "forbid"]},
+    "connector_policy": {"enum": ["allow", "conditional", "forbid"]}
+  }
+}

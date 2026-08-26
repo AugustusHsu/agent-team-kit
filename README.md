@@ -35,6 +35,7 @@ kit/
 │   │   └── qa-test-planner/ qa-automation-engineer/ code-reviewer/ # 品質
 │   ├── workflows/              # commit-message / product-analysis / validate-wireframes
 │   └── scripts/
+│       ├── agent_runtime.py    # Claude／Codex 初始化、健康檢查與能力路由
 │       ├── scan_backlog.py     # 掃工單 → 產生 BACKLOG.md（狀態儀表板）
 │       ├── precheck.py         # 第 1 層流程檢查，stdlib-only、不跑你的測試
 │       ├── migrate_dates.py    # 工單日期格式遷移
@@ -49,7 +50,8 @@ kit/
 │   └── workflows/
 │       └── kit-precheck.yml    # 薄轉接層：在 CI 上跑第 1 層檢查
 ├── .gitignore                  # 基礎忽略清單
-└── CLAUDE.md                   # 專案接手指南模板
+├── AGENTS.md                   # Claude／Codex 共用的專案規則入口
+└── CLAUDE.md                   # Claude 專屬 adapter（匯入 AGENTS.md）
 
 install.sh                      # 安裝到目標專案
 tests/                          # 本套件自身的 smoke test（不會被安裝）
@@ -63,7 +65,7 @@ docs/features/                  # 本 repo 自己的工單（不會被安裝，�
 uv run pytest
 ```
 
-驗證 `install.sh` 的複製行為、三支腳本在安裝後環境的實際輸出，以及 `kit/` 內的 SKILL
+驗證 `install.sh` 的複製行為、出貨腳本在安裝後環境的實際輸出，以及 `kit/` 內的 SKILL
 frontmatter、evals schema 與文件連結。全部離線執行。細節見 [tests/README.md](tests/README.md)。
 
 ## 安裝到新專案
@@ -79,8 +81,9 @@ git clone git@github.com:AugustusHsu/agent-team-kit.git
 
 1. 編輯 `.agent/resources/team_protocol.md` §3.1 的**模組前綴對照表**，換成你的模組（前綴取 3 個大寫字母，全專案唯一）。
 2. 依 `docs/features/_TEMPLATE/` 複製出第一個功能模組目錄，並到 `docs/DOCS_MAP.md` 登記。
-3. 依安裝到專案根目錄的 `CLAUDE.md` 模板，寫成你專案的入口摘要。
-4. 跑一次 `python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md` 確認腳本正常。
+3. 執行 `python3 .agent/scripts/agent_runtime.py init`，初始化 `AGENTS.md`／`CLAUDE.md`
+   與本機可用的 execution profiles。
+4. 跑一次 `python3 .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md` 確認腳本正常。
 
 ## 升級既有專案
 
@@ -100,7 +103,7 @@ kit 的流程規範會持續演進，但安裝後的專案一定改過東西（�
 | 與 kit 新版相同 | 不動（已是最新） |
 | 與 manifest 相同（你沒改過） | **更新為新版** |
 | 與 manifest 不同（你改過） | **不覆蓋**，新版另存 `<檔名>.new` 供 `diff` 後人工合併 |
-| 種子檔（`CLAUDE.md`、`.gitignore`、`docs/development/BACKLOG.md`） | 一律保留，它們安裝後就歸專案自己維護 |
+| 種子檔（`AGENTS.md`、`CLAUDE.md`、`.gitignore`、`docs/development/BACKLOG.md`、`docs/features/README.md`） | 一律保留；新版新增的種子也只提示 `migrate`，不直接補入舊專案 |
 
 `.kit-manifest` 請納入版控——它是團隊共用的基準線，不在版控裡的話別人升級時會全部變成待合併。
 
