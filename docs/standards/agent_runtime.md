@@ -1,0 +1,145 @@
+# 多代理執行標準 (Agent Runtime)
+
+> 本標準回答「同一張工單此刻由哪個代理、在哪個執行面完成」。
+> 角色職責仍以 `.agent/skills/` 為準，工單生命週期仍以
+> `.agent/resources/team_protocol.md` 為準；本檔不取代兩者。
+
+## 1. 先分清四個維度
+
+| 維度 | 問題 | 例子 |
+|---|---|---|
+| **Role** | 需要哪種專業判斷 | `tech-lead`、`backend-developer` |
+| **Task Profile** | 這次工作需要哪些能力與風險限制 | `implementation_local` |
+| **Execution Profile** | 哪個產品、執行面與工具集合 | `claude-code-cli`、`codex-app-worktree` |
+| **Availability** | 這個 execution profile 此刻能不能用 | `verified`、`degraded`、`unavailable`、`unknown` |
+
+**不得把供應商名稱寫進 `Task Type` 或 `Assignee`。** `Assignee` 永遠是角色；Task Type
+是既有佇列分類。Claude、Codex 或未來供應商只出現在 execution profile。
+使用者換訂閱或換產品時，工單的角色與業務語意不應跟著改名。
+
+## 2. Task Profile 宣告能力，不宣告廠商
+
+Task profile 的唯一正版是
+`.agent/resources/agent_runtime/task_profiles.json`。它包含：
+
+- `schema_version`：格式版本；不支援的版本必須明確失敗；
+- `capabilities`：高階能力詞彙與說明；
+- `data_classes`：資料敏感度由低到高的順序；
+- `profiles`：任務輪廓、必備／選配能力與預設風險政策。
+
+能力使用**高階語意**，例如 `repo_write`、`isolated_workspace`、`visual_interaction`。
+「有 Bash 3.2」或「有某個 plugin」只是 execution profile 證明高階能力的證據，
+不應成為每張工單都要知道的詞彙。工具版本改動時，只更新 adapter 的證據，不改任務語意。
+
+### 2.1 初始八種輪廓
+
+| ID | 典型工作 | 主要硬性能力 |
+|---|---|---|
+| `design_research` | DN、架構比較、外部證據 | repo 讀取、來源查證、長 context |
+| `implementation_local` | 程式與文件實作 | repo 讀寫、shell、測試 |
+| `parallel_long_running` | 多工單、背景任務 | 隔離工作區、長時間執行、交接 |
+| `review_security` | code review、安全審查 | 唯讀 diff、新鮮 context、證據紀錄 |
+| `test_verification` | 測試、負向對照 | shell、原始輸出保真、可重跑 |
+| `visual_interactive` | UI、瀏覽器、桌面應用 | 視覺互動、使用者在場 |
+| `automation_batch` | CI、批次、固定流程 | 非互動模式、結構化輸出、timeout |
+| `external_integration` | GitHub、MCP、Connector | 外部連線、權限與資料政策 |
+
+新增輪廓只新增 registry 資料；**不得為每個輪廓新增 Python enum 或供應商 if/else**。
+新增高階能力時必須同時補詞彙說明與至少一個可證明它的 adapter，但不需修改既有輪廓。
+
+## 3. 資料與外部連線分開判斷
+
+資料分成四級：`public`、`internal`、`sensitive`、`restricted`。registry 的順序就是
+風險順序，不由程式碼另寫第二份。
+
+每個 task profile 分別宣告：
+
+- `cloud_policy`：`allow`／`conditional`／`forbid`；
+- `connector_policy`：`allow`／`conditional`／`forbid`；
+- `default_data_class`：未被工單覆寫時採用的資料級別。
+
+「可上 cloud」不等於「可把資料送給外部 Connector」。兩個政策必須獨立檢查；
+任一為 `forbid`，路由器都不得以「目前只剩這個候選」為由偷偷放寬。
+
+## 4. 路由順序不可交換
+
+候選依下列順序處理：
+
+1. **硬性能力**：缺一項立即排除；
+2. **安全與資料政策**：cloud、Connector、資料級別不符即排除；
+3. **當下可用性**：依仍在有效期內的 probe 判斷；
+4. **專案偏好**：只能在合格候選之間作用；
+5. **成本、速度與 context**：採簡單、可解釋的層內評分；
+6. **使用者覆寫**：最後決定權屬使用者，但不得偽裝成自動決策。
+
+候選為零時回報「缺少哪些能力或政策衝突」，不得靜默選 `unknown`、禁止的 cloud，
+或只有登入 metadata 卻未證明功能的 profile。
+
+## 5. Availability 是有時效的證據
+
+| 狀態 | 意義 |
+|---|---|
+| `verified` | 功能探針成功且尚未過期 |
+| `degraded` | 部分能力失效，仍能執行受限任務 |
+| `unavailable` | 已確認登入、權限、額度或工具失效 |
+| `unknown` | 未驗證、已過期或目前不可觀察 |
+
+訂閱名稱、使用者填的到期日與 `auth status` 都只能當提示。最小功能探針才是主要證據；
+兩者矛盾時保留兩份證據並標 `degraded`，不得任選較順眼的一邊。
+
+即使只啟用一個供應商也要跑路由：候選數量變成一，不代表它自動具備任務所需能力。
+
+## 6. Codex CLI 是基線，App 是增強層
+
+預設流程以 **Claude Code CLI 與 Codex CLI** 都能承載的本機能力作可攜基線。
+Codex App Local／Worktree、Codex Cloud、瀏覽器、Apps／Plugins 等能力建成額外
+execution profiles；有就加入候選，沒有也不使基本開發流程失效。
+
+因此文件不得寫成「使用 Codex 就一定有 managed worktree」或「沒有 App 就不能路由」。
+同一供應商的 CLI、App Local、App Worktree 與 Cloud 是不同 profiles，分別驗證。
+
+模型與 reasoning 名稱同樣留在 provider adapter／使用者設定。Task profile 只描述
+`fast`、`balanced`、`deep` 等需求級別，避免模型改名或訂閱變動迫使所有工單改寫。
+
+## 7. 覆寫與證據
+
+工單由 Task Type 取得預設 task profile，只在例外時寫 capability／data override。
+使用者覆寫預設只對**單次路由**有效；整輪或專案永久覆寫必須明示 scope 與到期條件。
+
+實際路由證據寫進審查載體，至少包含：
+
+- task profile 與所有 override；
+- 硬性能力與資料政策；
+- 選中的 execution profile；
+- 其他候選的排除理由；
+- probe 的時間與是否使用過期 cache；
+- 是否發生中途交接。
+
+不得只寫「這次用 Codex」；那無法重建決策，也無法判斷換成 Claude 是否等價。
+
+## 8. 中途失效
+
+執行中失效採「保存 → 重探 → 重新路由」：保留 Task ID、branch／worktree、HEAD、
+工作區狀態、已完成 AC 與最後可信驗證，再停用失效 profile 並重新排序。
+
+換 execution profile **不重開工單、不更換 Assignee**。有外部副作用的工作預設停下等待
+使用者；只有純讀、無外部副作用的子任務可由專案政策允許自動接手。
+
+## 9. Registry 相容性
+
+- `schema_version` 不支援：明確失敗，不猜測；
+- 未知欄位：失敗並指出 JSON 路徑，避免拼字錯誤被靜默忽略；
+- 重複 profile ID：失敗；
+- 引用未知 capability／data class／policy：失敗；
+- 新增 profile：向後相容；
+- 刪除或重新命名既有 profile：屬破壞性變更，必須提供 migrate 對映。
+
+CI 驗證版控中的 schema 與引用；**不驗使用者是否登入、訂閱是否有效或 Connector 是否連上**。
+後者是本機生命週期狀態，不得讓同一個 commit 在不同人的 CI 得到不同結果。
+
+## 相關文件
+
+- `.agent/resources/agent_runtime/task_profiles.json`——任務輪廓唯一正版
+- `.agent/resources/team_protocol.md`——角色、工單狀態與 commit 閘門
+- [git_workflow.md](git_workflow.md)——分支、隔離與合併拓撲
+- [skill_conventions.md](skill_conventions.md)——角色 skill 的撰寫邊界

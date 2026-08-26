@@ -9,11 +9,7 @@
 
 > 包含狀態為 `In Progress` 或 `Ready` 的工單。
 
-| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
-|---|---------|------|------|-------------------|---------------|
-| 1 | PEV-DEV-AGENT-034 | 建立跨代理執行標準與任務輪廓 registry | process_evolution | system-architect | 🟢 Ready |
-
-**小計**：1 張（In Progress: 0 / Ready: 1）
+*(無)*
 
 ---
 
@@ -50,20 +46,20 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) | 完成時間 |
 |---|---------|------|------|-------------------|---------------|----------|
-| 1 | PEV-DEV-AGENT-033 | 依 skill_conventions.md 補齊 13 份 skill 的落差 | process_evolution | tech-lead | ✅ Done | 2026-08-22T04:05+08:00 |
-| 2 | PEV-DEV-AGENT-028 | 立 skill 撰寫標準：skill_conventions.md | process_evolution | system-architect | ✅ Done | 2026-08-22T02:20+08:00 |
-| 3 | PEV-DEV-AGENT-032-FIX-001 | 更正 git_workflow.md §7.3 的反查對照表 | process_evolution | devops-engineer | ✅ Done | 2026-08-22T01:52+08:00 |
-| 4 | PEV-DEV-AGENT-031 | precheck 新增 Assignee 合法性檢查 | process_evolution | devops-engineer | ✅ Done | 2026-08-21T21:32+08:00 |
-| 5 | PEV-DEV-AGENT-027 | qa-automation-engineer 的技術棧內容拆成第 2 層 | process_evolution | system-architect | ✅ Done | 2026-08-21T21:30+08:00 |
-| 6 | PEV-DEV-AGENT-026 | skill 與規範一致性的自動檢查：覆蓋率 ＋ 引用標題比對 | process_evolution | backend-developer | ✅ Done | 2026-08-21T21:03+08:00 |
-| 7 | PEV-DEV-AGENT-032 | 一輪多張工單的合併拓撲寫進 git_workflow.md §7 | process_evolution | devops-engineer | ✅ Done | 2026-08-19T14:53+08:00 |
-| 8 | PEV-DEV-AGENT-025 | 13 份 skill 全面盤點與對齊 | process_evolution | tech-lead | ✅ Done | 2026-08-18T23:55+08:00 |
-| 9 | PEV-DEV-AGENT-029 | 移除 kit 出貨內容裡硬編碼的 uv run | process_evolution | devops-engineer | ✅ Done | 2026-08-18T23:40+08:00 |
-| 10 | PEV-DEV-AGENT-030 | 修正 DN 取號指令：改從檔名取號 | process_evolution | scrum-master | ✅ Done | 2026-08-18T23:35+08:00 |
+| 1 | PEV-DEV-AGENT-034 | 建立跨代理執行標準與任務輪廓 registry | process_evolution | system-architect | ✅ Done | 2026-08-26T20:02+08:00 |
+| 2 | PEV-DEV-AGENT-033 | 依 skill_conventions.md 補齊 13 份 skill 的落差 | process_evolution | tech-lead | ✅ Done | 2026-08-22T04:05+08:00 |
+| 3 | PEV-DEV-AGENT-028 | 立 skill 撰寫標準：skill_conventions.md | process_evolution | system-architect | ✅ Done | 2026-08-22T02:20+08:00 |
+| 4 | PEV-DEV-AGENT-032-FIX-001 | 更正 git_workflow.md §7.3 的反查對照表 | process_evolution | devops-engineer | ✅ Done | 2026-08-22T01:52+08:00 |
+| 5 | PEV-DEV-AGENT-031 | precheck 新增 Assignee 合法性檢查 | process_evolution | devops-engineer | ✅ Done | 2026-08-21T21:32+08:00 |
+| 6 | PEV-DEV-AGENT-027 | qa-automation-engineer 的技術棧內容拆成第 2 層 | process_evolution | system-architect | ✅ Done | 2026-08-21T21:30+08:00 |
+| 7 | PEV-DEV-AGENT-026 | skill 與規範一致性的自動檢查：覆蓋率 ＋ 引用標題比對 | process_evolution | backend-developer | ✅ Done | 2026-08-21T21:03+08:00 |
+| 8 | PEV-DEV-AGENT-032 | 一輪多張工單的合併拓撲寫進 git_workflow.md §7 | process_evolution | devops-engineer | ✅ Done | 2026-08-19T14:53+08:00 |
+| 9 | PEV-DEV-AGENT-025 | 13 份 skill 全面盤點與對齊 | process_evolution | tech-lead | ✅ Done | 2026-08-18T23:55+08:00 |
+| 10 | PEV-DEV-AGENT-029 | 移除 kit 出貨內容裡硬編碼的 uv run | process_evolution | devops-engineer | ✅ Done | 2026-08-18T23:40+08:00 |
 
 **小計**：10 張（Done: 10 / Canceled: 0）
 
-> 📦 另有 26 張已歸檔工單未顯示。
+> 📦 另有 27 張已歸檔工單未顯示。
 
 ---
 
@@ -80,9 +76,8 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟢 Ready | 1 | 2.3% |
 | ⏳ Pending | 8 | 18.6% |
-| ✅ Done | 34 | 79.1% |
+| ✅ Done | 35 | 81.4% |
 | **總計** | **43** | **100%** |
 
 ### worktree_guard

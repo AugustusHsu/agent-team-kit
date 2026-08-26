@@ -19,6 +19,7 @@
 | [standards/git_workflow.md](standards/git_workflow.md) | **Git 流程正版**：分支、commit 時點、PR 閘門、合併與收尾、平台適配與換平台檢查清單 |
 | [standards/documentation_conventions.md](standards/documentation_conventions.md) | 文件撰寫慣例 |
 | [standards/skill_conventions.md](standards/skill_conventions.md) | **Skill 撰寫標準**：引用格式、必備章節分層、技術棧中立、篇幅上限 |
+| [standards/agent_runtime.md](standards/agent_runtime.md) | **多代理執行標準**：任務輪廓、能力路由、執行設定檔、可用性與失效交接 |
 | [standards/qa_testing_spec.md](standards/qa_testing_spec.md) | 測試規範與分層策略 |
 | [standards/security_audit.md](standards/security_audit.md) | 資安查核表（後端 OWASP Checklist + 前端客戶端查核） |
 | [standards/adr/](standards/adr/) | 架構決策紀錄 (ADR) |

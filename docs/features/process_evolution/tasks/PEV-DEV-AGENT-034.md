@@ -3,10 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** DN-009
 **🏷️ 任務類型 (Task Type):** docs_generation
 **👤 負責人 (Assignee):** system-architect
-**🚥 任務狀態 (Status):** Ready
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-26T19:53+08:00
-**✅ 完成時間 (Closed):** —
-**🔀 審查載體編號 (PR/MR):** —
+**✅ 完成時間 (Closed):** 2026-08-26T20:02+08:00
+**🔀 審查載體編號 (PR/MR):** 分支 `PEV-DEV-AGENT-034`（見 `../reviews/PEV-DEV-AGENT-034.md`）
 
 ## 1. 任務描述 (Description)
 
@@ -27,13 +27,13 @@
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：`agent_runtime.md` 完整定義四個維度、六階段路由順序與四種可用性。
-- [ ] AC-02：task profile registry 含八個初始輪廓、schema version、必備／選配能力與資料分級。
-- [ ] AC-03：新增輪廓只需改 registry，不需修改既有 Python enum 或供應商清單。
-- [ ] AC-04：測試證明未知欄位／重複 ID／未知能力會給出可定位的失敗訊息。
-- [ ] AC-05：規範明文禁止把 Claude／Codex 寫進 `Task Type` 或 `Assignee`。
-- [ ] AC-06：Codex CLI 是可攜基線；Codex App／Cloud 是額外 execution profile，不是另一套流程。
-- [ ] AC-07：文件登記、pytest、precheck 全綠；BACKLOG 已重生。
+- [x] AC-01：`agent_runtime.md` 完整定義四個維度、六階段路由順序與四種可用性。
+- [x] AC-02：task profile registry 含八個初始輪廓、schema version、必備／選配能力與資料分級。
+- [x] AC-03：新增輪廓只需改 registry，不需修改既有 Python enum 或供應商清單。
+- [x] AC-04：測試證明未知欄位／重複 ID／未知能力會給出可定位的失敗訊息。
+- [x] AC-05：規範明文禁止把 Claude／Codex 寫進 `Task Type` 或 `Assignee`。
+- [x] AC-06：Codex CLI 是可攜基線；Codex App／Cloud 是額外 execution profile，不是另一套流程。
+- [x] AC-07：文件登記、pytest、precheck 全綠；BACKLOG 已重生。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 

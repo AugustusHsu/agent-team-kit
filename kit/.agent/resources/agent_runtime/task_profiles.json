@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "capabilities": {
+    "repo_read": "讀取專案檔案與版本歷史",
+    "repo_write": "修改專案檔案",
+    "shell_execute": "執行本機命令並取得 exit code",
+    "test_execute": "執行並重跑專案驗證",
+    "web_research": "查詢外部來源",
+    "source_citation": "保留可追溯來源",
+    "long_context": "處理大量跨檔案脈絡",
+    "isolated_workspace": "使用獨立工作區或 worktree",
+    "long_running": "持續執行長時間工作",
+    "handoff": "保存可由另一執行者接手的狀態",
+    "diff_read": "以唯讀方式檢視變更",
+    "fresh_context": "與實作者隔離的新鮮 context",
+    "evidence_capture": "保存原始輸出與決策證據",
+    "visual_interaction": "操作或檢視視覺介面",
+    "user_presence": "執行時可取得使用者即時驗收",
+    "noninteractive": "以非互動方式重複執行",
+    "structured_output": "輸出可供程式解析的結果",
+    "timeout_control": "限制執行時間並正確回報逾時",
+    "external_connectors": "存取經授權的外部 Connector",
+    "github_access": "存取經驗證的 GitHub 能力"
+  },
+  "data_classes": [
+    "public",
+    "internal",
+    "sensitive",
+    "restricted"
+  ],
+  "profiles": [
+    {
+      "id": "design_research",
+      "title": "設計與研究",
+      "description": "DN、架構比較與外部證據整理",
+      "required_capabilities": ["repo_read", "long_context"],
+      "optional_capabilities": ["web_research", "source_citation"],
+      "default_data_class": "internal",
+      "cloud_policy": "conditional",
+      "connector_policy": "conditional",
+      "reasoning_class": "deep"
+    },
+    {
+      "id": "implementation_local",
+      "title": "本機實作",
+      "description": "程式、測試與文件的本機修改",
+      "required_capabilities": ["repo_read", "repo_write", "shell_execute", "test_execute"],
+      "optional_capabilities": ["isolated_workspace", "handoff"],
+      "default_data_class": "internal",
+      "cloud_policy": "conditional",
+      "connector_policy": "forbid",
+      "reasoning_class": "balanced"
+    },
+    {
+      "id": "parallel_long_running",
+      "title": "隔離的長時間並行工作",
+      "description": "多工單或可交接的背景工作",
+      "required_capabilities": ["repo_read", "repo_write", "isolated_workspace", "long_running", "handoff"],
+      "optional_capabilities": ["test_execute", "structured_output"],
+      "default_data_class": "internal",
+      "cloud_policy": "conditional",
+      "connector_policy": "conditional",
+      "reasoning_class": "deep"
+    },
+    {
+      "id": "review_security",
+      "title": "安全與程式碼審查",
+      "description": "在新鮮 context 中檢視 diff 與證據",
+      "required_capabilities": ["repo_read", "diff_read", "fresh_context", "evidence_capture"],
+      "optional_capabilities": ["shell_execute", "test_execute"],
+      "default_data_class": "sensitive",
+      "cloud_policy": "conditional",
+      "connector_policy": "forbid",
+      "reasoning_class": "deep"
+    },
+    {
+      "id": "test_verification",
+      "title": "測試與負向對照",
+      "description": "執行可重現測試並保存原始輸出",
+      "required_capabilities": ["repo_read", "shell_execute", "test_execute", "evidence_capture"],
+      "optional_capabilities": ["structured_output", "timeout_control"],
+      "default_data_class": "internal",
+      "cloud_policy": "forbid",
+      "connector_policy": "forbid",
+      "reasoning_class": "balanced"
+    },
+    {
+      "id": "visual_interactive",
+      "title": "視覺互動",
+      "description": "UI、瀏覽器或桌面應用的即時驗收",
+      "required_capabilities": ["visual_interaction", "user_presence"],
+      "optional_capabilities": ["repo_read", "repo_write", "evidence_capture"],
+      "default_data_class": "internal",
+      "cloud_policy": "conditional",
+      "connector_policy": "conditional",
+      "reasoning_class": "balanced"
+    },
+    {
+      "id": "automation_batch",
+      "title": "非互動批次",
+      "description": "CI 與固定流程的可重跑批次執行",
+      "required_capabilities": ["noninteractive", "structured_output", "timeout_control"],
+      "optional_capabilities": ["repo_read", "shell_execute", "test_execute"],
+      "default_data_class": "internal",
+      "cloud_policy": "conditional",
+      "connector_policy": "forbid",
+      "reasoning_class": "fast"
+    },
+    {
+      "id": "external_integration",
+      "title": "外部整合",
+      "description": "GitHub、MCP 與 Connector 的授權操作",
+      "required_capabilities": ["external_connectors"],
+      "optional_capabilities": ["github_access", "structured_output"],
+      "default_data_class": "sensitive",
+      "cloud_policy": "conditional",
+      "connector_policy": "conditional",
+      "reasoning_class": "balanced"
+    }
+  ]
+}
