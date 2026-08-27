@@ -20,8 +20,9 @@ Epic／模組只能表達分類，不能證明兩張工單之間沒有內容依�
 六欄的破折號空值只接受精準整欄值；清單使用 backtick 時不得留下未引用 token。Round 封閉
 集合的 header／separator 必須各唯一且先於資料列，每個資料列也必須完整匹配 Task ID；任何
 表格結構、成員來源或重複歸屬錯誤都直接阻擋所有涉入 Round 的全部並行候選。`TBD`、`N/A`、
-`None` 不得當成路徑或 Change Set；Change Set 必須是單一識別碼。前置工單用 literal 提供
-Contract 時只接受完整路徑相等；目錄使用 `path/**`，且 glob 必須錨定完整路徑實際匹配。
+`None` 不得當成路徑或 Change Set，破折號空值也不得混入路徑；Change Set 必須是單一識別碼。
+前置工單用 literal 提供 Contract 時只接受完整路徑相等；目錄使用 `path/**`，且 glob 必須
+錨定完整路徑實際匹配。
 僅有靜態前綴、反向父子路徑、深度不符或模糊表示不得視為契約已就緒。
 
 ## Rejected alternatives

@@ -1,5 +1,65 @@
 # [Review: PEV-DEV-AGENT-044] 實作工單 DAG、欄位與 wave 驗證
 
+## 2026-08-28 第五輪 ❌ CHANGES REQUESTED
+
+**Review Target：** `PEV-DEV-AGENT-044`
+**Round：** `ROUND-001`
+**Base：** `983cada7d8c01e0dc249063ed651758edc33e866`
+**Head：** `f077f49aab170b8687084765e5030f96ae4f5fab`
+**Fresh-context reviewer：** `gpt-5.6-sol`／`xhigh`；五行 fidelity probe 原樣通過。
+
+前四輪 findings 除 R4-F-03 的相鄰邊界外都已關閉；第五輪只剩混合破折號路徑仍可能
+fail open，因此本 target 不得合併進 round。
+
+### 第五輪 AC 核對
+
+| AC | 結果 | 證據／理由 |
+|---|---|---|
+| AC-01 | ✅ | 六欄模板、舊工單與只缺 External Effects 的過渡格式通過 |
+| AC-02 | ✅ | DAG 錯誤與確定性 topo／wave／blocks 通過 |
+| AC-03 | ✅ | Round 欄位、真實 commit、集合、結構與重複歸屬驗證通過 |
+| AC-04 | ❌ | `—/src` 與 `—/docs/api.md` 仍被當成合法 Write Scope／Contract |
+| AC-05 | ✅ | Parallel Change 與 Change Set schema 通過 |
+| AC-06 | ❌ | 既有測試未咬住混合破折號路徑 |
+| AC-07 | ✅ 開發分支證據 | 91 passed、precheck 8/8 與 9/9、BACKLOG 一致、diff check 通過；正式安裝入口仍留待 047 |
+
+### 第五輪阻擋 finding
+
+#### R5-F-01 — P1／混合破折號路徑仍可通過來源驗證
+
+- **File／line：** `kit/.agent/scripts/scan_backlog.py:161-174,267-287`
+- **Claim：** path validator 只拒絕整個 token 恰為破折號；`—/src`、`—/docs/api.md`
+  仍能 exit 0、`errors=[]`，違反破折號空值必須是整欄唯一內容的規則。
+- **Recommended fix：** Write Scope／Contract 都拒絕空值 sentinel 出現在非整欄空值路徑中，
+  並各補真實 Markdown 與 precheck 回歸。
+
+### 第五輪客觀證據
+
+| 驗證 | 結果 |
+|---|---|
+| Head 目標兩檔／完整套件 | 91 passed／232 passed、4 baseline failed |
+| Base 完整套件 | 196 passed、4 baseline failed |
+| 401＋Head tests | 83 passed、8 failed |
+| root／kit precheck | 8/8、9/9 |
+| graph／BACKLOG／diff | 兩次逐字一致且 errors=[]／原位一致／通過 |
+| R5-F-01 最小重現 | exit 0、errors=[] |
+
+四個全套失敗在 Base／Head 完全同形，均為未變更的 `test_check_versions.py` archive 路徑問題。
+審查前後工作 repo 均乾淨且 HEAD 未漂移；所有取證產物只在 `/tmp`。
+
+### 第五輪修正紀錄（Developer）
+
+- **R5-F-01：已修正。** path validator 拒絕 Unicode 破折號出現在路徑任何位置，也拒絕
+  `-/src` 這類獨立 ASCII 空值路徑段；一般含連字號檔名仍合法。
+- **回歸：** Write Scope 覆蓋 `—/src`、`–src`、`-/src`，Contract 覆蓋
+  `—/docs/api.md`；precheck 以兩張真實 Markdown 工單同時驗證 `TBD` 與混合破折號。
+- **規範同步：** `parallel_development.md` 與 ADR-001 已明定破折號空值不得成為路徑的一部分。
+- **修正後證據：** 目標兩檔 91 passed；完整套件 232 passed、4 個相同 baseline failures；
+  root／kit precheck 8/8、9/9；graph 兩次一致、`errors=[]`、拓撲與候選不變；BACKLOG 原位
+  重建一致；`git diff --check` 通過。新測試套用第五輪 Head 為 89 passed、2 failed。
+
+修正後正式結論待第六輪 fresh-context review 固定新 head 後獨立重跑。
+
 ## 2026-08-28 第四輪 ❌ CHANGES REQUESTED
 
 **Review Target：** `PEV-DEV-AGENT-044`

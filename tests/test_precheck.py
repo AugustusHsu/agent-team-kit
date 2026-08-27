@@ -425,7 +425,7 @@ def test_write_scope_placeholder_會讓_precheck_紅(乾淨專案: Path):
         _工單(
             status="Pending",
             closed="—",
-            planning=_規劃欄位(write_scope="`src/second.py`"),
+            planning=_規劃欄位(write_scope="—/src"),
         ).replace("MOD-DEV-BE-001", "MOD-DEV-BE-002"),
         encoding="utf-8",
     )
@@ -435,6 +435,7 @@ def test_write_scope_placeholder_會讓_precheck_紅(乾淨專案: Path):
     assert result.returncode != 0
     assert "工單 DAG／Round／Parallel Change 是否有效" in result.stdout
     assert "Write Scope 含非法或不完整路徑 token：TBD" in result.stdout
+    assert "Write Scope 含非法或不完整路徑 token：—/src" in result.stdout
 
 
 def test_round_窄審全勾仍維持_in_review_不算漏關帳(乾淨專案: Path):

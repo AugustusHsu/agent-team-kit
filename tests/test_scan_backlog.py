@@ -908,6 +908,10 @@ def test_write_scope_與_contract_拒絕_placeholder_及混合空值(規劃專�
         ("ROUND-004", 7, {"write_scope": "—、src/hidden.py"}),
         ("ROUND-005", 9, {"contract": "TBD"}),
         ("ROUND-006", 11, {"contract": "N/A"}),
+        ("ROUND-007", 13, {"write_scope": "—/src"}),
+        ("ROUND-008", 15, {"write_scope": "–src"}),
+        ("ROUND-009", 17, {"write_scope": "-/src"}),
+        ("ROUND-010", 19, {"contract": "—/docs/api.md"}),
     )
     for round_id, start, invalid_kwargs in cases:
         invalid_id = f"MOD-DEV-BE-{start:03d}"
@@ -922,7 +926,7 @@ def test_write_scope_與_contract_拒絕_placeholder_及混合空值(規劃專�
 
     result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
     assert result.returncode != 0
-    for token in ("TBD", "N/A", "None", "—"):
+    for token in ("TBD", "N/A", "None", "—", "–src", "-/src"):
         assert token in result.stderr, f"placeholder {token!r} 沒有被來源驗證攔截"
     graph = json.loads(result.stdout)
     for round_id, *_ in cases:

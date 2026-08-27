@@ -161,7 +161,14 @@ def parse_strict_item_list(value):
 def valid_repo_path_expression(value, *, allow_glob):
     """驗證 repo-relative 路徑表示；Write Scope 可含 glob，Contract 只能是實際路徑。"""
     raw = value.strip()
-    if not raw or "\\" in raw or "`" in raw or is_explicit_none(raw) or is_unknown_metadata(raw):
+    if (
+        not raw
+        or "\\" in raw
+        or "`" in raw
+        or any(char in raw for char in "—–")
+        or is_explicit_none(raw)
+        or is_unknown_metadata(raw)
+    ):
         return False
     text = raw.removeprefix("./")
     if (
@@ -171,7 +178,7 @@ def valid_repo_path_expression(value, *, allow_glob):
         or (not allow_glob and any(char in text for char in "*?[]{"))
     ):
         return False
-    return all(segment not in {"", ".", ".."} for segment in text.split("/"))
+    return all(segment not in {"", ".", "..", "-"} for segment in text.split("/"))
 
 
 def valid_change_set(value):

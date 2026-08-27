@@ -40,7 +40,8 @@
 清單只要使用 backtick，所有 token 都必須放在 backtick 內，外部只能有分隔符與空白；任何殘留
 文字都視為來源資料不完整。`TBD`、`N/A`、`None` 是未完成 placeholder，不能當成路徑或
 Change Set；Change Set 只接受一個英數開頭、後續可含 `._-` 的識別碼。precheck 必須
-fail closed，不能靜默丟棄後繼續推導。
+fail closed，不能靜默丟棄後繼續推導。破折號空值也不得成為路徑的一部分：`—/src`、
+`–src`、`-/src` 等表示一律無效。
 
 ### 2.2 Round Manifest
 
