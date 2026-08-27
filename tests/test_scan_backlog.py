@@ -694,20 +694,31 @@ def test_round_manifest_拒絕缺_review_target_空_topic_與不存在_base(規�
         assert 訊息 in result.stderr, f"缺少 {訊息!r} 的 Round 錯誤：\n{result.stderr}"
 
 
-def test_round_manifest_拒絕封閉集合內非法非空資料列(規劃專案: Path):
+def test_round_manifest_拒絕非法資料列與重複表格結構(規劃專案: Path):
     _寫規劃工單(規劃專案, "MOD-DEV-BE-001")
     _寫規劃工單(規劃專案, "MOD-DEV-BE-002")
     _寫_round(規劃專案, "ROUND-001", ["MOD-DEV-BE-001", "MOD-DEV-BE-002"])
     path = 規劃專案 / "docs/development/rounds/ROUND-001_test.md"
     content = path.read_text(encoding="utf-8").replace(
-        "|---|---|---|\n",
-        "|---|---|---|\n| TBD | 不合法但仍在封閉集合 | Pending |\n",
+        "| `MOD-DEV-BE-001` | 測試 | Pending |\n",
+        "| `MOD-DEV-BE-001` | 測試 | Pending |\n"
+        "| Task ID | 目標 | 初始狀態 |\n"
+        "|---|---|---|\n"
+        "| TBD | 不合法但仍在封閉集合 | Pending |\n"
+        "| MOD-DEV-BE-099x | 截短 ID | Pending |\n"
+        "| `MOD-DEV-BE-002` hidden | backtick 外殘留 | Pending |\n",
     )
     path.write_text(content, encoding="utf-8")
 
     result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
     assert result.returncode != 0
-    assert "Round 封閉集合含非法 Task ID token：TBD" in result.stderr
+    assert "重複或錯位的 header" in result.stderr
+    assert "重複或錯位的 separator" in result.stderr
+    for token in ("TBD", "MOD-DEV-BE-099x", "hidden"):
+        assert token in result.stderr, f"Round 非法來源 {token!r} 被靜默丟棄：\n{result.stderr}"
+    round_view = json.loads(result.stdout)["rounds"]["ROUND-001"]
+    assert round_view["parallel_candidates"] == []
+    assert "invalid_planning_source" in round_view["parallel_blockers"][0]["reasons"]
 
 
 def test_新式規劃欄位不可只填一部分(規劃專案: Path):
@@ -727,6 +738,36 @@ def test_新式規劃欄位不可只填一部分(規劃專案: Path):
     assert result.returncode != 0
     assert "新式規劃欄位不完整" in result.stderr
     assert "Write Scope" in result.stderr and "Phase" in result.stderr
+
+
+def test_來源驗證錯誤的工單不得出現在並行候選(規劃專案: Path):
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-001",
+        blocked_by="TBD",
+        write_scope="`src/a.py`",
+    )
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-002",
+        write_scope="`tests/b.py`",
+        change_set="—、N/A",
+        phase="—",
+    )
+    _寫_round(規劃專案, "ROUND-001", ["MOD-DEV-BE-001", "MOD-DEV-BE-002"])
+
+    result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
+    assert result.returncode != 0
+    assert "非法 Task ID token" in result.stderr
+    assert "填寫 Change Set 時必須指定 Phase" in result.stderr
+    round_view = json.loads(result.stdout)["rounds"]["ROUND-001"]
+    assert round_view["parallel_candidates"] == []
+    assert round_view["parallel_blockers"] == [
+        {
+            "tasks": ["MOD-DEV-BE-001", "MOD-DEV-BE-002"],
+            "reasons": ["invalid_planning_source"],
+        }
+    ]
 
 
 def test_round_拒絕輪外未結案前置所以集合必須封閉(規劃專案: Path):
@@ -985,6 +1026,57 @@ def test_contract_同_wave_peer_正在修改時不得沿用_base_舊版(規劃�
     round_view = graph["rounds"]["ROUND-001"]
     assert round_view["parallel_candidates"] == []
     assert "contract_changed_by_peer" in round_view["parallel_blockers"][0]["reasons"]
+
+
+def test_contract_前置_glob_必須實際匹配完整路徑才算已提供(規劃專案: Path):
+    cases = (
+        ("ROUND-001", 1, "docs/r3/*.md", "docs/r3/api.json", False),
+        ("ROUND-002", 4, "docs/r3/*.md", "docs/r3/nested/api.md", False),
+        ("ROUND-003", 7, "docs/r3/{api,event}.md", "docs/r3/api.md", False),
+        ("ROUND-004", 10, "docs/r3/*.md", "docs/r3/api.md", True),
+    )
+    consumer_pairs = {}
+    for round_id, start, provider_scope, contract, should_match in cases:
+        provider = f"MOD-DEV-BE-{start:03d}"
+        left = f"MOD-DEV-BE-{start + 1:03d}"
+        right = f"MOD-DEV-BE-{start + 2:03d}"
+        _寫規劃工單(
+            規劃專案,
+            provider,
+            write_scope=f"`{provider_scope}`",
+        )
+        _寫規劃工單(
+            規劃專案,
+            left,
+            blocked_by=provider,
+            write_scope=f"`src/{left}.py`",
+            contract=f"`{contract}`",
+        )
+        _寫規劃工單(
+            規劃專案,
+            right,
+            blocked_by=provider,
+            write_scope=f"`tests/{right}.py`",
+            contract=f"`{contract}`",
+        )
+        _寫_round(規劃專案, round_id, [provider, left, right])
+        consumer_pairs[round_id] = ([left, right], should_match)
+
+    result, graph = _讀_graph(規劃專案)
+    assert result.returncode == 0, result.stderr
+    for round_id, (pair, should_match) in consumer_pairs.items():
+        round_view = graph["rounds"][round_id]
+        if should_match:
+            assert pair in round_view["parallel_candidates"], (
+                f"{round_id} 的實際 glob match 沒有提供 Contract"
+            )
+        else:
+            assert pair not in round_view["parallel_candidates"], (
+                f"{round_id} 只靠靜態前綴就誤認 Contract 已提供"
+            )
+            blockers = {tuple(item["tasks"]): item["reasons"] for item in round_view["parallel_blockers"]}
+            assert f"contract_not_ready:{pair[0]}" in blockers[tuple(pair)]
+            assert f"contract_not_ready:{pair[1]}" in blockers[tuple(pair)]
 
 
 def test_parallel_change_合法三階段通過(規劃專案: Path):

@@ -21,7 +21,7 @@ import re
 import subprocess
 import sys
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 # 定義台北時區 (UTC+8)
 TZ_TAIPEI = timezone(timedelta(hours=8))
@@ -384,16 +384,21 @@ def flatten_tasks(all_project_tasks):
 def validate_task_graph(tasks):
     """驗證全域 Task DAG，回傳 deterministic topological view 與所有錯誤。"""
     errors = []
+    invalid_task_ids = set()
+
+    def add_task_error(task_id, location, message, code):
+        errors.append(planning_error(location, message, code))
+        invalid_task_ids.add(task_id)
+
     by_id = {}
     for task in sorted(tasks, key=lambda item: item["task_id"]):
         task_id = task["task_id"]
         if task_id in by_id:
-            errors.append(
-                planning_error(
-                    task["file"],
-                    f"Task ID {task_id!r} 重複；另一份位於 {by_id[task_id]['file']}",
-                    "duplicate_task_id",
-                )
+            add_task_error(
+                task_id,
+                task["file"],
+                f"Task ID {task_id!r} 重複；另一份位於 {by_id[task_id]['file']}",
+                "duplicate_task_id",
             )
         else:
             by_id[task_id] = task
@@ -401,70 +406,63 @@ def validate_task_graph(tasks):
     for task_id, task in sorted(by_id.items()):
         if task["planning_fields_present"] and task["planning_missing_fields"]:
             missing = "、".join(task["planning_missing_fields"])
-            errors.append(
-                planning_error(
-                    task["file"],
-                    f"新式規劃欄位不完整，缺少：{missing}；舊工單可五欄全無，但不可只填一部分",
-                    "incomplete_planning_fields",
-                )
+            add_task_error(
+                task_id,
+                task["file"],
+                f"新式規劃欄位不完整，缺少：{missing}；舊工單可五欄全無，但不可只填一部分",
+                "incomplete_planning_fields",
             )
         if task["invalid_blocked_by"]:
-            errors.append(
-                planning_error(
-                    task["file"],
-                    f"Blocked By 含非法 Task ID token：{', '.join(task['invalid_blocked_by'])}",
-                    "invalid_dependency_token",
-                )
+            add_task_error(
+                task_id,
+                task["file"],
+                f"Blocked By 含非法 Task ID token：{', '.join(task['invalid_blocked_by'])}",
+                "invalid_dependency_token",
             )
         if task["invalid_write_scope"]:
-            errors.append(
-                planning_error(
-                    task["file"],
-                    "Write Scope 含非法或不完整路徑 token："
-                    + ", ".join(task["invalid_write_scope"]),
-                    "invalid_write_scope",
-                )
+            add_task_error(
+                task_id,
+                task["file"],
+                "Write Scope 含非法或不完整路徑 token："
+                + ", ".join(task["invalid_write_scope"]),
+                "invalid_write_scope",
             )
         if task["invalid_contract"]:
-            errors.append(
-                planning_error(
-                    task["file"],
-                    "Contract 含非法或不完整契約路徑 token："
-                    + ", ".join(task["invalid_contract"]),
-                    "invalid_contract",
-                )
+            add_task_error(
+                task_id,
+                task["file"],
+                "Contract 含非法或不完整契約路徑 token："
+                + ", ".join(task["invalid_contract"]),
+                "invalid_contract",
             )
         if task["invalid_external_effects"]:
-            errors.append(
-                planning_error(
-                    task["file"],
-                    "External Effects 必須使用 category:resource 作用域，非法值："
-                    + ", ".join(task["invalid_external_effects"]),
-                    "invalid_external_effect",
-                )
+            add_task_error(
+                task_id,
+                task["file"],
+                "External Effects 必須使用 category:resource 作用域，非法值："
+                + ", ".join(task["invalid_external_effects"]),
+                "invalid_external_effect",
             )
         deps = task["blocked_by"]
         duplicates = sorted({dep for dep in deps if deps.count(dep) > 1})
         if duplicates:
-            errors.append(
-                planning_error(
-                    task["file"],
-                    f"Blocked By 含重複依賴：{', '.join(duplicates)}",
-                    "duplicate_dependency",
-                )
+            add_task_error(
+                task_id,
+                task["file"],
+                f"Blocked By 含重複依賴：{', '.join(duplicates)}",
+                "duplicate_dependency",
             )
         if task_id in deps:
-            errors.append(
-                planning_error(task["file"], f"{task_id} 不得依賴自己", "self_dependency")
+            add_task_error(
+                task_id, task["file"], f"{task_id} 不得依賴自己", "self_dependency"
             )
         unknown = sorted({dep for dep in deps if dep not in by_id})
         if unknown:
-            errors.append(
-                planning_error(
-                    task["file"],
-                    f"Blocked By 指向不存在的 Task ID：{', '.join(unknown)}",
-                    "unknown_dependency",
-                )
+            add_task_error(
+                task_id,
+                task["file"],
+                f"Blocked By 指向不存在的 Task ID：{', '.join(unknown)}",
+                "unknown_dependency",
             )
 
     blocks = {task_id: [] for task_id in by_id}
@@ -491,6 +489,7 @@ def validate_task_graph(tasks):
 
     if len(topological_order) != len(by_id):
         cyclic = sorted(task_id for task_id, degree in indegree.items() if degree > 0)
+        invalid_task_ids.update(cyclic)
         errors.append(
             planning_error(
                 "docs/features/*/tasks",
@@ -510,6 +509,7 @@ def validate_task_graph(tasks):
         "wave_by_task": waves,
         "blocks": blocks,
         "errors": errors,
+        "invalid_task_ids": invalid_task_ids,
     }
 
 
@@ -542,21 +542,45 @@ def parse_round_file(filepath):
     section = ROUND_SECTION_RE.search(content)
     task_ids = []
     invalid_task_ids = []
+    table_errors = []
     if section:
+        header_seen = False
+        separator_seen = False
+        data_seen = False
         for line in section.group(1).splitlines():
             if not line.lstrip().startswith("|"):
                 continue
             first_cell = line.split("|", 2)[1].strip()
-            if first_cell.lower() == "task id" or re.fullmatch(r":?-{3,}:?", first_cell):
+            if first_cell.lower() == "task id":
+                if header_seen or separator_seen or data_seen:
+                    table_errors.append("Round 封閉集合表格含重複或錯位的 header")
+                else:
+                    header_seen = True
+                continue
+            if re.fullmatch(r":?-{3,}:?", first_cell):
+                if not header_seen or separator_seen or data_seen:
+                    table_errors.append("Round 封閉集合表格含重複或錯位的 separator")
+                else:
+                    separator_seen = True
                 continue
             quoted = re.fullmatch(r"`([^`]+)`", first_cell)
             token = quoted.group(1).strip() if quoted else first_cell
+            if not header_seen or not separator_seen:
+                table_errors.append(
+                    f"Round 封閉集合資料列出現在唯一 header／separator 完成前：{token or '<空白>'}"
+                )
+            data_seen = True
             if TASK_ID_RE.fullmatch(token):
                 task_ids.append(token)
             else:
                 invalid_task_ids.append(token or "<空白>")
+        if not header_seen:
+            table_errors.append("Round 封閉集合表格缺少唯一 header")
+        if not separator_seen:
+            table_errors.append("Round 封閉集合表格缺少唯一 separator")
     result["task_ids"] = task_ids
     result["invalid_task_ids"] = invalid_task_ids
+    result["table_errors"] = table_errors
     return result
 
 
@@ -624,6 +648,7 @@ def scopes_are_definitely_disjoint(left, right):
 
 
 def scope_covers_path(scopes, path):
+    """Write Scope 必須實際涵蓋 Contract；glob 靜態前綴本身不是供應證據。"""
     if not scopes:
         return False
     target = path.strip().replace("\\", "/").removeprefix("./")
@@ -631,9 +656,18 @@ def scope_covers_path(scopes, path):
         prefix, wildcard = _scope_prefix(scope)
         if prefix is None:
             continue
-        if target == prefix or target.startswith(prefix + "/"):
-            return True
-        if not wildcard and prefix.startswith(target + "/"):
+        normalized_scope = scope.strip().removeprefix("./")
+        if wildcard:
+            try:
+                if PurePosixPath("/" + target).match("/" + normalized_scope):
+                    return True
+            except ValueError:
+                continue
+        elif (
+            target == normalized_scope
+            or target.startswith(normalized_scope + "/")
+            or normalized_scope.startswith(target + "/")
+        ):
             return True
     return False
 
@@ -741,11 +775,13 @@ def external_effects_are_definitely_disjoint(left, right):
 
 def validate_parallel_changes(by_id):
     errors = []
+    invalid_task_ids = set()
     groups = {}
     for task_id, task in sorted(by_id.items()):
         phase = task["phase"]
         change_set = task["change_set"]
         if phase and phase not in VALID_PHASES:
+            invalid_task_ids.add(task_id)
             errors.append(
                 planning_error(
                     task["file"],
@@ -754,12 +790,14 @@ def validate_parallel_changes(by_id):
                 )
             )
         if phase and not change_set:
+            invalid_task_ids.add(task_id)
             errors.append(
                 planning_error(
                     task["file"], "填寫 Phase 時必須同時填 Change Set", "phase_without_change_set"
                 )
             )
         if change_set and not phase:
+            invalid_task_ids.add(task_id)
             errors.append(
                 planning_error(
                     task["file"], "填寫 Change Set 時必須指定 Phase", "change_set_without_phase"
@@ -769,11 +807,13 @@ def validate_parallel_changes(by_id):
             groups.setdefault(change_set, []).append(task_id)
 
     for change_set, task_ids in sorted(groups.items()):
+        group_is_invalid = any(task_id in invalid_task_ids for task_id in task_ids)
         phase_map = {
             phase: [task_id for task_id in task_ids if by_id[task_id]["phase"] == phase]
             for phase in VALID_PHASES
         }
         if len(phase_map["expand"]) != 1:
+            group_is_invalid = True
             errors.append(
                 planning_error(
                     by_id[task_ids[0]]["file"],
@@ -782,6 +822,7 @@ def validate_parallel_changes(by_id):
                 )
             )
         if not phase_map["migrate"]:
+            group_is_invalid = True
             errors.append(
                 planning_error(
                     by_id[task_ids[0]]["file"],
@@ -790,6 +831,7 @@ def validate_parallel_changes(by_id):
                 )
             )
         if len(phase_map["contract"]) != 1:
+            group_is_invalid = True
             errors.append(
                 planning_error(
                     by_id[task_ids[0]]["file"],
@@ -801,6 +843,7 @@ def validate_parallel_changes(by_id):
             contract_id = phase_map["contract"][0]
             missing = sorted(set(phase_map["migrate"]) - set(by_id[contract_id]["blocked_by"]))
             if missing:
+                group_is_invalid = True
                 errors.append(
                     planning_error(
                         by_id[contract_id]["file"],
@@ -816,6 +859,7 @@ def validate_parallel_changes(by_id):
                 if expand_id not in transitive_dependencies(migrate_id, by_id)
             )
             if unordered:
+                group_is_invalid = True
                 errors.append(
                     planning_error(
                         by_id[unordered[0]]["file"],
@@ -824,7 +868,9 @@ def validate_parallel_changes(by_id):
                         "parallel_change_migrate_before_expand",
                     )
                 )
-    return errors
+        if group_is_invalid:
+            invalid_task_ids.update(task_ids)
+    return errors, invalid_task_ids
 
 
 def build_planning_view(root, all_project_tasks=None):
@@ -833,12 +879,16 @@ def build_planning_view(root, all_project_tasks=None):
     graph = validate_task_graph(flatten_tasks(all_project_tasks))
     errors = list(graph["errors"])
     by_id = graph["tasks"]
-    errors.extend(validate_parallel_changes(by_id))
+    invalid_task_ids = set(graph["invalid_task_ids"])
+    parallel_errors, invalid_parallel_tasks = validate_parallel_changes(by_id)
+    errors.extend(parallel_errors)
+    invalid_task_ids.update(invalid_parallel_tasks)
 
     manifests = scan_rounds(root)
     rounds_by_id = {}
     membership = {}
     commit_cache = {}
+    invalid_round_ids = set()
     for manifest in manifests:
         location = manifest["file"]
         round_id = manifest.get("round_id")
@@ -849,11 +899,13 @@ def build_planning_view(root, all_project_tasks=None):
             errors.append(planning_error(location, "找不到 Round ID header", "missing_round_id"))
             continue
         if round_id in rounds_by_id:
+            invalid_round_ids.add(round_id)
             errors.append(
                 planning_error(location, f"Round ID {round_id} 全域重複", "duplicate_round_id")
             )
             continue
         rounds_by_id[round_id] = manifest
+        round_error_count = len(errors)
         if not Path(location).stem.startswith(round_id):
             errors.append(
                 planning_error(location, f"檔名必須以 {round_id} 開頭", "round_filename_mismatch")
@@ -890,6 +942,14 @@ def build_planning_view(root, all_project_tasks=None):
             )
 
         task_ids = manifest["task_ids"]
+        if manifest["table_errors"]:
+            errors.append(
+                planning_error(
+                    location,
+                    "；".join(manifest["table_errors"]),
+                    "invalid_round_table_structure",
+                )
+            )
         if manifest["invalid_task_ids"]:
             errors.append(
                 planning_error(
@@ -953,6 +1013,8 @@ def build_planning_view(root, all_project_tasks=None):
                         "round_not_closed",
                     )
                 )
+        if len(errors) > round_error_count:
+            invalid_round_ids.add(round_id)
 
     revision_cache = {}
     round_views = {}
@@ -978,6 +1040,12 @@ def build_planning_view(root, all_project_tasks=None):
         for index, left_id in enumerate(sorted(members)):
             for right_id in sorted(members)[index + 1 :]:
                 reasons = []
+                if (
+                    round_id in invalid_round_ids
+                    or left_id in invalid_task_ids
+                    or right_id in invalid_task_ids
+                ):
+                    reasons.append("invalid_planning_source")
                 if left_id in ancestry[right_id] or right_id in ancestry[left_id]:
                     reasons.append("dag_order")
                 if wave_by_task.get(left_id) != wave_by_task.get(right_id):

@@ -53,7 +53,8 @@
 manifest **不手寫** wave、反向 blocks 或彙總狀態。介面可顯示由工單 DAG 重算的快照，
 但必須標明是衍生視圖，衝突時回到工單與 manifest 的來源欄位。
 封閉集合表格中除 header／separator 外，每個資料列的第一欄都必須完整匹配 Task ID；非法或
-非空未知列不得略過，否則 manifest 不再是可驗證的封閉集合。
+非空未知列不得略過，否則 manifest 不再是可驗證的封閉集合。header 與 separator 都只能
+各出現一次、依序位於第一筆資料列之前；重複、錯位或缺漏都使整份 manifest 無效。
 
 ## 3. 排程與拆解
 
@@ -65,12 +66,15 @@ manifest **不手寫** wave、反向 blocks 或彙總狀態。介面可顯示由
 1. DAG 之間沒有先後邊；
 2. `Write Scope` 不重疊；
 3. 共用 `Contract` 已存在於 opening base 或已由前置工單合併進輪次，且沒有同 wave peer 正在修改；
+   前置工單以 glob 宣告 Write Scope 時，必須由錨定完整路徑的 glob 實際匹配 Contract，只有
+   靜態前綴、路徑深度不符或含無法明確解讀的表示都不算已提供；
 4. 兩張工單都有 `External Effects` 來源證據，且網路寫入、部署、migration、帳號或其他
    外部寫入作用域可證明互不重疊；`—` 代表明確沒有外部寫入。
 
 外部作用域使用不含 glob 的 `category:resource` opaque key，例如 `deploy:staging`、
 `account:vendor/project`；相同作用域或父子作用域視為重疊。不同 Epic／模組只能當低耦合提示，
-不是放行條件。缺欄、格式不合法或任何一項無法判定時，預設排序執行。
+不是放行條件。工單、Parallel Change 或所屬 Round 只要有任何來源驗證錯誤，該 Round 的
+相關配對都不得列入並行候選；缺欄、格式不合法或任何一項無法判定時，預設排序執行。
 
 ### 3.2 執行中發現新依賴
 

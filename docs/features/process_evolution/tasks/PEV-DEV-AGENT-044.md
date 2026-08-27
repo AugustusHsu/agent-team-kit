@@ -54,7 +54,7 @@
 - **✍️ User 補充回覆 (User Input)**：同意建立 `ROUND-001` 與工單 043～047；2026-08-27
   同意擴大 044 Write Scope，納入 `kit/docs/standards/git_workflow.md` 以同步 precheck 第 9 項；
   同意新增 `External Effects` 來源欄位並納入 `kit/docs/standards/parallel_development.md`；
-  同意擴大 044 Write Scope，等義正規化 043／047 的規劃來源欄位。
+  同意擴大 044 Write Scope，等義正規化 043／047 的規劃來源欄位；同意修正第三輪 findings。
 
 ## 5. 範圍外 (Out of Scope)
 
@@ -62,18 +62,18 @@
 - 不要求一次性補齊所有歷史工單的新欄位。
 
 ## 📝 Code Review 備註
-> 2026-08-27 第二輪 ❌ CHANGES REQUESTED — 完整報告見 [../reviews/PEV-DEV-AGENT-044.md](../reviews/PEV-DEV-AGENT-044.md)
+> 2026-08-27 第三輪 ❌ CHANGES REQUESTED — 完整報告見 [../reviews/PEV-DEV-AGENT-044.md](../reviews/PEV-DEV-AGENT-044.md)
 
 ### 📊 客觀指標
 | 指標 | 變更前／負向對照 | 變更後 |
 |---|---:|---:|
-| 目標兩檔 | 55 passed | 83 passed、0 failed |
-| rejected head＋新 tests | 67 passed、16 failed | 83 passed、0 failed |
-| 全套隔離驗證 | reviewed head：219 passed、4 baseline failed | 224 passed、4 baseline failed |
-| precheck／diff／skill | — | 9/9／通過／有效 |
+| 目標兩檔 | reviewed head：83 passed | 修正後：85 passed、0 failed |
+| rejected head＋新 tests | 81 passed、4 failed | 85 passed、0 failed |
+| 全套驗證 | reviewed head：224 passed、4 baseline failed | 226 passed、4 baseline failed |
+| precheck／diff | — | 8/8、9/9／通過 |
 
-### 第二輪修正結果
-- ✅ explicit none 只接受整欄破折號；混合依賴、External Effects、Change Set／Phase 全部報錯。
-- ✅ Write Scope／Contract 保存並拒絕 backtick 外殘留與非法路徑。
-- ✅ Round 封閉集合每個非 header／separator 資料列都必須完整匹配 Task ID。
-- ✅ 043／047 規劃來源完成等義正規化；kit precheck 9/9，拓撲不變。
+### 待修正項目
+- `kit/.agent/scripts/scan_backlog.py:542`：Round header／separator 必須各唯一並依序位於資料列前。
+- `kit/.agent/scripts/scan_backlog.py:830`：有來源驗證錯誤的工單或 Round 不得產生並行候選。
+- `kit/.agent/scripts/scan_backlog.py:626`：前置 Write Scope glob 必須實際匹配完整 Contract 路徑。
+- `docs/features/process_evolution/tasks/PEV-DEV-AGENT-044.md:64`：工單審查備註只保留協議允許的三段摘要。

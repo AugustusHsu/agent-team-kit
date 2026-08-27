@@ -1,5 +1,92 @@
 # [Review: PEV-DEV-AGENT-044] 實作工單 DAG、欄位與 wave 驗證
 
+## 2026-08-27 第三輪 ❌ CHANGES REQUESTED
+
+**Review Target：** `PEV-DEV-AGENT-044`
+**Round：** `ROUND-001`
+**Base：** `983cada7d8c01e0dc249063ed651758edc33e866`
+**Head：** `c70c515cd6c9b026a3ef490ea6b2c2394625749d`
+**Fresh-context reviewer：** `gpt-5.6-sol`／`xhigh`；五行 fidelity probe 原樣通過。
+
+前兩輪 parser、Round schema、External Effects 與 Parallel Change 修正均可重現；第三輪仍找到
+三個會誤放行並行候選的 fail-open，另有一項工單審查備註不合第 1 層協議，因此本 target
+不得合併進 round。
+
+### 第三輪 AC 核對
+
+| AC | 結果 | 證據／理由 |
+|---|---|---|
+| AC-01 | ✅ | 六欄模板、舊工單與只缺 External Effects 的過渡工單相容行為正確 |
+| AC-02 | ✅／下游有 finding | DAG 來源錯誤會回報，但錯誤工單仍可能進候選，併入 AC-04 的 R3-F-02 |
+| AC-03 | ❌ | 一般非法資料列會失敗，但重複 header／separator 被略過 |
+| AC-04 | ❌ | invalid source 與不匹配的 ancestor glob Contract provider 仍可能產生 candidate |
+| AC-05 | ✅ | phase、expand→migrate、contract direct dependencies 與混合破折號正負向案例通過 |
+| AC-06 | ❌ | 真實 Markdown／Git、零 mock，但缺本輪三個 fail-open 的回歸 |
+| AC-07 | ✅ 開發分支證據 | 目標兩檔 83 passed、BACKLOG 重建一致、diff check 通過；正式安裝入口仍留待 047 |
+
+### 第三輪阻擋 findings
+
+#### R3-F-01 — P1／Round 重複 header／separator 被當成合法結構
+
+- **File／line：** `kit/.agent/scripts/scan_backlog.py:542-557`
+- **Claim：** parser 在封閉集合任何位置看到 header 或 separator 都直接略過，沒有驗證唯一性與順序；
+  插入第二組表格結構後 graph 仍 `errors=[]`、kit precheck 仍 9/9。
+- **Recommended fix：** 使用狀態式 parser 驗證唯一 header 與其後唯一 separator，並補 graph／precheck 回歸。
+
+#### R3-F-02 — P1／來源已報錯仍輸出 parallel candidate
+
+- **File／line：** `kit/.agent/scripts/scan_backlog.py:830-836,975-1010,1042-1048`
+- **Claim：** errors 與候選推導沒有共用 validity gate；非法 Blocked By 或 Parallel Change
+  雖讓 graph exit 1，同一對工單仍可能出現在 `parallel_candidates`。
+- **Recommended fix：** 傳遞 per-task／per-round validity；任何相關來源無效時只列
+  `invalid_planning_source` blocker。
+
+#### R3-F-03 — P1／glob 靜態前綴錯誤證明 Contract 已由 ancestor 提供
+
+- **File／line：** `kit/.agent/scripts/scan_backlog.py:626-638,693-711`
+- **Claim：** `docs/r3-contracts/*.md` 只因與 `docs/r3-contracts/api.json` 共用靜態前綴，
+  就被錯認為已提供 opening base 中不存在的 Contract。
+- **Recommended fix：** Contract provider 必須以錨定完整路徑的 glob 實際匹配；副檔名、深度或
+  brace 表示無法證明匹配時 fail closed。
+
+#### R3-F-04 — P2／工單 Code Review 備註超出允許結構
+
+- **File／line：** `docs/features/process_evolution/tasks/PEV-DEV-AGENT-044.md:64-79`
+- **Claim：** CHANGES REQUESTED 的工單備註另含 Developer 修正論述，超出 `team_protocol.md`
+  §2.3 允許的結論、客觀指標與單行 findings。
+- **Recommended fix：** 工單只保留三段摘要，完整判讀與修正紀錄移至本 review artifact。
+
+### 第三輪客觀證據
+
+| 指令／檢查 | 98bb／舊負向對照 | Head |
+|---|---:|---:|
+| 全套 archive | 219 passed、4 baseline failed | 224 passed、4 baseline failed |
+| 目標兩檔 | 78 passed | 83 passed |
+| rejected implementation＋Head tests | 8be：67 passed、16 failed | 83 passed、0 failed |
+| precheck／graph／BACKLOG／diff／skill | — | 8/8、9/9／確定且 errors=[]／一致／通過／有效 |
+
+完整套件四項失敗與第二輪相同，均為未變更的 `test_check_versions.py` archive 路徑問題。
+審查者全程未修改檔案、ref 或工作樹。
+
+### 第三輪修正紀錄（Developer）
+
+- **R3-F-01：已修正。** Round parser 改為狀態式驗證；header、separator 必須各唯一且依序
+  位於資料列前，重複、錯位與缺漏都使整份 manifest 無效。
+- **R3-F-02：已修正。** DAG、Parallel Change 與 Round 驗證會累積 per-task／per-round
+  validity；相關 pair 一律加入 `invalid_planning_source` blocker，不得成為候選。
+- **R3-F-03：已修正。** ancestor Write Scope glob 改為錨定完整 repo-relative 路徑實際匹配；
+  副檔名、深度或 brace 表示不匹配時都維持 Contract 未就緒。
+- **R3-F-04：已修正。** 工單 Code Review 備註只保留結論、客觀指標與四條單行 finding；
+  開發判讀與修正結果集中於本檔。
+- **規範同步：** `parallel_development.md` 與 ADR-001 已同步 Round 結構唯一性、來源 validity
+  gate 及 Contract glob 完整匹配規則。
+- **修正後證據：** 目標兩檔 85 passed；完整套件 226 passed、4 個與 reviewed head 相同的
+  baseline failures；root／kit precheck 8/8、9/9；`git diff --check` 通過。新測試套用第三輪
+  reviewed head 為 81 passed、4 failed，第二輪為 78 passed、7 failed，第一輪為
+  67 passed、18 failed。
+
+修正後正式結論待第四輪 fresh-context review 固定新 head 後獨立重跑。
+
 ## 2026-08-27 第二輪 ❌ CHANGES REQUESTED
 
 **Review Target：** `PEV-DEV-AGENT-044`

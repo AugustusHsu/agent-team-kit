@@ -373,7 +373,7 @@ def test_dag_有未知依賴時_precheck_會紅(乾淨專案: Path):
     assert "不存在的 Task ID：MOD-DEV-BE-099" in result.stdout
 
 
-def test_round_非法成員資料列會讓_precheck_紅(乾淨專案: Path):
+def test_round_非法成員與重複表格結構會讓_precheck_紅(乾淨專案: Path):
     (乾淨專案 / TASK).write_text(
         _工單(
             status="In Progress",
@@ -395,14 +395,19 @@ def test_round_非法成員資料列會讓_precheck_紅(乾淨專案: Path):
     重生(乾淨專案)
     round_path = 乾淨專案 / "docs/development/rounds/ROUND-001_test.md"
     content = round_path.read_text(encoding="utf-8").replace(
-        "|---|---|---|\n",
-        "|---|---|---|\n| TBD | 不合法但仍在封閉集合 | Pending |\n",
+        "| `MOD-DEV-BE-001` | 測試 | Pending |\n",
+        "| `MOD-DEV-BE-001` | 測試 | Pending |\n"
+        "| Task ID | 目標 | 初始狀態 |\n"
+        "|---|---|---|\n"
+        "| TBD | 不合法但仍在封閉集合 | Pending |\n",
     )
     round_path.write_text(content, encoding="utf-8")
 
     result = 跑(乾淨專案)
     assert result.returncode != 0
     assert "工單 DAG／Round／Parallel Change 是否有效" in result.stdout
+    assert "重複或錯位的 header" in result.stdout
+    assert "重複或錯位的 separator" in result.stdout
     assert "Round 封閉集合含非法 Task ID token：TBD" in result.stdout
 
 
