@@ -120,7 +120,9 @@ Scrum Master 負責工單初始狀態的設定與 Pending → Ready 的推進：
 
 工單的日期追蹤是生命週期管理的關鍵。Scrum Master 負責 **建立時間 (Created)** 的填寫：
 - **建立工單時**：必須在 `**📅 建立時間 (Created):**` 欄位填入當前時間，格式為 ISO 8601（例如 `2026-04-22T16:04+08:00`）。
-- **完成時間 (Closed)**：由 Code Reviewer 在審查通過（`Done`）或 Scrum Master 在標記 `Canceled` 時填寫 `**✅ 完成時間 (Closed):**` 欄位。未完成的工單此欄位保持 `—`。
+- **完成時間 (Closed)**：單張工單由 Developer 在正式審查前的結案 commit 填寫；多工單輪次由
+  round 在整合 QA 通過後、panel 前的結案 commit 統一填寫；`Canceled` 由 Scrum Master 填寫。
+  這些資料只有合併進主線才生效，未完成的工單在主線仍保持 `—`。
 
 ### 📌.1 母子工單狀態連動規則 (Parent-Child Status Linkage)
 

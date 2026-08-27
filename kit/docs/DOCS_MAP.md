@@ -17,6 +17,7 @@
 |---|---|
 | [standards/team_protocol.md](standards/team_protocol.md) | **指路檔**（不含內容）→ 正版在 `../.agent/resources/team_protocol.md`；含章節索引 |
 | [standards/git_workflow.md](standards/git_workflow.md) | **Git 流程正版**：分支、commit 時點、PR 閘門、合併與收尾、平台適配與換平台檢查清單 |
+| [standards/parallel_development.md](standards/parallel_development.md) | **並行流程正版**：工單 DAG、Write Scope／Contract、工作輪次、整合驗證與兩層審查 |
 | [standards/documentation_conventions.md](standards/documentation_conventions.md) | 文件撰寫慣例 |
 | [standards/skill_conventions.md](standards/skill_conventions.md) | **Skill 撰寫標準**：引用格式、必備章節分層、技術棧中立、篇幅上限 |
 | [standards/agent_runtime.md](standards/agent_runtime.md) | **多代理執行標準**：任務輪廓、能力路由、執行設定檔、可用性與失效交接 |

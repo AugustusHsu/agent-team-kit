@@ -42,5 +42,5 @@ description: 負責執行所有開發環境建設、容器化配置與 DevOps �
 - **🧪 驗證/測試建議**: 附上驗證此配置的具體指令（例如 `docker compose config --quiet`、`make help`、`pre-commit run --all-files`、`docker compose up -d && docker compose ps` 等）。
 - **🔀 審查載體**: 回報的**第一行**須指出審查載體的位置（PR 連結／MR 連結／無遠端則填分支名），並確認該編號已回填工單。
 - **📝 Commit Message**: 附上分支上**實際的** commit message 原文（依 `.agent/workflows/commit-message.md` 產出），隨本回報一併呈交供複查。**變更此時已 commit 並推送**，訊息可用 `git commit --amend` 修改（`.agent/resources/team_protocol.md` §1.10 Commit 閘門）。
-- **➡️ 下一步**: 提示使用者「開發已完成，交付回報與 commit message 如上，請提交給 `code-reviewer` 審查；APPROVED 後才做結案 commit、合併、刪除分支，**合併完成才是 `Done`**（`.agent/resources/team_protocol.md` §1.9 程式碼隔離與分支、§1.10 Commit 閘門，與 `docs/standards/git_workflow.md`）。」
+- **➡️ 下一步**: 單張工單先把 Status → `Done` 與 Closed 寫入審查前結案 commit，再固定 Review Target 交給 fresh-context reviewer；多工單輪次則維持 `In Review` 固定 Task head 做窄審，APPROVED 後不再修改該 head，以 merge commit 進 round，結案資料待整合 QA 通過後由 round 統一寫入。兩者都是**合併進主線才正式 `Done`**（`.agent/resources/team_protocol.md` §1.9、`docs/standards/git_workflow.md` §6.2）。
 - **📌 Status 更新**: 開始執行時將工單 Status 改為 `In Progress`；交付完成時改為 `In Review`。（詳見 `.agent/resources/team_protocol.md` §1.5 狀態更新操作方式）

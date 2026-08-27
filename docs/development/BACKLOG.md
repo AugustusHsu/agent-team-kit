@@ -9,11 +9,7 @@
 
 > 包含狀態為 `In Progress` 或 `Ready` 的工單。
 
-| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
-|---|---------|------|------|-------------------|---------------|
-| 1 | PEV-DEV-AGENT-043 | 落地並行開發標準與架構決策 | process_evolution | system-architect | 🟢 Ready |
-
-**小計**：1 張（In Progress: 0 / Ready: 1）
+*(無)*
 
 ---
 
@@ -21,7 +17,11 @@
 
 > 開發已完成，等待 Code Review 或驗收確認的工單。
 
-*(無)*
+| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
+|---|---------|------|------|-------------------|---------------|
+| 1 | PEV-DEV-AGENT-043 | 落地並行開發標準與架構決策 | process_evolution | system-architect | In Review |
+
+**小計**：1 張
 
 ---
 
@@ -76,7 +76,7 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟢 Ready | 1 | 2.1% |
+| 🟡 In Review | 1 | 2.1% |
 | ⏳ Pending | 4 | 8.3% |
 | ✅ Done | 43 | 89.6% |
 | **總計** | **48** | **100%** |
