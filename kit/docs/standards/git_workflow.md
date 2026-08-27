@@ -40,7 +40,7 @@ reviewed head；多工單輪次則在 round 最終候選一次寫入全部結案
 - **Task branch 名 = Task ID**，不加描述。
 - **Round branch 名 = `feature/{topic}`**，一輪一個清楚目標與 2～5 張封閉工單，輪次完即刪。
 - 單張工單從最新主線／既有整合線建立；多工單依 Round Manifest 的 opening base 與 DAG 建立。
-- 無依賴且通過 Write Scope／Contract／副作用檢查者可從相同 base 平行開出；有依賴者等前置
+- 無依賴且通過 Write Scope／Contract／External Effects 檢查者可從相同 base 平行開出；有依賴者等前置
   merge 進 round 再開工，不以隱性堆疊取代 DAG。
 - 工單取消且 branch 已有 commit 時，必須詢問使用者保留或丟棄，不得逕自刪除。
 
@@ -147,7 +147,7 @@ round merge main 後，內層 Task commits 經巢狀 merge 仍是 main 祖先，
 ### 7.1 開輪
 
 1. 以最新 main 建立 `feature/{topic}`，把完整 SHA 寫入 Round Manifest。
-2. 驗證 2～5 張封閉 Task ID、DAG、Write Scope、Contract 與外部副作用。
+2. 驗證 2～5 張封閉 Task ID、DAG、Write Scope、Contract 與 `External Effects` 來源欄位。
 3. 由來源資料推導 wave；同 wave 只有符合全部放行條件者才可同時活躍。
 4. 兩張以上同時活躍時，每條 Task branch 一個 worktree；否則使用主工作目錄即可。
 

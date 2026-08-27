@@ -380,6 +380,10 @@ def 規劃專案(bare_install: Path, tmp_path: Path) -> Path:
     target = tmp_path / "planning"
     shutil.copytree(bare_install, target)
     shutil.copytree(target / "docs/features/_TEMPLATE", target / "docs/features/my_module")
+    subprocess.run(["git", "init", "-q"], cwd=target, check=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=target, check=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=target, check=True)
+    subprocess.run(["git", "commit", "--allow-empty", "-qm", "planning base"], cwd=target, check=True)
     return target
 
 
@@ -388,12 +392,16 @@ def _規劃工單(
     *,
     blocked_by: str = "—",
     write_scope: str = "`src/default.py`",
+    external_effects: str | None = "—",
     contract: str = "—",
     change_set: str = "—",
     phase: str = "—",
     task_type: str = "queue_backend",
     status: str = "Pending",
 ) -> str:
+    external_effects_line = (
+        "" if external_effects is None else f"**🌐 外部副作用 (External Effects):** {external_effects}\n"
+    )
     return (
         f"# [Task ID: {task_id}] {task_id} 測試工單\n\n"
         "**🔗 依附母任務 (Parent Task ID):** Independent\n"
@@ -401,6 +409,7 @@ def _規劃工單(
         "**👤 負責人 (Assignee):** backend-developer\n"
         f"**⛓️ 前置工單 (Blocked By):** {blocked_by}\n"
         f"**✍️ 寫入範圍 (Write Scope):** {write_scope}\n"
+        f"{external_effects_line}"
         f"**📜 共用契約 (Contract):** {contract}\n"
         f"**🔁 變更集合 (Change Set):** {change_set}\n"
         f"**🪜 變更階段 (Phase):** {phase}\n"
@@ -423,8 +432,17 @@ def _寫_round(
     *,
     goal: str | None = "驗證規劃圖",
     branch: str | None = "feature/planning-test",
-    opening_base: str | None = "1" * 40,
+    opening_base: str | None = "HEAD",
+    review_target: str | None = "—",
 ) -> None:
+    if opening_base == "HEAD":
+        opening_base = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=專案,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
     metadata = [f"# [Round ID: {round_id}] 測試輪次", "", "**🚥 輪次狀態 (Status):** Open"]
     if goal is not None:
         metadata.append(f"**🎯 輪次目標 (Goal):** {goal}")
@@ -432,9 +450,12 @@ def _寫_round(
         metadata.append(f"**🌿 輪次分支 (Branch):** `{branch}`")
     if opening_base is not None:
         metadata.append(f"**📍 開輪基準 (Opening Base):** `{opening_base}`")
+    if review_target is not None:
+        metadata.append(
+            f"**🔎 整合審查對象 (Integration Review Target):** {review_target}"
+        )
     metadata.extend(
         [
-            "**🔎 整合審查對象 (Integration Review Target):** —",
             "",
             "## 1. 封閉工單集合（唯一來源）",
             "",
@@ -458,13 +479,24 @@ def _讀_graph(專案: Path):
     return result, json.loads(result.stdout)
 
 
-def test_graph_舊工單沒有五欄仍可讀(project: Path):
+def test_graph_舊工單沒有原五欄仍可讀(project: Path):
     result, graph = _讀_graph(project)
     assert result.returncode == 0, result.stderr
     task = graph["tasks"]["ABC-DEV-BE-001"]
     assert task["blocked_by"] == []
     assert task["write_scope"] is None
     assert task["contract"] is None
+    assert task["external_effects"] is None
+
+
+def test_graph_過渡工單只有原五欄仍可讀但外部副作用未知(規劃專案: Path):
+    path = 規劃專案 / "docs/features/my_module/tasks/MOD-DEV-BE-001.md"
+    content = _規劃工單("MOD-DEV-BE-001", external_effects=None)
+    path.write_text(content, encoding="utf-8")
+
+    result, graph = _讀_graph(規劃專案)
+    assert result.returncode == 0, result.stderr
+    assert graph["tasks"]["MOD-DEV-BE-001"]["external_effects"] is None
 
 
 def test_graph_合法_dag_穩定推導順序_wave_與反向_blocks(規劃專案: Path):
@@ -527,6 +559,22 @@ def test_graph_拒絕未知_自我_重複依賴與循環(規劃專案: Path):
     assert result.returncode != 0
     for 訊息 in ("不得依賴自己", "不存在的 Task ID", "重複依賴", "有向循環"):
         assert 訊息 in result.stderr, f"缺少 {訊息!r} 的明確錯誤：\n{result.stderr}"
+
+
+def test_graph_拒絕被丟棄或截短的非法依賴_token(規劃專案: Path):
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-001", blocked_by="TBD")
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-002", blocked_by="MOD-DEV-BE-099x")
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-003",
+        blocked_by="`MOD-DEV-BE-001`、hidden",
+    )
+
+    result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
+    assert result.returncode != 0
+    assert "非法 Task ID token" in result.stderr
+    for token in ("TBD", "MOD-DEV-BE-099x", "hidden"):
+        assert token in result.stderr, f"非法 token {token!r} 被靜默丟棄：\n{result.stderr}"
 
 
 def test_round_manifest_產出輪內_wave_blocks_與並行候選(規劃專案: Path):
@@ -599,6 +647,24 @@ def test_round_manifest_拒絕缺欄_超額_未知與重複歸屬(規劃專案: 
         assert 訊息 in result.stderr, f"缺少 {訊息!r} 的 manifest 錯誤：\n{result.stderr}"
 
 
+def test_round_manifest_拒絕缺_review_target_空_topic_與不存在_base(規劃專案: Path):
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-001")
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-002")
+    _寫_round(
+        規劃專案,
+        "ROUND-001",
+        ["MOD-DEV-BE-001", "MOD-DEV-BE-002"],
+        branch="feature/",
+        opening_base="1" * 40,
+        review_target=None,
+    )
+
+    result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
+    assert result.returncode != 0
+    for 訊息 in ("缺少 Integration Review Target", "feature/{topic}", "不是此 repo 中存在的 commit"):
+        assert 訊息 in result.stderr, f"缺少 {訊息!r} 的 Round 錯誤：\n{result.stderr}"
+
+
 def test_新式規劃欄位不可只填一部分(規劃專案: Path):
     path = 規劃專案 / "docs/features/my_module/tasks/MOD-DEV-BE-001.md"
     path.write_text(
@@ -649,6 +715,7 @@ def test_並行候選四項任一不確定就不放行(規劃專案: Path):
         規劃專案,
         "MOD-DEV-MANUAL-005",
         write_scope="`ops/e.txt`",
+        external_effects=None,
         task_type="manual_user",
     )
     ids = [
@@ -667,7 +734,105 @@ def test_並行候選四項任一不確定就不放行(規劃專案: Path):
     blockers = {tuple(item["tasks"]): item["reasons"] for item in round_view["parallel_blockers"]}
     assert "write_scope_overlap_or_unknown" in blockers[("MOD-DEV-BE-001", "MOD-DEV-BE-003")]
     assert any("contract_not_ready" in reason for reason in blockers[("MOD-DEV-BE-001", "MOD-DEV-BE-004")])
-    assert any("external_side_effects_unknown" in reason for reason in blockers[("MOD-DEV-BE-001", "MOD-DEV-MANUAL-005")])
+    assert "external_effects_overlap_or_unknown" in blockers[("MOD-DEV-BE-001", "MOD-DEV-MANUAL-005")]
+
+
+def test_write_scope_根目錄_glob_無法證明與實際檔案不重疊(規劃專案: Path):
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-001", write_scope="`*.md`")
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-002", write_scope="`README.md`")
+    _寫_round(規劃專案, "ROUND-001", ["MOD-DEV-BE-001", "MOD-DEV-BE-002"])
+
+    result, graph = _讀_graph(規劃專案)
+    assert result.returncode == 0, result.stderr
+    round_view = graph["rounds"]["ROUND-001"]
+    assert round_view["parallel_candidates"] == []
+    assert "write_scope_overlap_or_unknown" in round_view["parallel_blockers"][0]["reasons"]
+
+
+def test_external_effects_缺來源或作用域重疊時不列並行候選(規劃專案: Path):
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-001", write_scope="`src/a.py`")
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-002", write_scope="`tests/b.py`")
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-003",
+        write_scope="`docs/c.md`",
+        external_effects=None,
+    )
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-004",
+        write_scope="`ops/d.py`",
+        external_effects="`account:vendor`",
+    )
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-005",
+        write_scope="`config/e.py`",
+        external_effects="`account:vendor/project`",
+    )
+    ids = [f"MOD-DEV-BE-00{index}" for index in range(1, 6)]
+    _寫_round(規劃專案, "ROUND-001", ids)
+
+    result, graph = _讀_graph(規劃專案)
+    assert result.returncode == 0, result.stderr
+    round_view = graph["rounds"]["ROUND-001"]
+    assert ["MOD-DEV-BE-001", "MOD-DEV-BE-002"] in round_view["parallel_candidates"]
+    blockers = {tuple(item["tasks"]): item["reasons"] for item in round_view["parallel_blockers"]}
+    assert "external_effects_overlap_or_unknown" in blockers[("MOD-DEV-BE-001", "MOD-DEV-BE-003")]
+    assert "external_effects_overlap_or_unknown" in blockers[("MOD-DEV-BE-004", "MOD-DEV-BE-005")]
+
+
+def test_external_effects_具名作用域可證不重疊時允許並行(規劃專案: Path):
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-001",
+        write_scope="`src/a.py`",
+        external_effects="`deploy:staging/blue`",
+    )
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-002",
+        write_scope="`tests/b.py`",
+        external_effects="`deploy:staging/green`",
+    )
+    _寫_round(規劃專案, "ROUND-001", ["MOD-DEV-BE-001", "MOD-DEV-BE-002"])
+
+    result, graph = _讀_graph(規劃專案)
+    assert result.returncode == 0, result.stderr
+    assert graph["rounds"]["ROUND-001"]["parallel_candidates"] == [
+        ["MOD-DEV-BE-001", "MOD-DEV-BE-002"]
+    ]
+
+
+def test_external_effects_拒絕未命名作用域與_glob(規劃專案: Path):
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-001",
+        external_effects="`第三方帳號`、`deploy:*`、hidden",
+    )
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-002", external_effects="TBD")
+
+    result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
+    assert result.returncode != 0
+    assert "External Effects 必須使用 category:resource" in result.stderr
+    for token in ("第三方帳號", "deploy:*", "hidden", "TBD"):
+        assert token in result.stderr, f"非法外部作用域 {token!r} 被靜默丟棄：\n{result.stderr}"
+
+
+def test_external_effects_出貨標準_ADR_與模板保持同一六欄語意(bare_install: Path):
+    paths = (
+        "docs/standards/parallel_development.md",
+        "docs/standards/adr/ADR-001_task_dag_and_ownership.md",
+        ".agent/resources/task_template.md",
+        "docs/features/_TEMPLATE/tasks/_EXAMPLE-DEV-BE-001.md",
+    )
+    contents = {
+        path: (bare_install / path).read_text(encoding="utf-8")
+        for path in paths
+    }
+    for path, content in contents.items():
+        assert "External Effects" in content, f"{path} 漏掉第六個來源欄位"
+    assert "六個來源欄位" in contents["docs/standards/adr/ADR-001_task_dag_and_ownership.md"]
 
 
 def test_contract_存在於_opening_base_才能直接放行並行(規劃專案: Path):
@@ -713,6 +878,45 @@ def test_contract_存在於_opening_base_才能直接放行並行(規劃專案: 
     ]
 
 
+def test_contract_同_wave_peer_正在修改時不得沿用_base_舊版(規劃專案: Path):
+    contract = 規劃專案 / "docs/contracts/api.md"
+    contract.parent.mkdir(parents=True, exist_ok=True)
+    contract.write_text("# API contract\n", encoding="utf-8")
+    subprocess.run(["git", "add", "docs/contracts/api.md"], cwd=規劃專案, check=True)
+    subprocess.run(["git", "commit", "-qm", "contract base"], cwd=規劃專案, check=True)
+    base = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=規劃專案,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-001",
+        write_scope="`docs/contracts/api.md`",
+    )
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-002",
+        write_scope="`src/consumer.py`",
+        contract="`docs/contracts/api.md`",
+    )
+    _寫_round(
+        規劃專案,
+        "ROUND-001",
+        ["MOD-DEV-BE-001", "MOD-DEV-BE-002"],
+        opening_base=base,
+    )
+
+    result, graph = _讀_graph(規劃專案)
+    assert result.returncode == 0, result.stderr
+    round_view = graph["rounds"]["ROUND-001"]
+    assert round_view["parallel_candidates"] == []
+    assert "contract_changed_by_peer" in round_view["parallel_blockers"][0]["reasons"]
+
+
 def test_parallel_change_合法三階段通過(規劃專案: Path):
     _寫規劃工單(
         規劃專案,
@@ -740,6 +944,32 @@ def test_parallel_change_合法三階段通過(規劃專案: Path):
 
     result, _ = _讀_graph(規劃專案)
     assert result.returncode == 0, result.stderr
+
+
+def test_parallel_change_拒絕_migrate_未位於_expand_之後(規劃專案: Path):
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-001",
+        change_set="auth-v2",
+        phase="expand",
+    )
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-002",
+        change_set="auth-v2",
+        phase="migrate",
+    )
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-003",
+        blocked_by="MOD-DEV-BE-002",
+        change_set="auth-v2",
+        phase="contract",
+    )
+
+    result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
+    assert result.returncode != 0
+    assert "migrate 必須位於 expand MOD-DEV-BE-001 之後" in result.stderr
 
 
 def test_parallel_change_拒絕非法_phase_缺_contract_與漏列_migrate(規劃專案: Path):

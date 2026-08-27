@@ -92,15 +92,18 @@ description: 當使用者需要「安排 Sprint 規劃」、「拆解任務 (Bre
 
 ### DAG、Write Scope 與 Round Manifest
 
-- 新建或重新規劃的普通工單一律填 `Blocked By`、`Write Scope`、`Contract`、`Change Set`、
-  `Phase`；歷史工單可五欄全無，但不可只補一部分。`Blocked By` 只存正向 Task ID，
+- 新建或重新規劃的普通工單一律填 `Blocked By`、`Write Scope`、`External Effects`、`Contract`、
+  `Change Set`、`Phase`；歷史工單可原五欄全無，已採原五欄但缺 `External Effects` 也可讀，
+  但缺欄代表副作用未知、不得取得並行資格。`Blocked By` 只存完整的正向 Task ID，
   **不得手寫**反向 blocks、wave 或 `[P]`。
 - 只有 2～5 張相關工單才建立 `docs/development/rounds/{RoundID}[_slug].md`。Manifest 保存
   唯一 Round ID、目標、`feature/{topic}` branch、40 字元 opening base SHA 與封閉 Task ID 集合；
   工單不重複保存 Round ID。建立後先跑 `scan_backlog.py --format graph` 與 `precheck.py`。
 - 並行候選必須同時滿足：DAG 無先後、Write Scope 可證明不重疊、Contract 已在 round base
-  或由輪內前置提供、外部副作用可隔離；任何一項不確定就排序執行。介面顯示的 wave、blocks
-  與候選都是衍生視圖，不得抄回來源文件。
+  或由輪內前置提供且沒有同 wave peer 正在修改、兩邊 `External Effects` 的
+  `category:resource` 外部寫入作用域可證隔離；
+  `—` 只在明確無外部寫入時使用。缺欄、glob、格式不合法或任何一項不確定就排序執行。
+  介面顯示的 wave、blocks 與候選都是衍生視圖，不得抄回來源文件。
 - Parallel Change 使用同一 `Change Set` 的 `expand`／一至多張 `migrate`／`contract` 普通工單；
   開 expand 時就建立 contract，且 contract 的 `Blocked By` 必須涵蓋全部 migrate 工單。
 

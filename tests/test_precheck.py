@@ -6,6 +6,7 @@
 
 import json
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -65,6 +66,10 @@ def 乾淨專案(bare_install: Path, tmp_path: Path) -> Path:
     target = tmp_path / "clean"
     shutil.copytree(bare_install, target)
     shutil.copytree(target / "docs/features/_TEMPLATE", target / "docs/features/my_module")
+    subprocess.run(["git", "init", "-q"], cwd=target, check=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=target, check=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=target, check=True)
+    subprocess.run(["git", "commit", "--allow-empty", "-qm", "precheck base"], cwd=target, check=True)
     (target / TASK).write_text(_工單(), encoding="utf-8")
     重生(target)
     return target
@@ -92,6 +97,7 @@ def _runtime欄位(
 def _規劃欄位(
     blocked_by="—",
     write_scope="`src/example.py`",
+    external_effects="—",
     contract="—",
     change_set="—",
     phase="—",
@@ -99,6 +105,7 @@ def _規劃欄位(
     return (
         f"**⛓️ 前置工單 (Blocked By):** {blocked_by}\n"
         f"**✍️ 寫入範圍 (Write Scope):** {write_scope}\n"
+        f"**🌐 外部副作用 (External Effects):** {external_effects}\n"
         f"**📜 共用契約 (Contract):** {contract}\n"
         f"**🔁 變更集合 (Change Set):** {change_set}\n"
         f"**🪜 變更階段 (Phase):** {phase}\n"
@@ -109,12 +116,19 @@ def _寫_round(專案: Path, task_ids: list[str]) -> None:
     rounds = 專案 / "docs/development/rounds"
     rounds.mkdir(parents=True, exist_ok=True)
     rows = "\n".join(f"| `{task_id}` | 測試 | Pending |" for task_id in task_ids)
+    opening_base = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=專案,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
     (rounds / "ROUND-001_test.md").write_text(
         "# [Round ID: ROUND-001] precheck 測試\n\n"
         "**🚥 輪次狀態 (Status):** Open\n"
         "**🎯 輪次目標 (Goal):** 驗證窄審狀態\n"
         "**🌿 輪次分支 (Branch):** `feature/precheck-test`\n"
-        f"**📍 開輪基準 (Opening Base):** `{'1' * 40}`\n"
+        f"**📍 開輪基準 (Opening Base):** `{opening_base}`\n"
         "**🔎 整合審查對象 (Integration Review Target):** —\n\n"
         "## 1. 封閉工單集合（唯一來源）\n\n"
         "| Task ID | 目標 | 初始狀態 |\n"

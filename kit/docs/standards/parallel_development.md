@@ -26,11 +26,14 @@
 |---|---|---|
 | `Blocked By` | 正向硬依賴的 Task ID；無則 `—` | 不手寫反向 `blocks`、wave 或 `[P]` |
 | `Write Scope` | 本工單可寫的檔案／目錄／glob | 不取代專案級長期風險登記 |
+| `External Effects` | 外部寫入作用域的 `category:resource`；明確無外部寫入填 `—` | 不從標題、Task Type 或未列出關鍵詞推測安全 |
 | `Contract` | 已位於本輪 base 的第 1 層共用契約路徑；無則 `—` | 不指向未合併分支或 DN |
 | `Change Set` | Parallel Change 三階段共用識別；不用則 `—` | 不當 Epic 或 Round ID |
 | `Phase` | `expand`、`migrate`、`contract`；不用則 `—` | 不新增同名 Task Type |
 
-舊工單沒有這五欄仍合法；只有新建或重新規劃的工單必須使用。`Assignee` 仍是專業角色，
+舊工單沒有原五欄仍合法；已採原五欄但沒有 `External Effects` 的過渡工單也可讀，
+但外部副作用視為未知，不能取得並行資格。新建或重新規劃的工單必須填齊六欄；
+`External Effects: —` 是「明確沒有外部寫入」，與缺欄的 unknown 不同。`Assignee` 仍是專業角色，
 執行者由 [agent_runtime.md](agent_runtime.md) 的能力路由決定。
 
 ### 2.2 Round Manifest
@@ -55,10 +58,13 @@ manifest **不手寫** wave、反向 blocks 或彙總狀態。介面可顯示由
 
 1. DAG 之間沒有先後邊；
 2. `Write Scope` 不重疊；
-3. 共用 `Contract` 已存在於 opening base 或已由前置工單合併進輪次；
-4. 網路寫入、部署、migration、帳號或其他外部副作用可彼此隔離。
+3. 共用 `Contract` 已存在於 opening base 或已由前置工單合併進輪次，且沒有同 wave peer 正在修改；
+4. 兩張工單都有 `External Effects` 來源證據，且網路寫入、部署、migration、帳號或其他
+   外部寫入作用域可證明互不重疊；`—` 代表明確沒有外部寫入。
 
-不同 Epic／模組只能當低耦合提示，不是放行條件。任何一項無法判定時，預設排序執行。
+外部作用域使用不含 glob 的 `category:resource` opaque key，例如 `deploy:staging`、
+`account:vendor/project`；相同作用域或父子作用域視為重疊。不同 Epic／模組只能當低耦合提示，
+不是放行條件。缺欄、格式不合法或任何一項無法判定時，預設排序執行。
 
 ### 3.2 執行中發現新依賴
 

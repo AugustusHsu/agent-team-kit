@@ -38,6 +38,7 @@ PATTERNS = {
     "assignee": re.compile(rf"^\*\*👤{_H}負責人{_H}\(Assignee\):\*\*{_H}(\S.*?){_H}$", re.MULTILINE),
     "blocked_by": re.compile(rf"^\*\*⛓️{_H}前置工單{_H}\(Blocked By\):\*\*{_H}(\S.*?){_H}$", re.MULTILINE),
     "write_scope": re.compile(rf"^\*\*✍️{_H}寫入範圍{_H}\(Write Scope\):\*\*{_H}(\S.*?){_H}$", re.MULTILINE),
+    "external_effects": re.compile(rf"^\*\*🌐{_H}外部副作用{_H}\(External Effects\):\*\*{_H}(\S.*?){_H}$", re.MULTILINE),
     "contract": re.compile(rf"^\*\*📜{_H}共用契約{_H}\(Contract\):\*\*{_H}(\S.*?){_H}$", re.MULTILINE),
     "change_set": re.compile(rf"^\*\*🔁{_H}變更集合{_H}\(Change Set\):\*\*{_H}(\S.*?){_H}$", re.MULTILINE),
     "phase": re.compile(rf"^\*\*🪜{_H}變更階段{_H}\(Phase\):\*\*{_H}(\S.*?){_H}$", re.MULTILINE),
@@ -55,7 +56,8 @@ PLANNING_LABELS = {
     "phase": "Phase",
 }
 EMPTY_METADATA = {"", "-", "—", "–", "None", "N/A", "TBD"}
-TASK_ID_RE = re.compile(r"\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+){2,}\b")
+TASK_ID_RE = re.compile(r"\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+){3,}\b")
+EXTERNAL_EFFECT_RE = re.compile(r"^[a-z][a-z0-9_-]*:[A-Za-z0-9][A-Za-z0-9._/-]*$")
 BACKTICK_RE = re.compile(r"`([^`]+)`")
 
 ROUND_HEADER_RE = re.compile(r"^#\s*\[Round ID:\s*(ROUND-\d+)\]\s*(.+)$", re.MULTILINE)
@@ -68,6 +70,7 @@ ROUND_PATTERNS = {
 }
 ROUND_SECTION_RE = re.compile(r"^##\s+1\.[^\n]*\n(.*?)(?=^##\s+2\.|\Z)", re.MULTILINE | re.DOTALL)
 SHA40_RE = re.compile(r"^[0-9a-fA-F]{40}$")
+FEATURE_BRANCH_RE = re.compile(r"^feature/[A-Za-z0-9][A-Za-z0-9._/-]*$")
 VALID_PHASES = {"expand", "migrate", "contract"}
 
 # Design Note (DN) 的 header 正則表達式
@@ -123,6 +126,14 @@ def is_empty_metadata(value):
     return text in EMPTY_METADATA or text.startswith(("—", "–"))
 
 
+def is_explicit_none(value):
+    """規劃安全欄位只接受破折號表達「已確認為無」；TBD／N/A 仍是 unknown。"""
+    if value is None:
+        return True
+    text = str(value).strip()
+    return text in {"", "-", "—", "–"} or text.startswith(("—", "–"))
+
+
 def parse_item_list(value):
     """解析 backtick 清單或逗號／頓號清單，保留順序與重複值供驗證器判斷。"""
     if is_empty_metadata(value):
@@ -134,11 +145,46 @@ def parse_item_list(value):
     return [item.strip() for item in re.split(r"[,，、;；]", text) if item.strip()]
 
 
+def parse_strict_item_list(value):
+    """解析來源清單並回報 backtick 之外的殘留文字，避免混合語法藏掉非法 token。"""
+    if is_explicit_none(value):
+        return [], []
+    text = str(value).strip()
+    quoted = BACKTICK_RE.findall(text)
+    if not quoted:
+        return [
+            item.strip()
+            for item in re.split(r"[,，、;；]", text)
+            if item.strip()
+        ], []
+    remainder = BACKTICK_RE.sub("", text)
+    remainder = re.sub(r"[,，、;；\s]", "", remainder)
+    return [item.strip() for item in quoted if item.strip()], ([remainder] if remainder else [])
+
+
 def parse_task_ids(value):
-    """只取 Task ID；顯示用括號、Markdown 連結或分隔符不影響解析。"""
-    if is_empty_metadata(value):
-        return []
-    return TASK_ID_RE.findall(str(value))
+    """嚴格解析 Task ID 清單；非空 token 不得被搜尋式 regex 靜默丟棄。"""
+    if is_explicit_none(value):
+        return [], []
+    items, syntax_errors = parse_strict_item_list(value)
+    valid = [item for item in items if TASK_ID_RE.fullmatch(item)]
+    invalid = [*syntax_errors, *(item for item in items if not TASK_ID_RE.fullmatch(item))]
+    return valid, invalid
+
+
+def valid_external_effect(value):
+    """外部寫入作用域使用 namespaced opaque key，拒絕 glob 與模糊路徑。"""
+    if not EXTERNAL_EFFECT_RE.fullmatch(value):
+        return False
+    _, scope = value.split(":", 1)
+    segments = scope.split("/")
+    return all(segment not in {"", ".", ".."} for segment in segments)
+
+
+def valid_feature_branch(value):
+    if not FEATURE_BRANCH_RE.fullmatch(value or ""):
+        return False
+    return all(segment not in {"", ".", ".."} for segment in value.split("/"))
 
 
 def parse_task_file(filepath):
@@ -176,7 +222,10 @@ def parse_task_file(filepath):
             result[key] = None
 
     planning_matches = {key: PATTERNS[key].search(content) for key in PLANNING_FIELDS}
-    result["planning_fields_present"] = any(planning_matches.values())
+    external_effects_match = PATTERNS["external_effects"].search(content)
+    result["planning_fields_present"] = any(planning_matches.values()) or bool(
+        external_effects_match
+    )
     result["planning_missing_fields"] = [
         PLANNING_LABELS[key] for key, match in planning_matches.items() if match is None
     ]
@@ -184,7 +233,9 @@ def parse_task_file(filepath):
         key: match.group(1).strip().replace("\r", "") if match else None
         for key, match in planning_matches.items()
     }
-    result["blocked_by"] = parse_task_ids(raw_planning["blocked_by"])
+    result["blocked_by"], result["invalid_blocked_by"] = parse_task_ids(
+        raw_planning["blocked_by"]
+    )
     result["write_scope"] = (
         parse_item_list(raw_planning["write_scope"])
         if planning_matches["write_scope"]
@@ -195,6 +246,25 @@ def parse_task_file(filepath):
         if planning_matches["contract"]
         else None
     )
+    raw_external_effects = (
+        external_effects_match.group(1).strip().replace("\r", "")
+        if external_effects_match
+        else None
+    )
+    if external_effects_match:
+        result["external_effects"], invalid_external_syntax = parse_strict_item_list(
+            raw_external_effects
+        )
+    else:
+        result["external_effects"], invalid_external_syntax = None, []
+    result["invalid_external_effects"] = [
+        *invalid_external_syntax,
+        *(
+            effect
+            for effect in (result["external_effects"] or [])
+            if not valid_external_effect(effect)
+        ),
+    ]
     result["change_set"] = (
         None if is_empty_metadata(raw_planning["change_set"]) else raw_planning["change_set"]
     )
@@ -311,6 +381,23 @@ def validate_task_graph(tasks):
                     task["file"],
                     f"新式規劃欄位不完整，缺少：{missing}；舊工單可五欄全無，但不可只填一部分",
                     "incomplete_planning_fields",
+                )
+            )
+        if task["invalid_blocked_by"]:
+            errors.append(
+                planning_error(
+                    task["file"],
+                    f"Blocked By 含非法 Task ID token：{', '.join(task['invalid_blocked_by'])}",
+                    "invalid_dependency_token",
+                )
+            )
+        if task["invalid_external_effects"]:
+            errors.append(
+                planning_error(
+                    task["file"],
+                    "External Effects 必須使用 category:resource 作用域，非法值："
+                    + ", ".join(task["invalid_external_effects"]),
+                    "invalid_external_effect",
                 )
             )
         deps = task["blocked_by"]
@@ -435,8 +522,17 @@ def scan_rounds(root):
 
 
 def _scope_prefix(value):
-    text = value.strip().replace("\\", "/").removeprefix("./")
-    if not text or text.startswith(("/", "~", "http://", "https://")):
+    raw = value.strip()
+    if "\\" in raw:
+        return None, True
+    text = raw.removeprefix("./")
+    segments = text.split("/")
+    if (
+        not text
+        or text.startswith(("/", "~", "http://", "https://"))
+        or ":" in text
+        or any(segment in {"", ".", ".."} for segment in segments)
+    ):
         return None, True
     wildcard_at = min(
         (text.find(char) for char in "*?[]{" if char in text),
@@ -444,6 +540,8 @@ def _scope_prefix(value):
     )
     has_wildcard = wildcard_at < len(text)
     prefix = text[:wildcard_at].rstrip("/")
+    if not prefix:
+        return None, has_wildcard
     return prefix, has_wildcard
 
 
@@ -464,6 +562,10 @@ def scopes_are_definitely_disjoint(left, right):
             if left_prefix.startswith(right_prefix + "/"):
                 return False
             if right_prefix.startswith(left_prefix + "/"):
+                return False
+            if left_wild and right_prefix.startswith(left_prefix):
+                return False
+            if right_wild and left_prefix.startswith(right_prefix):
                 return False
             if (left_wild or right_wild) and left_prefix.split("/")[0] == right_prefix.split("/")[0]:
                 # 同一頂層且帶 glob 時，靜態資訊不足以證明永不交集。
@@ -518,6 +620,26 @@ def path_exists_at_revision(root, revision, path, cache):
     return cache[key]
 
 
+def revision_is_commit(root, revision, cache):
+    """Opening Base 必須是此 repo 中真實存在的 commit object。"""
+    if revision not in cache:
+        if not SHA40_RE.fullmatch(revision or ""):
+            cache[revision] = False
+        else:
+            try:
+                result = subprocess.run(
+                    ["git", "-C", str(root), "cat-file", "-e", f"{revision}^{{commit}}"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                )
+            except OSError:
+                cache[revision] = False
+            else:
+                cache[revision] = result.returncode == 0
+    return cache[revision]
+
+
 def contracts_are_ready(root, task, manifest, by_id, revision_cache):
     contracts = task["contract"]
     if contracts is None:
@@ -538,18 +660,31 @@ def contracts_are_ready(root, task, manifest, by_id, revision_cache):
     return True
 
 
-def external_side_effects_are_isolatable(task):
-    """從來源欄位只能證明 repo-local 工作；部署、人工操作與 migration 預設不並行。"""
-    scopes = task["write_scope"]
-    task_id_parts = set(task["task_id"].split("-"))
-    title = (task.get("title") or "").lower()
-    if not scopes or task.get("task_type") == "manual_user":
+def task_writes_contract_used_by(writer, consumer):
+    """base 雖有契約，但同 wave peer 正在改它時不能把舊版視為穩定。"""
+    return any(
+        scope_covers_path(writer["write_scope"], contract)
+        for contract in (consumer["contract"] or [])
+    )
+
+
+def external_effects_are_definitely_disjoint(left, right):
+    """缺欄是 unknown；只有明確列出且作用域互不包含時才證明可隔離。"""
+    left_effects = left["external_effects"]
+    right_effects = right["external_effects"]
+    if left_effects is None or right_effects is None:
         return False
-    if task_id_parts & {"DEPLOY", "MANUAL"} or task.get("phase") in {"migrate", "contract"}:
+    if left["invalid_external_effects"] or right["invalid_external_effects"]:
         return False
-    if re.search(r"\b(?:deploy|migration|migrate)\b|部署|遷移|外部副作用", title):
-        return False
-    return all(_scope_prefix(scope)[0] is not None for scope in scopes)
+    for left_effect in left_effects:
+        for right_effect in right_effects:
+            if left_effect == right_effect:
+                return False
+            if left_effect.startswith(right_effect + "/"):
+                return False
+            if right_effect.startswith(left_effect + "/"):
+                return False
+    return True
 
 
 def validate_parallel_changes(by_id):
@@ -621,6 +756,22 @@ def validate_parallel_changes(by_id):
                         "parallel_change_contract_dependencies",
                     )
                 )
+        if len(phase_map["expand"]) == 1:
+            expand_id = phase_map["expand"][0]
+            unordered = sorted(
+                migrate_id
+                for migrate_id in phase_map["migrate"]
+                if expand_id not in transitive_dependencies(migrate_id, by_id)
+            )
+            if unordered:
+                errors.append(
+                    planning_error(
+                        by_id[unordered[0]]["file"],
+                        f"Change Set {change_set!r} 的 migrate 必須位於 expand {expand_id} 之後："
+                        + ", ".join(unordered),
+                        "parallel_change_migrate_before_expand",
+                    )
+                )
     return errors
 
 
@@ -635,6 +786,7 @@ def build_planning_view(root, all_project_tasks=None):
     manifests = scan_rounds(root)
     rounds_by_id = {}
     membership = {}
+    commit_cache = {}
     for manifest in manifests:
         location = manifest["file"]
         round_id = manifest.get("round_id")
@@ -659,13 +811,30 @@ def build_planning_view(root, all_project_tasks=None):
                 errors.append(
                     planning_error(location, f"Round Manifest 缺少 {label}", f"missing_round_{field}")
                 )
-        if manifest.get("branch") and not manifest["branch"].startswith("feature/"):
+        if manifest.get("review_target") is None:
+            errors.append(
+                planning_error(
+                    location,
+                    "Round Manifest 缺少 Integration Review Target 欄位",
+                    "missing_round_review_target",
+                )
+            )
+        if manifest.get("branch") and not valid_feature_branch(manifest["branch"]):
             errors.append(
                 planning_error(location, "Round branch 必須使用 feature/{topic}", "invalid_round_branch")
             )
-        if not SHA40_RE.fullmatch(manifest.get("opening_base") or ""):
+        opening_base = manifest.get("opening_base") or ""
+        if not SHA40_RE.fullmatch(opening_base):
             errors.append(
                 planning_error(location, "Opening Base 必須是 40 字元 SHA", "invalid_opening_base")
+            )
+        elif not revision_is_commit(root, opening_base, commit_cache):
+            errors.append(
+                planning_error(
+                    location,
+                    f"Opening Base {opening_base} 不是此 repo 中存在的 commit",
+                    "missing_opening_base_commit",
+                )
             )
 
         task_ids = manifest["task_ids"]
@@ -756,13 +925,19 @@ def build_planning_view(root, all_project_tasks=None):
                     by_id[left_id]["write_scope"], by_id[right_id]["write_scope"]
                 ):
                     reasons.append("write_scope_overlap_or_unknown")
+                if task_writes_contract_used_by(by_id[left_id], by_id[right_id]) or task_writes_contract_used_by(
+                    by_id[right_id], by_id[left_id]
+                ):
+                    reasons.append("contract_changed_by_peer")
                 for task_id in (left_id, right_id):
                     if not contracts_are_ready(
                         root, by_id[task_id], manifest, by_id, revision_cache
                     ):
                         reasons.append(f"contract_not_ready:{task_id}")
-                    if not external_side_effects_are_isolatable(by_id[task_id]):
-                        reasons.append(f"external_side_effects_unknown:{task_id}")
+                if not external_effects_are_definitely_disjoint(
+                    by_id[left_id], by_id[right_id]
+                ):
+                    reasons.append("external_effects_overlap_or_unknown")
                 pair = [left_id, right_id]
                 if reasons:
                     blockers.append({"tasks": pair, "reasons": sorted(set(reasons))})
@@ -777,6 +952,7 @@ def build_planning_view(root, all_project_tasks=None):
             "goal": manifest["goal"],
             "branch": manifest["branch"],
             "opening_base": manifest["opening_base"],
+            "review_target": manifest["review_target"],
             "task_ids": manifest["task_ids"],
             "topological_order": round_order,
             "waves": waves,
@@ -791,6 +967,7 @@ def build_planning_view(root, all_project_tasks=None):
             "blocks": graph["blocks"].get(task_id, []),
             "wave": graph["wave_by_task"].get(task_id),
             "write_scope": task["write_scope"],
+            "external_effects": task["external_effects"],
             "contract": task["contract"],
             "change_set": task["change_set"],
             "phase": task["phase"],

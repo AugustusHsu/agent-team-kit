@@ -9,6 +9,7 @@
 **↪️ Execution 覆寫 (Execution Override):** — [通常留空；例：`profile=codex-cli; scope=single`。round/project 還要 `expires=...`]
 **⛓️ 前置工單 (Blocked By):** — [只填正向硬依賴的 Task ID；無則填 —，不要手寫 blocks／wave／`[P]`]
 **✍️ 寫入範圍 (Write Scope):** [列出本工單唯一可寫的 repo 相對路徑、目錄或 glob]
+**🌐 外部副作用 (External Effects):** — [明確無外部寫入填 —；否則列出 `category:resource` 作用域，例如 `deploy:staging`、`account:vendor/project`]
 **📜 共用契約 (Contract):** — [填已位於 round base 的第 1 層契約路徑；無共享介面填 —]
 **🔁 變更集合 (Change Set):** — [只供 Parallel Change 三階段共用；不用則填 —]
 **🪜 變更階段 (Phase):** — [Change Set 使用 `expand`／`migrate`／`contract`；不用則填 —]

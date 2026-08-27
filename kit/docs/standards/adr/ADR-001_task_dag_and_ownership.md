@@ -11,11 +11,12 @@ Epic／模組只能表達分類，不能證明兩張工單之間沒有內容依�
 
 ## Decision
 
-工單只保存 `Blocked By`、`Write Scope`、`Contract`、`Change Set`、`Phase` 五個來源欄位；
-wave、反向 blocks 與可並行集合由 DAG 推導。輪次內以 Write Scope 表達動態排他所有權，
-專案另以 `overlap_zones.md` 保存長期熱點；Epic 不擁有檔案。
+工單只保存 `Blocked By`、`Write Scope`、`External Effects`、`Contract`、`Change Set`、`Phase`
+六個來源欄位；wave、反向 blocks 與可並行集合由 DAG 推導。輪次內以 Write Scope 表達動態
+排他所有權，專案另以 `overlap_zones.md` 保存長期熱點；Epic 不擁有檔案。
 
-並行必須同時滿足 DAG 無邊、Write Scope 不重疊、Contract 已進 base、外部副作用可隔離。
+並行必須同時滿足 DAG 無邊、Write Scope 不重疊、Contract 已進 base 且沒有 peer 同時修改，
+以及雙方都有可證互不重疊的 External Effects 來源。缺欄與不可判定都預設排序。
 
 ## Rejected alternatives
 
@@ -27,6 +28,7 @@ wave、反向 blocks 與可並行集合由 DAG 推導。輪次內以 Write Scope
 ## Consequences
 
 開輪成本增加一次結構化檢查，但 wave 可重算、執行期新依賴有明確落點，且重疊預設會在
-開工前轉為排序。舊工單沒有新欄位仍合法，避免一次性遷移。
+開工前轉為排序。舊工單沒有原五欄仍合法；只有原五欄、缺 External Effects 的過渡工單
+也可讀但不取得並行資格，避免一次性遷移造成 BACKLOG 中斷。
 
 完整規則見 [並行開發與工作輪次標準](../parallel_development.md) §2～§4。
