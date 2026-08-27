@@ -25,10 +25,10 @@
 | 欄位 | 唯一語意 | 不得拿來做什麼 |
 |---|---|---|
 | `Blocked By` | 正向硬依賴的 Task ID；無則 `—` | 不手寫反向 `blocks`、wave 或 `[P]` |
-| `Write Scope` | 本工單可寫的檔案／目錄／glob | 不取代專案級長期風險登記 |
+| `Write Scope` | 本工單可寫的檔案／glob；目錄必須明示為 `path/**` | 不取代專案級長期風險登記 |
 | `External Effects` | 外部寫入作用域的 `category:resource`；明確無外部寫入填 `—` | 不從標題、Task Type 或未列出關鍵詞推測安全 |
 | `Contract` | 已位於本輪 base 的第 1 層共用契約路徑；無則 `—` | 不指向未合併分支或 DN |
-| `Change Set` | Parallel Change 三階段共用識別；不用則 `—` | 不當 Epic 或 Round ID |
+| `Change Set` | Parallel Change 三階段共用的單一識別碼；不用則 `—` | 不當清單、Epic 或 Round ID |
 | `Phase` | `expand`、`migrate`、`contract`；不用則 `—` | 不新增同名 Task Type |
 
 舊工單沒有原五欄仍合法；已採原五欄但沒有 `External Effects` 的過渡工單也可讀，
@@ -38,7 +38,9 @@
 
 六欄的破折號空值必須是**整個欄位的唯一內容**；`—、TBD`、`—、實際值` 等混合表示一律無效。
 清單只要使用 backtick，所有 token 都必須放在 backtick 內，外部只能有分隔符與空白；任何殘留
-文字都視為來源資料不完整，precheck 必須 fail closed，不能靜默丟棄後繼續推導。
+文字都視為來源資料不完整。`TBD`、`N/A`、`None` 是未完成 placeholder，不能當成路徑或
+Change Set；Change Set 只接受一個英數開頭、後續可含 `._-` 的識別碼。precheck 必須
+fail closed，不能靜默丟棄後繼續推導。
 
 ### 2.2 Round Manifest
 
@@ -66,15 +68,17 @@ manifest **不手寫** wave、反向 blocks 或彙總狀態。介面可顯示由
 1. DAG 之間沒有先後邊；
 2. `Write Scope` 不重疊；
 3. 共用 `Contract` 已存在於 opening base 或已由前置工單合併進輪次，且沒有同 wave peer 正在修改；
-   前置工單以 glob 宣告 Write Scope 時，必須由錨定完整路徑的 glob 實際匹配 Contract，只有
-   靜態前綴、路徑深度不符或含無法明確解讀的表示都不算已提供；
+   前置工單以 literal 宣告 Write Scope 時只接受與 Contract 完整相等；目錄必須使用 `path/**`
+   glob，並由錨定完整路徑的 glob 實際匹配。只有靜態前綴、反向父子路徑、路徑深度不符或含
+   無法明確解讀的表示都不算已提供；
 4. 兩張工單都有 `External Effects` 來源證據，且網路寫入、部署、migration、帳號或其他
    外部寫入作用域可證明互不重疊；`—` 代表明確沒有外部寫入。
 
 外部作用域使用不含 glob 的 `category:resource` opaque key，例如 `deploy:staging`、
 `account:vendor/project`；相同作用域或父子作用域視為重疊。不同 Epic／模組只能當低耦合提示，
 不是放行條件。工單、Parallel Change 或所屬 Round 只要有任何來源驗證錯誤，該 Round 的
-相關配對都不得列入並行候選；缺欄、格式不合法或任何一項無法判定時，預設排序執行。
+全部配對都不得列入並行候選；同一工單重複歸屬時，所有涉入 Round 一律無效。缺欄、格式
+不合法或任何一項無法判定時，預設排序執行。
 
 ### 3.2 執行中發現新依賴
 

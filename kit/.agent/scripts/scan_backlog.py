@@ -56,8 +56,10 @@ PLANNING_LABELS = {
     "phase": "Phase",
 }
 EMPTY_METADATA = {"", "-", "—", "–", "None", "N/A", "TBD"}
+UNKNOWN_METADATA = {"none", "n/a", "tbd"}
 TASK_ID_RE = re.compile(r"\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+){3,}\b")
 EXTERNAL_EFFECT_RE = re.compile(r"^[a-z][a-z0-9_-]*:[A-Za-z0-9][A-Za-z0-9._/-]*$")
+CHANGE_SET_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 BACKTICK_RE = re.compile(r"`([^`]+)`")
 
 ROUND_HEADER_RE = re.compile(r"^#\s*\[Round ID:\s*(ROUND-\d+)\]\s*(.+)$", re.MULTILINE)
@@ -134,6 +136,11 @@ def is_explicit_none(value):
     return text in {"", "-", "—", "–"}
 
 
+def is_unknown_metadata(value):
+    """TBD／N/A／None 是未完成來源，不得偽裝成 repo path 或識別碼。"""
+    return str(value).strip().lower() in UNKNOWN_METADATA
+
+
 def parse_strict_item_list(value):
     """解析來源清單並回報 backtick 之外的殘留文字，避免混合語法藏掉非法 token。"""
     if is_explicit_none(value):
@@ -154,7 +161,7 @@ def parse_strict_item_list(value):
 def valid_repo_path_expression(value, *, allow_glob):
     """驗證 repo-relative 路徑表示；Write Scope 可含 glob，Contract 只能是實際路徑。"""
     raw = value.strip()
-    if not raw or "\\" in raw or "`" in raw:
+    if not raw or "\\" in raw or "`" in raw or is_explicit_none(raw) or is_unknown_metadata(raw):
         return False
     text = raw.removeprefix("./")
     if (
@@ -165,6 +172,16 @@ def valid_repo_path_expression(value, *, allow_glob):
     ):
         return False
     return all(segment not in {"", ".", ".."} for segment in text.split("/"))
+
+
+def valid_change_set(value):
+    """Change Set 是單一 opaque identifier，不接受 placeholder、清單或引用殘留。"""
+    text = str(value).strip()
+    return (
+        not is_explicit_none(text)
+        and not is_unknown_metadata(text)
+        and bool(CHANGE_SET_RE.fullmatch(text))
+    )
 
 
 def parse_task_ids(value):
@@ -290,6 +307,11 @@ def parse_task_file(filepath):
     ]
     result["change_set"] = (
         None if is_explicit_none(raw_planning["change_set"]) else raw_planning["change_set"]
+    )
+    result["invalid_change_set"] = (
+        []
+        if result["change_set"] is None or valid_change_set(result["change_set"])
+        else [result["change_set"]]
     )
     result["phase"] = (
         None if is_explicit_none(raw_planning["phase"]) else raw_planning["phase"]
@@ -648,7 +670,7 @@ def scopes_are_definitely_disjoint(left, right):
 
 
 def scope_covers_path(scopes, path):
-    """Write Scope 必須實際涵蓋 Contract；glob 靜態前綴本身不是供應證據。"""
+    """Write Scope 必須實際涵蓋 Contract；literal 只證明 exact，目錄須明示 glob。"""
     if not scopes:
         return False
     target = path.strip().replace("\\", "/").removeprefix("./")
@@ -658,16 +680,19 @@ def scope_covers_path(scopes, path):
             continue
         normalized_scope = scope.strip().removeprefix("./")
         if wildcard:
+            if normalized_scope.endswith("/**"):
+                directory = normalized_scope[:-3].rstrip("/")
+                if not any(char in directory for char in "*?[]{") and (
+                    target == directory or target.startswith(directory + "/")
+                ):
+                    return True
+                continue
             try:
                 if PurePosixPath("/" + target).match("/" + normalized_scope):
                     return True
             except ValueError:
                 continue
-        elif (
-            target == normalized_scope
-            or target.startswith(normalized_scope + "/")
-            or normalized_scope.startswith(target + "/")
-        ):
+        elif target == normalized_scope:
             return True
     return False
 
@@ -780,6 +805,15 @@ def validate_parallel_changes(by_id):
     for task_id, task in sorted(by_id.items()):
         phase = task["phase"]
         change_set = task["change_set"]
+        if task["invalid_change_set"]:
+            invalid_task_ids.add(task_id)
+            errors.append(
+                planning_error(
+                    task["file"],
+                    f"Change Set 必須是單一識別碼，非法值：{change_set}",
+                    "invalid_change_set",
+                )
+            )
         if phase and phase not in VALID_PHASES:
             invalid_task_ids.add(task_id)
             errors.append(
@@ -803,7 +837,7 @@ def validate_parallel_changes(by_id):
                     task["file"], "填寫 Change Set 時必須指定 Phase", "change_set_without_phase"
                 )
             )
-        if change_set:
+        if change_set and not task["invalid_change_set"]:
             groups.setdefault(change_set, []).append(task_id)
 
     for change_set, task_ids in sorted(groups.items()):
@@ -887,6 +921,7 @@ def build_planning_view(root, all_project_tasks=None):
     manifests = scan_rounds(root)
     rounds_by_id = {}
     membership = {}
+    membership_rounds = {}
     commit_cache = {}
     invalid_round_ids = set()
     for manifest in manifests:
@@ -986,16 +1021,20 @@ def build_planning_view(root, all_project_tasks=None):
                 )
             )
         for task_id in sorted(set(task_ids)):
-            if task_id in membership:
+            prior_rounds = membership_rounds.setdefault(task_id, [])
+            if prior_rounds:
+                invalid_round_ids.update(prior_rounds)
+                invalid_round_ids.add(round_id)
                 errors.append(
                     planning_error(
                         location,
-                        f"Task {task_id} 已屬於 {membership[task_id]}，不得重複歸入 {round_id}",
+                        f"Task {task_id} 已屬於 {prior_rounds[0]}，不得重複歸入 {round_id}",
                         "duplicate_round_membership",
                     )
                 )
             else:
                 membership[task_id] = round_id
+            prior_rounds.append(round_id)
         members = set(task_ids)
         for task_id in sorted(members & set(by_id)):
             outside = [
@@ -1014,6 +1053,10 @@ def build_planning_view(root, all_project_tasks=None):
                     )
                 )
         if len(errors) > round_error_count:
+            invalid_round_ids.add(round_id)
+
+    for round_id, manifest in rounds_by_id.items():
+        if set(manifest["task_ids"]) & invalid_task_ids:
             invalid_round_ids.add(round_id)
 
     revision_cache = {}

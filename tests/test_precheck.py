@@ -411,6 +411,32 @@ def test_round_非法成員與重複表格結構會讓_precheck_紅(乾淨專案
     assert "Round 封閉集合含非法 Task ID token：TBD" in result.stdout
 
 
+def test_write_scope_placeholder_會讓_precheck_紅(乾淨專案: Path):
+    (乾淨專案 / TASK).write_text(
+        _工單(
+            status="In Progress",
+            closed="—",
+            planning=_規劃欄位(write_scope="TBD"),
+        ),
+        encoding="utf-8",
+    )
+    第二張 = 乾淨專案 / "docs/features/my_module/tasks/MOD-DEV-BE-002.md"
+    第二張.write_text(
+        _工單(
+            status="Pending",
+            closed="—",
+            planning=_規劃欄位(write_scope="`src/second.py`"),
+        ).replace("MOD-DEV-BE-001", "MOD-DEV-BE-002"),
+        encoding="utf-8",
+    )
+    _寫_round(乾淨專案, ["MOD-DEV-BE-001", "MOD-DEV-BE-002"])
+
+    result = 跑(乾淨專案)
+    assert result.returncode != 0
+    assert "工單 DAG／Round／Parallel Change 是否有效" in result.stdout
+    assert "Write Scope 含非法或不完整路徑 token：TBD" in result.stdout
+
+
 def test_round_窄審全勾仍維持_in_review_不算漏關帳(乾淨專案: Path):
     """多工單要等整合 QA 後才在 round 統一結案，舊檢查不能逼 Task 提前 Done。"""
     (乾淨專案 / TASK).write_text(

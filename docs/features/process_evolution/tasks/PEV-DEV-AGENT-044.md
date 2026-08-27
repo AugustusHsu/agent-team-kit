@@ -55,6 +55,7 @@
   同意擴大 044 Write Scope，納入 `kit/docs/standards/git_workflow.md` 以同步 precheck 第 9 項；
   同意新增 `External Effects` 來源欄位並納入 `kit/docs/standards/parallel_development.md`；
   同意擴大 044 Write Scope，等義正規化 043／047 的規劃來源欄位；同意修正第三輪 findings。
+  2026-08-28 同意修正第四輪 findings。
 
 ## 5. 範圍外 (Out of Scope)
 
@@ -62,18 +63,18 @@
 - 不要求一次性補齊所有歷史工單的新欄位。
 
 ## 📝 Code Review 備註
-> 2026-08-27 第三輪 ❌ CHANGES REQUESTED — 完整報告見 [../reviews/PEV-DEV-AGENT-044.md](../reviews/PEV-DEV-AGENT-044.md)
+> 2026-08-28 第四輪 ❌ CHANGES REQUESTED — 完整報告見 [../reviews/PEV-DEV-AGENT-044.md](../reviews/PEV-DEV-AGENT-044.md)
 
 ### 📊 客觀指標
 | 指標 | 變更前／負向對照 | 變更後 |
 |---|---:|---:|
-| 目標兩檔 | reviewed head：83 passed | 修正後：85 passed、0 failed |
-| rejected head＋新 tests | 81 passed、4 failed | 85 passed、0 failed |
-| 全套驗證 | reviewed head：224 passed、4 baseline failed | 226 passed、4 baseline failed |
+| 目標兩檔 | reviewed head：85 passed | 修正後：91 passed、0 failed |
+| rejected head＋新 tests | 83 passed、8 failed | 91 passed、0 failed |
+| 全套驗證 | reviewed head：226 passed、4 baseline failed | 232 passed、4 baseline failed |
 | precheck／diff | — | 8/8、9/9／通過 |
 
 ### 待修正項目
-- `kit/.agent/scripts/scan_backlog.py:542`：Round header／separator 必須各唯一並依序位於資料列前。
-- `kit/.agent/scripts/scan_backlog.py:830`：有來源驗證錯誤的工單或 Round 不得產生並行候選。
-- `kit/.agent/scripts/scan_backlog.py:626`：前置 Write Scope glob 必須實際匹配完整 Contract 路徑。
-- `docs/features/process_evolution/tasks/PEV-DEV-AGENT-044.md:64`：工單審查備註只保留協議允許的三段摘要。
+- `kit/.agent/scripts/scan_backlog.py:988`：任一成員或重複歸屬錯誤必須阻擋所有涉入 Round 的全部候選。
+- `kit/.agent/scripts/scan_backlog.py:666`：literal 子路徑不得反向證明父層 Contract 已由前置工單提供。
+- `kit/.agent/scripts/scan_backlog.py:154`：Write Scope／Contract 必須拒絕 placeholder 與混合空值路徑。
+- `kit/.agent/scripts/scan_backlog.py:291`：Change Set 必須是單一合法識別碼，不得使用混合破折號清單。

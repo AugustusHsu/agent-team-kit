@@ -770,6 +770,46 @@ def test_來源驗證錯誤的工單不得出現在並行候選(規劃專案: Pa
     ]
 
 
+def test_任一成員來源無效會使整個_round_的候選失效(規劃專案: Path):
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-001",
+        blocked_by="TBD",
+        write_scope="`src/invalid.py`",
+    )
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-002", write_scope="`src/left.py`")
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-003", write_scope="`tests/right.py`")
+    _寫_round(
+        規劃專案,
+        "ROUND-001",
+        ["MOD-DEV-BE-001", "MOD-DEV-BE-002", "MOD-DEV-BE-003"],
+    )
+
+    result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
+    assert result.returncode != 0
+    round_view = json.loads(result.stdout)["rounds"]["ROUND-001"]
+    assert round_view["parallel_candidates"] == []
+    blockers = {tuple(item["tasks"]): item["reasons"] for item in round_view["parallel_blockers"]}
+    assert "invalid_planning_source" in blockers[("MOD-DEV-BE-002", "MOD-DEV-BE-003")]
+
+
+def test_重複歸屬會同時使所有涉入_round_的候選失效(規劃專案: Path):
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-001", write_scope="`src/shared.py`")
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-002", write_scope="`tests/first.py`")
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-003", write_scope="`docs/second.md`")
+    _寫_round(規劃專案, "ROUND-001", ["MOD-DEV-BE-001", "MOD-DEV-BE-002"])
+    _寫_round(規劃專案, "ROUND-002", ["MOD-DEV-BE-001", "MOD-DEV-BE-003"])
+
+    result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
+    assert result.returncode != 0
+    assert "不得重複歸入 ROUND-002" in result.stderr
+    graph = json.loads(result.stdout)
+    for round_id in ("ROUND-001", "ROUND-002"):
+        round_view = graph["rounds"][round_id]
+        assert round_view["parallel_candidates"] == []
+        assert "invalid_planning_source" in round_view["parallel_blockers"][0]["reasons"]
+
+
 def test_round_拒絕輪外未結案前置所以集合必須封閉(規劃專案: Path):
     _寫規劃工單(規劃專案, "MOD-DEV-BE-001", write_scope="`src/outside.py`")
     _寫規劃工單(
@@ -860,6 +900,35 @@ def test_write_scope_與_contract_拒絕_backtick_外殘留路徑(規劃專案: 
     assert "contract_not_ready:MOD-DEV-BE-002" in reasons
 
 
+def test_write_scope_與_contract_拒絕_placeholder_及混合空值(規劃專案: Path):
+    cases = (
+        ("ROUND-001", 1, {"write_scope": "TBD"}),
+        ("ROUND-002", 3, {"write_scope": "N/A"}),
+        ("ROUND-003", 5, {"write_scope": "None"}),
+        ("ROUND-004", 7, {"write_scope": "—、src/hidden.py"}),
+        ("ROUND-005", 9, {"contract": "TBD"}),
+        ("ROUND-006", 11, {"contract": "N/A"}),
+    )
+    for round_id, start, invalid_kwargs in cases:
+        invalid_id = f"MOD-DEV-BE-{start:03d}"
+        peer_id = f"MOD-DEV-BE-{start + 1:03d}"
+        _寫規劃工單(規劃專案, invalid_id, **invalid_kwargs)
+        _寫規劃工單(
+            規劃專案,
+            peer_id,
+            write_scope=f"`tests/{peer_id}.py`",
+        )
+        _寫_round(規劃專案, round_id, [invalid_id, peer_id])
+
+    result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
+    assert result.returncode != 0
+    for token in ("TBD", "N/A", "None", "—"):
+        assert token in result.stderr, f"placeholder {token!r} 沒有被來源驗證攔截"
+    graph = json.loads(result.stdout)
+    for round_id, *_ in cases:
+        assert graph["rounds"][round_id]["parallel_candidates"] == []
+
+
 def test_external_effects_缺來源或作用域重疊時不列並行候選(規劃專案: Path):
     _寫規劃工單(規劃專案, "MOD-DEV-BE-001", write_scope="`src/a.py`")
     _寫規劃工單(規劃專案, "MOD-DEV-BE-002", write_scope="`tests/b.py`")
@@ -943,6 +1012,8 @@ def test_external_effects_出貨標準_ADR_與模板保持同一六欄語意(bar
     }
     for path, content in contents.items():
         assert "External Effects" in content, f"{path} 漏掉第六個來源欄位"
+        assert "單一識別碼" in content, f"{path} 漏掉 Change Set 單值規則"
+        assert "path/**" in content, f"{path} 漏掉目錄 Write Scope 的明確 glob 表示"
     assert "六個來源欄位" in contents["docs/standards/adr/ADR-001_task_dag_and_ownership.md"]
 
 
@@ -1034,6 +1105,7 @@ def test_contract_前置_glob_必須實際匹配完整路徑才算已提供(規�
         ("ROUND-002", 4, "docs/r3/*.md", "docs/r3/nested/api.md", False),
         ("ROUND-003", 7, "docs/r3/{api,event}.md", "docs/r3/api.md", False),
         ("ROUND-004", 10, "docs/r3/*.md", "docs/r3/api.md", True),
+        ("ROUND-005", 13, "docs/r3/**", "docs/r3/nested/api.md", True),
     )
     consumer_pairs = {}
     for round_id, start, provider_scope, contract, should_match in cases:
@@ -1075,6 +1147,50 @@ def test_contract_前置_glob_必須實際匹配完整路徑才算已提供(規�
                 f"{round_id} 只靠靜態前綴就誤認 Contract 已提供"
             )
             blockers = {tuple(item["tasks"]): item["reasons"] for item in round_view["parallel_blockers"]}
+            assert f"contract_not_ready:{pair[0]}" in blockers[tuple(pair)]
+            assert f"contract_not_ready:{pair[1]}" in blockers[tuple(pair)]
+
+
+def test_contract_前置_literal_只接受完整路徑相等(規劃專案: Path):
+    cases = (
+        ("ROUND-001", 1, "docs/contracts/api.md/child", False),
+        ("ROUND-002", 4, "docs/contracts/api.md", True),
+    )
+    expected = {}
+    for round_id, start, provider_scope, should_match in cases:
+        provider = f"MOD-DEV-BE-{start:03d}"
+        left = f"MOD-DEV-BE-{start + 1:03d}"
+        right = f"MOD-DEV-BE-{start + 2:03d}"
+        _寫規劃工單(規劃專案, provider, write_scope=f"`{provider_scope}`")
+        _寫規劃工單(
+            規劃專案,
+            left,
+            blocked_by=provider,
+            write_scope=f"`src/{left}.py`",
+            contract="`docs/contracts/api.md`",
+        )
+        _寫規劃工單(
+            規劃專案,
+            right,
+            blocked_by=provider,
+            write_scope=f"`tests/{right}.py`",
+            contract="`docs/contracts/api.md`",
+        )
+        _寫_round(規劃專案, round_id, [provider, left, right])
+        expected[round_id] = ([left, right], should_match)
+
+    result, graph = _讀_graph(規劃專案)
+    assert result.returncode == 0, result.stderr
+    for round_id, (pair, should_match) in expected.items():
+        round_view = graph["rounds"][round_id]
+        if should_match:
+            assert pair in round_view["parallel_candidates"]
+        else:
+            assert pair not in round_view["parallel_candidates"]
+            blockers = {
+                tuple(item["tasks"]): item["reasons"]
+                for item in round_view["parallel_blockers"]
+            }
             assert f"contract_not_ready:{pair[0]}" in blockers[tuple(pair)]
             assert f"contract_not_ready:{pair[1]}" in blockers[tuple(pair)]
 
@@ -1152,6 +1268,40 @@ def test_parallel_change_拒絕破折號與階段內容混用(規劃專案: Path
     assert result.returncode != 0
     assert "填寫 Change Set 時必須指定 Phase" in result.stderr
     assert "Phase '—、expand' 不合法" in result.stderr
+
+
+def test_parallel_change_完整三階段仍拒絕非法_change_set_識別碼(規劃專案: Path):
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-001",
+        change_set="—、auth-v2",
+        phase="expand",
+    )
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-002",
+        blocked_by="MOD-DEV-BE-001",
+        change_set="—、auth-v2",
+        phase="migrate",
+    )
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-003",
+        blocked_by="MOD-DEV-BE-002",
+        change_set="—、auth-v2",
+        phase="contract",
+    )
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-004", write_scope="`docs/independent.md`")
+    _寫_round(
+        規劃專案,
+        "ROUND-001",
+        ["MOD-DEV-BE-001", "MOD-DEV-BE-002", "MOD-DEV-BE-003", "MOD-DEV-BE-004"],
+    )
+
+    result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
+    assert result.returncode != 0
+    assert "Change Set 必須是單一識別碼，非法值：—、auth-v2" in result.stderr
+    assert json.loads(result.stdout)["rounds"]["ROUND-001"]["parallel_candidates"] == []
 
 
 def test_parallel_change_拒絕非法_phase_缺_contract_與漏列_migrate(規劃專案: Path):

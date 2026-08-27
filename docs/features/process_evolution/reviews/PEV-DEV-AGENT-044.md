@@ -1,5 +1,92 @@
 # [Review: PEV-DEV-AGENT-044] 實作工單 DAG、欄位與 wave 驗證
 
+## 2026-08-28 第四輪 ❌ CHANGES REQUESTED
+
+**Review Target：** `PEV-DEV-AGENT-044`
+**Round：** `ROUND-001`
+**Base：** `983cada7d8c01e0dc249063ed651758edc33e866`
+**Head：** `4010b54262ffd9324dc070caa8fbd0645b1a14d2`
+**Fresh-context reviewer：** `gpt-5.6-sol`／`xhigh`；五行 fidelity probe 原樣通過。
+
+第三輪 R3-F-01、F-03、F-04 的原始案例已關閉，但 Round validity 只做到 pair-local，另有
+literal Contract、路徑 placeholder 與 Change Set 單值格式三個新缺口，因此本 target
+仍不得合併進 round。
+
+### 第四輪 AC 核對
+
+| AC | 結果 | 證據／理由 |
+|---|---|---|
+| AC-01 | ✅ | 六欄模板、舊工單與只缺 External Effects 的過渡工單相容行為正確 |
+| AC-02 | ✅ | unknown／self／duplicate／cycle 與確定性 topo、wave、reverse blocks 均通過 |
+| AC-03 | ✅ | Round 必備欄位、真實 commit、集合大小、非法列與表格結構均會報錯 |
+| AC-04 | ❌ | 無效成員未污染整輪、literal 子路徑與 placeholder Write Scope 仍可能產生 candidate |
+| AC-05 | ❌ | 完整三階段可共用非法的混合破折號 Change Set 而零錯誤通過 |
+| AC-06 | ❌ | 既有 85 tests 使用真實檔案／Git、零 mock，但未覆蓋本輪四個邊界 |
+| AC-07 | ✅ 開發分支證據 | 85 passed、precheck 8/8 與 9/9、BACKLOG 一致、diff check 通過；正式安裝入口仍留待 047 |
+
+### 第四輪阻擋 findings
+
+#### R4-F-01 — P1／Round validity gate 仍是 pair-local
+
+- **File／line：** `kit/.agent/scripts/scan_backlog.py:988-998,1043-1048`
+- **Claim：** 同 Round 的 A 工單來源非法時，合法 B／C 仍能成為 candidate；工單重複歸屬時
+  也只污染後讀到的 Round。
+- **Recommended fix：** 所有 manifest 讀完後做全域 validity／membership pass；任一 member
+  或 Parallel Change 無效就阻擋整輪全部配對，重複歸屬污染所有涉入 Round。
+
+#### R4-F-02 — P1／literal 子路徑錯認為涵蓋父層 Contract
+
+- **File／line：** `kit/.agent/scripts/scan_backlog.py:666-670`
+- **Claim：** `docs/contracts/api.md/child` 被視為提供 `docs/contracts/api.md`，即使 Contract
+  不在 base 且 provider 沒有寫該完整路徑。
+- **Recommended fix：** 非 glob scope 只接受 exact；目錄涵蓋必須有明確表示，禁止 child→parent。
+
+#### R4-F-03 — P1／placeholder 可被當成合法 Write Scope
+
+- **File／line：** `kit/.agent/scripts/scan_backlog.py:154-167,244-257`
+- **Claim：** `TBD`、`N/A`、`None` 及未引用的混合破折號能通過 repo path 驗證，可能放行候選；
+  Contract 使用相同 parser，也有相同來源風險。
+- **Recommended fix：** 路徑 token 明確拒絕 placeholder 與混合空值；只有整欄精準破折號代表無值。
+
+#### R4-F-04 — P2／混合破折號 Change Set 可成為合法群組
+
+- **File／line：** `kit/.agent/scripts/scan_backlog.py:291-296,799-807`
+- **Claim：** 三階段全部使用 `—、auth-v2` 時仍 `errors=[]`，沒有單值 identifier schema。
+- **Recommended fix：** Change Set 只接受單一識別碼，拒絕 placeholder、分隔清單與引用殘留。
+
+### 第四輪客觀證據
+
+| 驗證 | 結果 |
+|---|---|
+| Head 目標兩檔／完整套件 | 85 passed／226 passed、4 baseline failed |
+| Base 完整套件 | 196 passed、4 baseline failed |
+| 舊 Head＋Head tests | c70：81 passed、4 failed；98bb：78／7；8be：67／18 |
+| root／kit precheck | 8/8、9/9 |
+| graph／BACKLOG／diff | 兩次逐字一致且 errors=[]／原位一致／通過 |
+
+四個全套失敗在 Base／Head 完全同形，均為未變更的 `test_check_versions.py` archive 路徑問題。
+審查前後工作 repo 均乾淨且 HEAD 未漂移；所有取證產物只在 `/tmp`。
+
+### 第四輪修正紀錄（Developer）
+
+- **R4-F-01：已修正。** 全部 manifest 驗證完成後，再將 invalid task／Parallel Change 傳播至
+  所屬 Round；重複歸屬同步標記先後所有 Round，invalid round 的全部 pair 都有
+  `invalid_planning_source` blocker。
+- **R4-F-02：已修正。** literal Write Scope 只接受與 Contract 完整相等；目錄統一明示為
+  `path/**`，沿用錨定完整路徑的 glob matching。
+- **R4-F-03：已修正。** Write Scope／Contract path validator 明確拒絕 `TBD`、`N/A`、`None`
+  與混合破折號 token，並由 graph／precheck fail closed。
+- **R4-F-04：已修正。** Change Set 新增單值 identifier schema；非法值會標記 task 與整輪無效，
+  不再建立 Parallel Change 群組。
+- **規範同步：** 兩份模板、`parallel_development.md` 與 ADR-001 已同步 `path/**`、單值
+  Change Set、placeholder 與整輪污染規則。
+- **修正後證據：** 目標兩檔 91 passed；完整套件 232 passed、4 個相同 baseline failures；
+  root／kit precheck 8/8、9/9；graph 兩次一致、`errors=[]`、拓撲與候選不變；BACKLOG 原位
+  重建一致；`git diff --check` 通過。新測試套用第四輪 Head 為 83 passed、8 failed，第三輪
+  80／11，第二輪 77／14，第一輪 67／24。
+
+修正後正式結論待第五輪 fresh-context review 固定新 head 後獨立重跑。
+
 ## 2026-08-27 第三輪 ❌ CHANGES REQUESTED
 
 **Review Target：** `PEV-DEV-AGENT-044`
