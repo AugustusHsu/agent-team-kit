@@ -40,4 +40,6 @@ grep -rEn "^#{2,4} ADR-[0-9]+" docs --include=*.md | grep -oE "ADR-[0-9]+" | sor
 
 | ADR | 標題 | 決策本文位置 | 定案日期 |
 |---|---|---|---|
-| — | *（尚無 ADR。新增後刪除本列）* | — | — |
+| ADR-001 | 任務排程採 DAG 與雙層所有權 | [ADR-001_task_dag_and_ownership.md](ADR-001_task_dag_and_ownership.md) | 2026-08-27 |
+| ADR-002 | 多工單採短命輪次分支並保留兩層拓撲 | [ADR-002_round_branch_topology.md](ADR-002_round_branch_topology.md) | 2026-08-27 |
+| ADR-003 | 正式審查採 fresh context 與不可變 Review Target | [ADR-003_fresh_context_review_target.md](ADR-003_fresh_context_review_target.md) | 2026-08-27 |

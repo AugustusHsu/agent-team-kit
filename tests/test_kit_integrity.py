@@ -78,6 +78,26 @@ EVAL_KEYS = {"id", "prompt", "expected_output", "files", "expectations"}
         r"只能靠讀法規避|這件事關不掉",
         "保真優先修通道設定，規避是修不了時的退路（§1.12）",
     ),
+    # DN-006 推翻平台分流的 squash：所有進入共享分支的方向都要留下 merge topology。
+    # 只抓肯定採用舊方案的句型；ADR 與新標準仍需能寫「禁止 squash」及被否決方案。
+    (
+        r"\*\*合併用 squash|有 PR／MR\s*→\s*\*\*squash|允許的合併方式[^\n]*只留 squash",
+        "所有 Task→round／main 與 round→main 都使用 merge commit，不再依 PR 平台切換（parallel_development.md §5.2）",
+    ),
+    # 舊的並行形狀把工單強行堆成直線，只 merge 最上層；Round Manifest＋DAG 已取代它。
+    (
+        r"後一張從\*\*前一張的分支\*\*開出去|\*\*整輪只合併一次\*\*[^\n]*最上層",
+        "多工單依 DAG 逐張 merge 進短命 round branch，無依賴工單可平行（parallel_development.md §5）",
+    ),
+    # Review Target 固定 head 後，正式 APPROVED 之後追加結案 commit 會讓核可失效。
+    (
+        r"APPROVED[^。\n]{0,30}接著[^。\n]{0,20}結案 commit",
+        "結案資料必須先納入正式 Review Target，APPROVED 後不得再改 head（git_workflow.md §6.2）",
+    ),
+    (
+        r"Dismiss stale approvals[^\n]{0,12}(?:必須)?關",
+        "head 改變必須使平台核可失效；結案資料已移到正式審查前，不再形成死循環（git_workflow.md §8.2）",
+    ),
 ]
 
 
