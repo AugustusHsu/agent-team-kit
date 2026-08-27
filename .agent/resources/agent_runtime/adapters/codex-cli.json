@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "id": "codex-cli",
+  "provider": "openai",
+  "surface": "cli",
+  "title": "Codex CLI",
+  "execution_location": "local",
+  "capabilities": [
+    "repo_read",
+    "repo_write",
+    "shell_execute",
+    "test_execute",
+    "web_research",
+    "source_citation",
+    "long_context",
+    "isolated_workspace",
+    "handoff",
+    "diff_read",
+    "fresh_context",
+    "evidence_capture",
+    "noninteractive",
+    "structured_output",
+    "timeout_control"
+  ],
+  "probes": {
+    "install": "codex_version",
+    "auth": "codex_login_status",
+    "functional": "codex_readonly_exec"
+  },
+  "ttl_seconds": {"install": 86400, "auth": 3600, "functional": 3600},
+  "project_config": ["AGENTS.md", ".codex/config.toml"],
+  "manual_capabilities": []
+}

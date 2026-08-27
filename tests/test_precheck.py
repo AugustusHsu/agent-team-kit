@@ -1,9 +1,10 @@
-"""precheck.py 的七項第 1 層流程檢查。
+"""precheck.py 的八項第 1 層流程檢查。
 
 每一項都有負向對照（造出違規輸入，確認會紅），另有兩支防假紅燈的迴歸：
 檢查器誤把合法內容判成違規，比漏抓更糟——它會逼作者改成不自然的寫法來閃避。
 """
 
+import json
 import shutil
 from pathlib import Path
 
@@ -26,13 +27,15 @@ def _工單(
     內文="",
     打勾=None,
     assignee="backend-developer",
+    runtime="",
 ):
     return (
         "# [Task ID: MOD-DEV-BE-001] 測試工單\n\n"
         "**🔗 依附母任務 (Parent Task ID):** —\n"
         "**🏷️ 任務類型 (Task Type):** queue_agent\n"
         f"**👤 負責人 (Assignee):** {assignee}\n"
-        f"**🚥 任務狀態 (Status):** {status}\n"
+        + runtime
+        + f"**🚥 任務狀態 (Status):** {status}\n"
         f"**📅 建立時間 (Created):** {created}\n"
         f"**✅ 完成時間 (Closed):** {closed}\n"
         "**🔀 審查載體編號 (PR/MR):** —\n\n"
@@ -70,10 +73,147 @@ def 重生(專案: Path):
     assert result.returncode == 0, result.stderr
 
 
+def _runtime欄位(
+    task_profile="—",
+    capabilities="—",
+    data_class="—",
+    execution_override="—",
+):
+    return (
+        f"**🧭 任務輪廓 (Task Profile):** {task_profile}\n"
+        f"**🧩 必備能力覆寫 (Required Capabilities):** {capabilities}\n"
+        f"**🔐 資料分級 (Data Class):** {data_class}\n"
+        f"**↪️ Execution 覆寫 (Execution Override):** {execution_override}\n"
+    )
+
+
+def _寫共享政策(專案: Path, **changes):
+    policy = {
+        "schema_version": 1,
+        "project_id": "1" * 32,
+        "project_name": "test",
+        "enabled_profiles": ["claude-code-cli", "codex-cli", "codex-cloud"],
+        "preferred_profiles": ["codex-cli"],
+        "default_data_class": "internal",
+        "cloud_policy": "conditional",
+        "connector_policy": "conditional",
+    }
+    policy.update(changes)
+    path = 專案 / ".agent/agent-runtime.json"
+    path.write_text(json.dumps(policy, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
 def test_乾淨專案每項全綠(乾淨專案: Path):
     result = 跑(乾淨專案)
     assert result.returncode == 0, result.stdout + result.stderr
     assert result.stdout.count("✅") == 檢查項數(乾淨專案), result.stdout
+
+
+def test_舊工單沒有_runtime_欄位仍由_task_type_合法映射(乾淨專案: Path):
+    result = 跑(乾淨專案)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert not (乾淨專案 / ".agent/agent-runtime.json").exists()
+
+
+def test_未知_task_profile_與非法_override_scope_會紅(乾淨專案: Path):
+    (乾淨專案 / TASK).write_text(
+        _工單(
+            status="In Progress",
+            closed="—",
+            runtime=_runtime欄位(
+                task_profile="typo_profile",
+                execution_override="profile=codex-cli; scope=forever",
+            ),
+        ),
+        encoding="utf-8",
+    )
+    重生(乾淨專案)
+    result = 跑(乾淨專案)
+    assert result.returncode != 0
+    assert "typo_profile" in result.stdout
+    # 第一個錯誤就足以阻止這張工單；另用合法 profile 單獨證明 scope。
+    (乾淨專案 / TASK).write_text(
+        _工單(
+            status="In Progress",
+            closed="—",
+            runtime=_runtime欄位(
+                task_profile="implementation_local",
+                execution_override="profile=codex-cli; scope=forever",
+            ),
+        ),
+        encoding="utf-8",
+    )
+    重生(乾淨專案)
+    result = 跑(乾淨專案)
+    assert result.returncode != 0
+    assert "scope 必須是 single／round／project" in result.stdout
+
+
+def test_共享政策禁_cloud_卻由工單強制_cloud_會紅(乾淨專案: Path):
+    _寫共享政策(乾淨專案, cloud_policy="forbid")
+    (乾淨專案 / TASK).write_text(
+        _工單(
+            status="In Progress",
+            closed="—",
+            runtime=_runtime欄位(
+                execution_override="profile=codex-cloud; scope=single"
+            ),
+        ),
+        encoding="utf-8",
+    )
+    重生(乾淨專案)
+    result = 跑(乾淨專案)
+    assert result.returncode != 0
+    assert "共享政策禁止 cloud" in result.stdout
+    assert "codex-cloud" in result.stdout
+
+
+def test_execution_override_引用未知_profile_會紅(乾淨專案: Path):
+    _寫共享政策(乾淨專案)
+    (乾淨專案 / TASK).write_text(
+        _工單(
+            status="In Progress",
+            closed="—",
+            runtime=_runtime欄位(
+                execution_override="profile=codex-clii; scope=single"
+            ),
+        ),
+        encoding="utf-8",
+    )
+    重生(乾淨專案)
+    result = 跑(乾淨專案)
+    assert result.returncode != 0
+    assert "Execution Override 引用未知 profile 'codex-clii'" in result.stdout
+
+
+def test_版控政策出現疑似_token_值會紅(乾淨專案: Path):
+    path = _寫共享政策(乾淨專案)
+    policy = json.loads(path.read_text(encoding="utf-8"))
+    policy["access_token"] = "ghp_not_a_real_token"
+    path.write_text(json.dumps(policy, indent=2), encoding="utf-8")
+    result = 跑(乾淨專案)
+    assert result.returncode != 0
+    assert "疑似把 access_token 的值寫進版控" in result.stdout
+    assert ".agent/agent-runtime.json" in result.stdout
+
+
+def test_秘密欄位使用環境變數佔位不誤判(乾淨專案: Path):
+    (乾淨專案 / ".mcp.json").write_text(
+        '{"headers": {"Authorization": "${GITHUB_TOKEN}", "api_key": "${API_KEY}"}}\n',
+        encoding="utf-8",
+    )
+    result = 跑(乾淨專案)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_precheck_不讀本機登入或損壞的_local_state(乾淨專案: Path):
+    (乾淨專案 / ".agent/agent-runtime.local.json").write_text(
+        "這不是 JSON，access_token=local_only；它是 ignored state，不得讓 CI 結果因人而異\n",
+        encoding="utf-8",
+    )
+    result = 跑(乾淨專案)
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 def test_backlog_過期會紅(乾淨專案: Path):

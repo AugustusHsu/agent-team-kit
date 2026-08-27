@@ -5,7 +5,7 @@
 檢查「流程有沒有被遵守」，不跑專案自己的單元測試——後者是第 2 層，
 只有專案自己知道要跑什麼。本腳本的輸入全在 repo 內，跟技術棧無關。
 
-七項檢查（見 docs/standards/git_workflow.md §8）：
+八項檢查（見 docs/standards/git_workflow.md §8）：
   1. BACKLOG 是否過期——重跑產生器比對現檔
   2. 工單 Status 值是否合法
   3. Created / Closed 是否為 ISO 8601，且 Closed 不早於 Created
@@ -13,6 +13,7 @@
   5. Status 為 Done 卻沒填 Closed
   6. AC 全數打勾卻還沒結案
   7. 未結案工單的 Assignee 是否對應得到實際存在的 skill
+  8. 版控中的 agent runtime 政策、引用與秘密邊界是否合法
 
 使用方式:
   python3 .agent/scripts/precheck.py            # 全部檢查
@@ -31,6 +32,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import scan_backlog as sb  # noqa: E402  （必須在 sys.path 調整之後）
+import agent_runtime as ar  # noqa: E402
 
 BACKLOG_PATH = "docs/development/BACKLOG.md"
 
@@ -54,6 +56,11 @@ AC_EXEMPT_STATUSES = {"Done", "Canceled"}
 
 # 工單範本明列的非角色 Assignee：使用者親自處理。留空（EMPTY_VALUES）另行放行。
 MANUAL_ASSIGNEE = "manual_user"
+
+SECRET_VALUE_RE = re.compile(
+    r"(?i)(api[_-]?key|access[_-]?token|refresh[_-]?token|password|cookie|private[_-]?key)"
+    r"[^:=\n]{0,4}[:=]\s*[\"']?([^\"'\s,}]+)"
+)
 
 
 class Finding:
@@ -314,6 +321,89 @@ def check_assignee_valid(root):
     return findings
 
 
+def _runtime_field_present(path):
+    text = Path(path).read_text(encoding="utf-8")
+    return any(label in text for label in ar.TASK_RUNTIME_FIELDS.values())
+
+
+def _secret_findings(root, paths):
+    findings = []
+    safe_prefixes = ("${", "<", "REDACTED", "example", "EXAMPLE")
+    for path in paths:
+        if not path.exists():
+            continue
+        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            for match in SECRET_VALUE_RE.finditer(line):
+                value = match.group(2)
+                if value.startswith(safe_prefixes) or value in {"—", "-", "null", "None"}:
+                    continue
+                findings.append(
+                    Finding(
+                        f"{path.relative_to(root)}:{lineno}",
+                        f"疑似把 {match.group(1)} 的值寫進版控；改用 ${{VAR}} 或本機狀態",
+                    )
+                )
+    return findings
+
+
+def check_agent_runtime_policy(root):
+    """只驗 repo 內可重現資料；刻意不讀 HOME、XDG state、登入或訂閱狀態。"""
+    findings = []
+    try:
+        tasks, adapters = ar.load_registry(root)
+    except ar.RuntimeConfigError as error:
+        return [Finding(".agent/resources/agent_runtime", str(error))]
+    policy_path = root / ar.POLICY_REL
+    policy = None
+    if policy_path.exists():
+        try:
+            policy = ar.load_policy(root)
+            ar._validate_profile_lists(policy, adapters, tasks)
+        except ar.RuntimeConfigError as error:
+            findings.append(Finding(str(ar.POLICY_REL), str(error)))
+    for task in iter_tasks(root):
+        if task.get("status") in AC_EXEMPT_STATUSES or task.get("task_type") == "manual_user":
+            continue
+        path = Path(task["file"])
+        try:
+            routing = ar.parse_task_routing(path, tasks)
+        except ar.RuntimeConfigError as error:
+            findings.append(Finding(rel(root, task), str(error)))
+            continue
+        override = routing["execution_override"]
+        if override:
+            profile_id = override["profile"]
+            if profile_id not in adapters:
+                findings.append(
+                    Finding(rel(root, task), f"Execution Override 引用未知 profile {profile_id!r}")
+                )
+            elif policy is None:
+                findings.append(
+                    Finding(rel(root, task), "工單有 Execution Override，但尚未建立共享 agent runtime policy")
+                )
+            elif (
+                adapters[profile_id]["execution_location"] == "cloud"
+                and policy["cloud_policy"] == "forbid"
+            ):
+                findings.append(
+                    Finding(
+                        rel(root, task),
+                        f"共享政策禁止 cloud，工單卻強制 {profile_id!r}",
+                    )
+                )
+        elif _runtime_field_present(path) and policy is None:
+            # 全部留 — 是合法的向後相容形狀；Task Type mapping 足以解讀，不逼舊專案 init。
+            pass
+    secret_paths = [
+        policy_path,
+        root / ".codex/config.toml",
+        root / ".mcp.json",
+        *sorted((root / ar.RUNTIME_REL / "adapters").glob("*.json")),
+    ]
+    findings.extend(_secret_findings(root, secret_paths))
+    return findings
+
+
 def aware(value):
     return value if value.tzinfo else value.replace(tzinfo=sb.TZ_TAIPEI)
 
@@ -340,6 +430,7 @@ CHECKS = [
     ("結案工單是否填了 Closed", check_closed_filled),
     ("AC 全打勾的工單是否已結案", check_ac_matches_status),
     ("未結案工單的 Assignee 是否合法", check_assignee_valid),
+    ("Agent runtime 版控政策與秘密邊界是否合法", check_agent_runtime_policy),
 ]
 
 

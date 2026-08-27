@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "id": "codex-cloud",
+  "provider": "openai",
+  "surface": "cloud",
+  "title": "Codex Cloud",
+  "execution_location": "cloud",
+  "capabilities": [
+    "repo_read",
+    "repo_write",
+    "shell_execute",
+    "test_execute",
+    "long_running",
+    "handoff",
+    "diff_read",
+    "fresh_context",
+    "evidence_capture",
+    "noninteractive",
+    "structured_output",
+    "timeout_control",
+    "external_connectors",
+    "github_access"
+  ],
+  "probes": {
+    "install": "codex_cloud_manual",
+    "auth": "chatgpt_session_manual",
+    "functional": "codex_github_connector_manual"
+  },
+  "ttl_seconds": {"install": 86400, "auth": 1800, "functional": 1800},
+  "project_config": ["AGENTS.md", ".codex/config.toml"],
+  "manual_capabilities": ["external_connectors", "github_access"]
+}

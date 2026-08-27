@@ -1,7 +1,7 @@
 # 📋 待辦總表 (Backlog)
 
 > **工單來源目錄**：`docs/features/*/tasks/`
-> **工單總數**：36 張
+> **工單總數**：45 張
 
 ---
 
@@ -35,20 +35,20 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) | 完成時間 |
 |---|---------|------|------|-------------------|---------------|----------|
-| 1 | PEV-DEV-AGENT-033 | 依 skill_conventions.md 補齊 13 份 skill 的落差 | process_evolution | tech-lead | ✅ Done | 2026-08-22T04:05+08:00 |
-| 2 | PEV-DEV-AGENT-028 | 立 skill 撰寫標準：skill_conventions.md | process_evolution | system-architect | ✅ Done | 2026-08-22T02:20+08:00 |
-| 3 | PEV-DEV-AGENT-032-FIX-001 | 更正 git_workflow.md §7.3 的反查對照表 | process_evolution | devops-engineer | ✅ Done | 2026-08-22T01:52+08:00 |
-| 4 | PEV-DEV-AGENT-031 | precheck 新增 Assignee 合法性檢查 | process_evolution | devops-engineer | ✅ Done | 2026-08-21T21:32+08:00 |
-| 5 | PEV-DEV-AGENT-027 | qa-automation-engineer 的技術棧內容拆成第 2 層 | process_evolution | system-architect | ✅ Done | 2026-08-21T21:30+08:00 |
-| 6 | PEV-DEV-AGENT-026 | skill 與規範一致性的自動檢查：覆蓋率 ＋ 引用標題比對 | process_evolution | backend-developer | ✅ Done | 2026-08-21T21:03+08:00 |
-| 7 | PEV-DEV-AGENT-032 | 一輪多張工單的合併拓撲寫進 git_workflow.md §7 | process_evolution | devops-engineer | ✅ Done | 2026-08-19T14:53+08:00 |
-| 8 | PEV-DEV-AGENT-025 | 13 份 skill 全面盤點與對齊 | process_evolution | tech-lead | ✅ Done | 2026-08-18T23:55+08:00 |
-| 9 | PEV-DEV-AGENT-029 | 移除 kit 出貨內容裡硬編碼的 uv run | process_evolution | devops-engineer | ✅ Done | 2026-08-18T23:40+08:00 |
-| 10 | PEV-DEV-AGENT-030 | 修正 DN 取號指令：改從檔名取號 | process_evolution | scrum-master | ✅ Done | 2026-08-18T23:35+08:00 |
+| 1 | PEV-DEV-AGENT-042 | 混合代理路由與交接端到端驗證 | process_evolution | qa-automation-engineer | ✅ Done | 2026-08-27T08:11+08:00 |
+| 2 | PEV-DEV-AGENT-041 | 安全遷移本 repo 的 Claude／Codex／GitHub 設定 | process_evolution | devops-engineer | ✅ Done | 2026-08-27T00:27+08:00 |
+| 3 | PEV-DEV-AGENT-040 | 工單與審查流程接入能力路由證據 | process_evolution | scrum-master | ✅ Done | 2026-08-27T00:09+08:00 |
+| 4 | PEV-DEV-AGENT-039 | 實作 route／explain 與失效重路由 | process_evolution | backend-developer | ✅ Done | 2026-08-27T00:01+08:00 |
+| 5 | PEV-DEV-AGENT-038 | 實作 doctor／refresh 與 Claude、Codex、GitHub probes | process_evolution | devops-engineer | ✅ Done | 2026-08-26T23:55+08:00 |
+| 6 | PEV-DEV-AGENT-037 | 實作 agent runtime state、provider registry 與 init | process_evolution | backend-developer | ✅ Done | 2026-08-26T23:46+08:00 |
+| 7 | PEV-DEV-AGENT-036 | installer 支援雙入口種子檔與模板升級 | process_evolution | devops-engineer | ✅ Done | 2026-08-26T23:36+08:00 |
+| 8 | PEV-DEV-AGENT-035 | 建立雙入口模板與供應商 adapter manifests | process_evolution | system-architect | ✅ Done | 2026-08-26T20:10+08:00 |
+| 9 | PEV-DEV-AGENT-034 | 建立跨代理執行標準與任務輪廓 registry | process_evolution | system-architect | ✅ Done | 2026-08-26T20:02+08:00 |
+| 10 | PEV-DEV-AGENT-033 | 依 skill_conventions.md 補齊 13 份 skill 的落差 | process_evolution | tech-lead | ✅ Done | 2026-08-22T04:05+08:00 |
 
 **小計**：10 張（Done: 10 / Canceled: 0）
 
-> 📦 另有 26 張已歸檔工單未顯示。
+> 📦 另有 35 張已歸檔工單未顯示。
 
 ---
 
@@ -65,8 +65,8 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| ✅ Done | 34 | 100.0% |
-| **總計** | **34** | **100%** |
+| ✅ Done | 43 | 100.0% |
+| **總計** | **43** | **100%** |
 
 ### worktree_guard
 
@@ -91,7 +91,10 @@
 | [DN-005](../design_notes/DN-005_parallel_task_decomposition.md) | 🌱 Seed | 並行開發的任務拆解與變更傳播 | DN-001（本檔的格式）；DN-003（git 流程，本 DN 視其為「基本層」並在其上擴充） |
 | [DN-006](../design_notes/DN-006_branch_topology_and_isolation.md) | 🔍 Exploring | 分支拓撲與並行隔離 | DN-001（本檔的格式）；DN-003（已畢業的單線 git 流程，本 DN 在其上擴充） |
 | [DN-007](../design_notes/DN-007_ci_gate.md) | 🎓 Graduated | CI 閘門：kit 要不要出貨自動檢查，以及檢查什麼 | DN-001（本檔的格式）；DN-003（已畢業，`git_workflow.md` 是本檔要補的那份規範） |
-| [DN-008](../design_notes/DN-008_review_panel_and_context_isolation.md) | 🌱 Seed | 審查的執行形態：panel 模式與 context 隔離 | DN-001（本檔的格式）；DN-005（§2.1 的 panel 是它 §4「放大審查粒度」訴求的落點）；DN-006（§4.2 的重疊區強制人工審查與 panel 方向相反，判準要一起定；隔離載體的選擇與它的合併點耦合） |
+| [DN-008](../design_notes/DN-008_review_panel_and_context_isolation.md) | 🌱 Seed | 審查的執行形態：panel 模式與 context 隔離 | DN-001（本檔的格式）；DN-005（§2.1 的 panel 是它 §4「放大審查粒度」訴求的落點）；DN-006（§4.2 的重疊區強制人工審查與 panel 方向相反，判準要一起定；隔離載體的選擇與它的合併點耦合）；DN-009（panel 成員可來自不同供應商／執行面，需先有共同能力與可用性判準） |
+| [DN-009](../design_notes/DN-009_multi_agent_capability_routing.md) | 🎓 Graduated | 多代理能力路由與可用性 | DN-001（本檔的格式與畢業條件） |
+| [DN-010](../design_notes/DN-010_cross_agent_instruction_and_configuration.md) | 🎓 Graduated | 跨代理入口與設定分層 | DN-001（本檔的格式與畢業條件）；DN-009（供應商／執行面／可用性的名詞與邊界） |
+| [DN-011](../design_notes/DN-011_agent_initialization_and_lifecycle.md) | 🎓 Graduated | 多代理初始化、健康檢查與生命週期 | DN-001（本檔的格式與畢業條件）；DN-009（路由模型與可用性語意）；DN-010（共同／供應商／使用者設定分層） |
 
 ---
 

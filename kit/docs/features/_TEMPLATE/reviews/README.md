@@ -12,3 +12,7 @@
 
 沒有遠端 PR／MR 的專案，這個檔案就是唯一的審查載體，
 因此 **APPROVED 也必須寫**（見 `docs/standards/git_workflow.md` §8.3）。
+
+新檔可從本目錄的 `_REVIEW_TEMPLATE.md` 複製。除既有 AC／風險／客觀證據外，還要保留
+**本次路由證據**：task profile 與 override、選中的 execution profile、其餘候選的排除理由、
+probe 時間／是否使用過期 cache，以及是否曾中途交接。不得只寫「這次用 Codex」。

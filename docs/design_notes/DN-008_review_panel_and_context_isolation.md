@@ -2,7 +2,7 @@
 
 **🚥 狀態 (Status):** 🌱 Seed
 **📅 建立 (Created):** 2026-08-18
-**🔗 依賴 (Depends on):** DN-001（本檔的格式）；[DN-005](DN-005_parallel_task_decomposition.md)（§2.1 的 panel 是它 §4「放大審查粒度」訴求的落點）；[DN-006](DN-006_branch_topology_and_isolation.md)（§4.2 的重疊區強制人工審查與 panel 方向相反，判準要一起定；隔離載體的選擇與它的合併點耦合）
+**🔗 依賴 (Depends on):** DN-001（本檔的格式）；[DN-005](DN-005_parallel_task_decomposition.md)（§2.1 的 panel 是它 §4「放大審查粒度」訴求的落點）；[DN-006](DN-006_branch_topology_and_isolation.md)（§4.2 的重疊區強制人工審查與 panel 方向相反，判準要一起定；隔離載體的選擇與它的合併點耦合）；[DN-009](DN-009_multi_agent_capability_routing.md)（panel 成員可來自不同供應商／執行面，需先有共同能力與可用性判準）
 **📌 來源 (Origin):** 從 [DN-004](DN-004_skill_system_realignment.md) §3／§5 拆出（2026-08-18）。
 原始來源：panel 為使用者對並行開發的訴求「需要人來判斷的部份可以放大審查粒度，減少人工審查的負擔」（2026-08-16）；
 context 隔離原為 `BACKLOG.md` 冰箱「審查與開發拆 context」，2026-08-17 裁定拆兩半後併入 DN-004
@@ -37,7 +37,9 @@ context 隔離原為 `BACKLOG.md` 冰箱「審查與開發拆 context」，2026-
 
 **panel 模式**是另一種形態：同一份程式碼，派出多個**關注面向不同、範圍更窄**的
 審查 agent 並行跑，各自只看自己那一面，最後由父 agent 統整成一份報告。
-Claude Code 原生支援並行 subagent，機制端不是障礙。
+Claude Code 原生支援並行 subagent；Codex App 也支援平行 chat、受管理 worktree 與 Handoff。
+機制端不是單一障礙，真正待決的是：要哪些能力、是否允許異質 panel，以及當下哪個執行面可用。
+前兩項由本檔裁定，最後一項交給 DN-009。
 
 為什麼值得考慮：使用者對並行開發的訴求之一是
 **「需要人來判斷的部份可以放大審查粒度，減少人工審查的負擔」**（DN-005 §4）。

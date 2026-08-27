@@ -1,136 +1,42 @@
-# 專案 CLAUDE.md 模板
+# Claude Code 專案 adapter
 
-> 這份檔案只在建立／更新專案 CLAUDE.md 時讀取，不會進入日常 context。
+@AGENTS.md
 
-## 最重要的前提：這是每次請求都要付費的文件
+> 共同專案規則只維護在 `AGENTS.md`。本檔只放 Claude Code 專屬載入、MCP 與本機設定；
+> 不得複製 commit、測試、架構或文件權威規則。
 
-專案 CLAUDE.md 在 session 開頭載入後，**之後每一次請求都在 context 裡**。
-一個 300 次請求的 session，裡面每 1000 tokens 就會被重複計費 300 次。
+## Claude context 成本
 
-因此判準是：**「不寫這條，Claude 會不會做錯事？」**
-- 會 → 寫，而且壓到最短。
-- 不會，只是「知道了不錯」→ 不要寫。
+Claude Code 會在 session 開頭載入專案入口，內容之後持續佔用 context。
+Claude 專屬補充同樣採「不寫會不會做錯」判準，避免把一次性資訊留成常駐成本。
 
-**目標長度：200 行以內，越短越好。**
+全域 Claude 慣例放 `~/.claude/CLAUDE.md`；專案共同規則放 `AGENTS.md`；
+只有本專案的 Claude 差異才留在這裡。
 
-## 該寫什麼
+## Claude 設定 scope
 
-只寫「無法從程式碼與 git history 直接看出來、且會影響行為」的東西：
+- 可共享的專案設定：`.claude/settings.json`，可納入版控；
+- 個人專案設定：`.claude/settings.local.json`，不得納入版控；
+- 登入、訂閱、個人 hook、絕對路徑與暫時停用屬使用者執行層。
 
-| 類別 | 例子 |
-|---|---|
-| 指令 | build／test／lint 的實際指令，尤其是非標準的 |
-| 非顯而易見的架構 | 為什麼拆成這幾層、哪個檔案是真正的入口 |
-| 專案特有的陷阱 | 「改 X 一定要同步改 Y」「這個測試要先啟動 Z」 |
-| 專案內的慣例 | 命名規則、錯誤處理風格——**僅限從現有程式碼看不出來的** |
-| 明確的禁止事項 | 「不要動 generated/ 底下的檔案」 |
+不要把 Codex 的 sandbox、App environment、plugin 或 model 設定寫進 `.claude/`。
 
-## 不要寫什麼
+## MCP scope
 
-- **目錄樹**——Claude 自己會看，而且很快就過期
-- **依賴套件清單**——package.json／requirements.txt 已經有了
-- **從程式碼一眼可見的慣例**——Claude 讀檔案時自然會沿用
-- **通用的最佳實踐**（「寫測試」「處理錯誤」）——沒有專案特定資訊量
-- **歷史沿革／已修過的 bug**——那是 git log 跟 HANDOFF 的工作
-- **完整的 API 文件**——放 README，需要時才讀
-- **全域慣例**——已經在 `~/.claude/CLAUDE.md`，不要重複
+初始化或更新本檔時，回報 `claude mcp list` 的伺服器與 scope：
 
-## 跟 HANDOFF.md 的分工
+1. 專案專屬 MCP 預設 `--scope project`，寫進 repo 的 `.mcp.json`；
+2. `local` 存在使用者設定，換機器會消失；
+3. `user` 會在所有專案載入，只有真正跨專案必要的工具才使用；
+4. 密鑰以 `${VAR}` 引用，值留在使用者 secrets 檔，不進 repo；
+5. 新增 MCP 前評估工具 schema 的固定 context 成本，避免重複內建 filesystem／git 能力。
 
-| | 何時載入 | 放什麼 |
-|---|---|---|
-| **CLAUDE.md** | 每一次請求 | 穩定、高價值、影響行為的規則 |
-| **HANDOFF.md** | 接手時讀一次 | 詳細脈絡、決策過程、待辦、踩過的坑 |
+MCP 是否存在是 Claude execution profile 的能力證據，不得反過來污染 `AGENTS.md` 的共同規則。
 
-**不要把 HANDOFF.md 的內容搬進 CLAUDE.md。**
+## Claude Code 功能探針
 
-## 建議結構
+`auth status`、訂閱名稱與版本只算 metadata。是否能完成某項任務，以
+`docs/standards/agent_runtime.md` 定義的最小功能 probe 為準；兩者矛盾時保留證據並標 degraded。
 
-```markdown
-# <專案名>
-
-<一到兩句：這是什麼、解決什麼問題>
-
-## 指令
-<build / test / lint / run，只列實際會用到的>
-
-## 架構
-<只寫從檔案結構看不出來的部分：真正的入口、關鍵的耦合>
-
-## 陷阱
-<改 A 要同步改 B 之類，每條都要是踩過的真實問題>
-
-## 禁止
-<明確不該做的事>
-```
-
-段落沒內容就整段刪掉，不要留空標題。
-
-## Commit 規則這裡必須寫
-
-**這是不寫就等於沒有的一條。** `.agent/workflows/commit-message.md` 只有在被明確呼叫
-（`/commit-message`）時才載入；Agent 順手 commit 的路徑完全不經過它。要讓規則對**每一次**
-提交生效，只能靠 CLAUDE.md——它是唯一每次請求都在 context 裡的檔案。
-
-⚠️ **指路不等於送達。** 只寫「格式見 `.agent/workflows/commit-message.md`」仍然無效——
-**問題正是那個地址不會被走到**。判準沿用本檔開頭那條：「不寫這條，Claude 會不會做錯事？」
-
-| 判準 | 處理 | 有哪些 |
-|---|---|---|
-| 不寫就會**寫錯** | **內嵌進 CLAUDE.md** | Body 條列格式、禁止 AI 署名 trailer、閘門的範圍 |
-| 不寫只是**查得慢** | 指路即可 | gitmoji 對照表、scope 命名、`--amend` 等操作細節 |
-
-寫**五行以內**（原訂三行，為了塞下 Body 格式而放寬——本套件自己漏寫那一行，
-整批歷史 commit 的 Body 就寫成了散文，這一行是實測過的必要成本）：
-
-```markdown
-## Commit
-工單分支上的 commit 直接做，不用先問。**合併回主線前**須把訊息原文給我複查、
-取得當次同意；上一次的同意不算。訊息只描述本專案的變更，禁止 AI 署名 trailer。
-格式：`<emoji> <type>(<scope>): <繁中標題>`，空行後 Body 用 `- **標題**：說明` 條列。
-對照表與其餘規則見 `.agent/workflows/commit-message.md`。
-```
-
-⚠️ **閘門的範圍是「進入主線前」，不是「每一顆 commit 前」。** 寫成後者會讓 Agent
-在工單分支上每提交一次就停下來問一次——那既不是規則的原意，也會讓開發寸步難行。
-正版定義見 `.agent/resources/team_protocol.md` §1.10。
-
-即使使用者的全域 `~/.claude/CLAUDE.md` 已有同等規則，**這段仍然要寫**——
-專案會被別人 clone、會在別台機器上跑，全域設定不跟著 repo 走。
-
-## 順便問：這個專案有文檔資料夾嗎？
-
-若有（`docs/`、`doc/`、`spec/` 之類），**不要把文檔內容搬進 CLAUDE.md 或記憶庫**——
-那會把一次性的檢索需求變成每次請求的常駐成本。正確做法是在 CLAUDE.md 裡寫**導航規則**，
-讓 Claude 知道怎麼「按需精準取用」：
-
-1. 文檔根目錄在哪、有沒有索引檔（`DOCS_MAP.md`、`README.md`）——**先讀索引，不要盲目掃目錄**。
-2. 命名慣例，讓 Claude 能直接組出路徑而不用搜尋。
-   例：`features/<模組>/{prd,hld,lld,api_spec,test_plan}.md`、工單在 `features/<模組>/tasks/<ID>.md`。
-3. **標出大檔**（>20KB）並下規則：**用 `grep -n` 定位段落再局部讀，禁止整份載入**。
-   一份 68KB 的 prd.md 讀進來約 2 萬 tokens，而且之後每一輪都要重付。
-4. 哪些目錄**不要**主動讀（產生物、封存、大量重複的工單）。
-
-寫成三到五行的「文檔導航」段落即可，不要複製目錄樹。
-
-## 順便檢查 MCP scope
-
-寫專案 CLAUDE.md 時（`/init` 也算），一併回報這個專案的 MCP 狀態：
-
-1. 跑 `claude mcp list`，列出這個專案目前載入哪些 MCP、各自是什麼 scope。
-2. **如果有 user scope 的伺服器就明確提出來**——user scope 會在「每一個專案」載入工具定義，
-   除非那個工具真的每個專案都要用，否則應該改成 project scope。
-3. 建議這個專案該用的 scope，預設推薦 **`--scope project`**（寫進 repo 的 `.mcp.json`）：
-   - `local` 存在 `~/.claude.json`，**不納入版控**，換機器會消失
-   - `project` 存在 repo 的 `.mcp.json`，跟著 git 走，新機器 clone 就有
-   - `user` 全域載入——只有真正跨專案都要用的工具才考慮
-4. 列出 `~/code/dotfiles/claude/mcp-servers.json` 裡已記錄的伺服器供參考
-   （那份清單只放全域必要的；專案專屬的應該放該專案的 `.mcp.json`）。
-5. 密鑰一律用 `${VAR}` 展開，實際的值放 `~/.config/claude-secrets.env`，不要寫進 `.mcp.json`。
-
-裝任何 MCP 前先問：**它的工具定義每次請求都要載入，帶來的價值大於這個固定成本嗎？**
-特別留意跟內建功能重疊的（filesystem、git 這類 Claude Code 本來就會做的事）——那是純成本。
-
-## 寫完後
-
-回報這份 CLAUDE.md 的大概 token 數，讓我判斷值不值得。
+Claude Code 中途不可用時，依共同入口保存 Task ID、branch／worktree、HEAD、AC 與驗證輸出，
+再交由其他合格 execution profile 接手；不得因換供應商而更換 Assignee。

@@ -3,6 +3,10 @@
 **🔗 依附母任務 (Parent Task ID):** [在此填寫追溯來源，例如: ABC-DOC-HLD-001 或 Independent]
 **🏷️ 任務類型 (Task Type):** [在此填寫類型，例如: queue_frontend, queue_backend, queue_agent, queue_data, docs_generation, manual_user]
 **👤 負責人 (Assignee):** [指定 Skill 名稱，例如: backend-developer, frontend-developer, devops-engineer；若需使用者親自處理填 manual_user]
+**🧭 任務輪廓 (Task Profile):** — [通常留空，由 Task Type 映射；只有例外才填 `implementation_local` 等 ID]
+**🧩 必備能力覆寫 (Required Capabilities):** — [逗號分隔，例如 `visual_interaction,user_presence`；只寫超出輪廓預設的硬需求]
+**🔐 資料分級 (Data Class):** — [通常留空採輪廓預設；例外填 public / internal / sensitive / restricted]
+**↪️ Execution 覆寫 (Execution Override):** — [通常留空；例：`profile=codex-cli; scope=single`。round/project 還要 `expires=...`]
 **🚥 任務狀態 (Status):** Pending / Ready / In Progress / In Review / Done
 **📅 建立時間 (Created):** {YYYY-MM-DDTHH:MM+08:00}
 **✅ 完成時間 (Closed):** —

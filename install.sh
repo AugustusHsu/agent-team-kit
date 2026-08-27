@@ -73,10 +73,11 @@ if [ "$DRY_RUN" = "yes" ] && [ "$MODE" != "upgrade" ]; then
 fi
 
 # 種子檔：kit 給的只是起始內容，安裝後由專案自己接手。
-# 升級時一律不動它們，否則會洗掉專案的模組登記、自訂忽略規則與 BACKLOG 產出。
+# 升級時一律不動它們；新版新增的種子檔也不直接補進舊專案，改提示 migrate。
+# 否則會洗掉專案的入口、自訂忽略規則與 BACKLOG，或在未遷移前改變 agent 行為。
 is_seed_file() {
   case "$1" in
-    CLAUDE.md | .gitignore | docs/development/BACKLOG.md | docs/features/README.md) return 0 ;;
+    AGENTS.md | CLAUDE.md | .gitignore | docs/development/BACKLOG.md | docs/features/README.md) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -135,8 +136,14 @@ record() {
 while IFS= read -r rel; do
   kit_hash="$(file_hash "$KIT_ROOT/$rel")"
 
-  # 目標端還沒有 → 任何模式都直接補上
+  # 升級舊專案時不直接補「新出現的種子檔」。種子檔由專案接手，新增入口尤其可能
+  # 立即改變 agent 行為；最新版骨架已在 .agent/templates/，交給 migrate 產生候選。
   if [ ! -e "$TARGET/$rel" ]; then
+    if [ "$MODE" = "upgrade" ] && is_seed_file "$rel"; then
+      echo "  🌱 缺少種子檔，請執行 migrate：$rel"
+      n_kept=$((n_kept + 1))
+      continue
+    fi
     install_file "$rel"
     n_added=$((n_added + 1))
     [ "$MODE" = "upgrade" ] && echo "  ➕ 新增：$rel"
@@ -228,7 +235,8 @@ cat <<EOF
 
   1. 編輯 .agent/resources/team_protocol.md §3.1 模組前綴對照表，換成你的模組
   2. 依 docs/features/_TEMPLATE/ 複製出第一個功能模組目錄
-  3. 依 CLAUDE.md 模板填寫專案的入口摘要
+  3. 初始化 Claude／Codex 入口與本機 execution profiles：
+     python3 .agent/scripts/agent_runtime.py init
   4. 驗證腳本（需先完成第 2 步——沒有任何功能模組時腳本會提示找不到工單）：
      python .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md
 

@@ -267,8 +267,10 @@ worktree 提供的是**工作區隔離**（各自有獨立的檔案系統與 HEA
 
 這對本 repo 有直接意涵：kit 的 worktree 規範已於 2026-08-16 整份移除（DN-003）。
 日後要不要重新引入，**必須連同所有權規則一起設計**，只把 worktree 加回來等於沒加。
-Claude Code 的 subagent frontmatter 原生支援 `isolation: worktree`，
-機制端不是問題，問題在規則端。
+Claude Code 能為 subagent 提供 worktree 隔離；Codex App 也能建立受管理的 worktree，
+並在 Local／Worktree 間 Handoff。各產品的操作面不同，但都沒有解決所有權問題。
+本檔只定 provider-neutral 的 git 不變式；執行時選哪個 surface 由
+[DN-009](DN-009_multi_agent_capability_routing.md) 路由。
 
 ### 4.2 檔案所有權與重疊區
 

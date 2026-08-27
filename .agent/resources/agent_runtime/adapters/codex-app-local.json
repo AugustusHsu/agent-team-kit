@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "id": "codex-app-local",
+  "provider": "openai",
+  "surface": "app-local",
+  "title": "Codex App Local",
+  "execution_location": "local",
+  "capabilities": [
+    "repo_read",
+    "repo_write",
+    "shell_execute",
+    "test_execute",
+    "web_research",
+    "source_citation",
+    "long_context",
+    "handoff",
+    "diff_read",
+    "fresh_context",
+    "evidence_capture",
+    "visual_interaction",
+    "user_presence",
+    "external_connectors"
+  ],
+  "probes": {
+    "install": "codex_app_manual",
+    "auth": "chatgpt_session_manual",
+    "functional": "codex_app_local_manual"
+  },
+  "ttl_seconds": {"install": 86400, "auth": 1800, "functional": 1800},
+  "project_config": ["AGENTS.md", ".codex/config.toml"],
+  "manual_capabilities": ["visual_interaction", "user_presence", "external_connectors"]
+}

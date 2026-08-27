@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "project_id": "c05f73d700b244f1b1ec100c42edd1f9",
+  "project_name": "agent-team-kit",
+  "enabled_profiles": [
+    "claude-code-cli",
+    "codex-app-local",
+    "codex-app-worktree",
+    "codex-cli",
+    "codex-cloud"
+  ],
+  "preferred_profiles": [
+    "codex-app-worktree",
+    "codex-cli",
+    "claude-code-cli"
+  ],
+  "default_data_class": "internal",
+  "cloud_policy": "conditional",
+  "connector_policy": "conditional"
+}
