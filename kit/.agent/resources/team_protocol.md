@@ -321,6 +321,8 @@ CI runner 沒有 agent 的 context，shell 輸出必然保真，該檢查會永�
   - **🚨 矛盾與風險警告**: 列出開發過程中發現的任何風險或架構衝突（無則填「無」）。
   - **🧪 驗證/測試建議**: 提供具體的驗證方法（`curl` 指令、`pytest` 指令、或瀏覽器頁面路徑）。
 - 交付回報連同工單原文一併提交給 Code Reviewer。
+- **正式審查前先固定 Review Target。** 單張工單先在 Task branch 寫入 Status → `Done` 與 Closed；
+  多工單輪次的 Task 維持 `In Review`。兩者都記錄完整 base SHA、head SHA 與 Task ID，head 變動就重審。
 - **交付回報須附上分支上實際的 commit message 原文**（依
   `.agent/workflows/commit-message.md` 產出），與報告**一併呈交、一次表態**。
   變更**此時已經 commit 並推送**，訊息可用 `--amend` 修改（§1.10）。
@@ -329,7 +331,8 @@ CI runner 沒有 agent 的 context，shell 輸出必然保真，該檢查會永�
   結案資料待整合 QA 通過後由 round 統一寫入。兩者皆依 §1.9／git workflow §6.2 收尾。
 
 ### 2.3 Code Reviewer → Done / 退回
-- Code Reviewer 審查後產出標準化審查報告（含 Verdict: APPROVED 或 CHANGES REQUESTED）。
+- 能產生 APPROVED 的 Code Reviewer 必須使用與開發隔離的 fresh context，對 pinned
+  `base SHA + head SHA + Task/Round ID` 產出標準化報告；同 session 換角色只能自查。
 - 若單張工單 APPROVED，reviewed head 不得再變動，接著以 merge commit 進 main；若為多工單輪次的
   工單窄審 APPROVED，則以 merge commit 進 round 並維持 `In Review`，整輪完成 QA、結案資料與
   round panel 後才一起進 main。**合併進主線之後工單才正式 `Done`**——見 §1.9。
@@ -346,7 +349,12 @@ CI runner 沒有 agent 的 context，shell 輸出必然保真，該檢查會永�
   - **連「實際輸出」本身都要存疑**：輸出可能在進入 context 前就被中間層改寫，
     而最嚴重的那種失效**不留任何提示**。取證前依 **§1.12** 驗證通道保真；
     在未通過的通道上跑出來的輸出，不得作為審查證據。
-- **審查紀錄的落點 (Write-back)：完整報告進 `reviews/`，工單只留結論與指標。**
+- **審查紀錄的落點 (Write-back)：完整報告進 `reviews/`，工單只留結論與指標；
+  APPROVED 後不得為寫回而修改 reviewed head。**
+  - CHANGES REQUESTED 沒有可沿用的核可：退回後可直接在 Task branch 寫報告、Status、AC 與規格修正，
+    再固定新 target。
+  - APPROVED 時，正式輸出先綁定 target；審查檔、工單結論與尚待補記的 checklist 由目的端
+    merge commit 一併帶入 round／main，不回頭改 Task head。多工單的這些 metadata 還會進 round panel。
   - **完整審查報告**寫入 `docs/features/<模組>/reviews/<TaskID>.md`——一張工單一個檔，
     多輪審查在同一檔內**由新到舊追加**，不另開檔。內容即 `code-reviewer` SKILL.md §4
     的完整報告：AC 逐條核對表、重大瑕疵與建議改法、Nitpicks、僅人工判讀的部分。

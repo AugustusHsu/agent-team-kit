@@ -1,7 +1,7 @@
 # ADR-003：正式審查採 fresh context 與不可變 Review Target
 
-**狀態：** Accepted  
-**定案日期：** 2026-08-27  
+**狀態：** Accepted
+**定案日期：** 2026-08-27
 **影響範圍：** Code review、輪次 panel、審查證據與人工閘門
 
 ## Context

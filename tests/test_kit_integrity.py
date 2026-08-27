@@ -91,8 +91,14 @@ EVAL_KEYS = {"id", "prompt", "expected_output", "files", "expectations"}
     ),
     # Review Target 固定 head 後，正式 APPROVED 之後追加結案 commit 會讓核可失效。
     (
-        r"APPROVED[^。\n]{0,30}接著[^。\n]{0,20}結案 commit",
+        r"APPROVED[^。\n]{0,30}接著[^。\n]{0,20}結案 commit|"
+        r"APPROVED 後才做結案 commit|APPROVED 後的收尾提醒|"
+        r"APPROVED 時提醒 Developer 於結案 commit",
         "結案資料必須先納入正式 Review Target，APPROVED 後不得再改 head（git_workflow.md §6.2）",
+    ),
+    (
+        r"由 Code Reviewer 在審查通過（`Done`）[^\n]{0,40}Closed",
+        "Closed 由 Developer／round 在正式審查前寫入 pinned head，不由 Reviewer 在核可後填寫（git_workflow.md §6.2）",
     ),
     (
         r"Dismiss stale approvals[^\n]{0,12}(?:必須)?關",

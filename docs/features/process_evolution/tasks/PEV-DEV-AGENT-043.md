@@ -8,7 +8,7 @@
 **🔐 資料分級 (Data Class):** —
 **↪️ Execution 覆寫 (Execution Override):** —
 **⛓️ 前置工單 (Blocked By):** —
-**✍️ 寫入範圍 (Write Scope):** `kit/docs/standards/parallel_development.md`、`kit/docs/standards/git_workflow.md`、`kit/docs/standards/adr/ADR-001_*.md`～`ADR-003_*.md`、`kit/docs/standards/adr/README.md`、`kit/docs/DOCS_MAP.md`、`kit/.agent/resources/team_protocol.md`、`kit/docs/standards/team_protocol.md`、`tests/test_kit_integrity.py`
+**✍️ 寫入範圍 (Write Scope):** `kit/docs/standards/parallel_development.md`、`kit/docs/standards/git_workflow.md`、`kit/docs/standards/adr/ADR-001_*.md`～`ADR-003_*.md`、`kit/docs/standards/adr/README.md`、`kit/docs/DOCS_MAP.md`、`kit/.agent/resources/team_protocol.md`、`kit/docs/standards/team_protocol.md`、`kit/.agent/skills/{backend-developer,frontend-developer,devops-engineer,qa-automation-engineer,code-reviewer,scrum-master}/SKILL.md`、`kit/.agent/skills/code-reviewer/evals/evals.json`、`tests/test_kit_integrity.py`、`docs/features/process_evolution/reviews/PEV-DEV-AGENT-043.md`
 **📜 共用契約 (Contract):** —（本工單建立 `kit/docs/standards/parallel_development.md`）
 **🔁 變更集合 (Change Set):** —
 **🪜 變更階段 (Phase):** —
@@ -49,9 +49,28 @@
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
 - **❓ 需要確認的事項 (Agent 提問)**：無；三份 DN 已於 2026-08-27 簽核畢業。
-- **✍️ User 補充回覆 (User Input)**：同意建立 `ROUND-001` 與工單 043～047。
+- **✍️ User 補充回覆 (User Input)**：同意建立 `ROUND-001` 與工單 043～047；2026-08-27
+  同意依 fresh-context review F-02 擴大本工單 Write Scope，修正相關 skills、eval 與回歸防線。
 
 ## 5. 範圍外 (Out of Scope)
 
 - 本工單只落地規範與 ADR，不實作 DAG 掃描、worktree 操作或 panel 執行器。
 - 不建立遠端 PR、不修改託管平台設定、不 push。
+
+## 📝 Code Review 備註
+
+> 2026-08-27 ❌ CHANGES REQUESTED — 完整報告見 [../reviews/PEV-DEV-AGENT-043.md](../reviews/PEV-DEV-AGENT-043.md)
+
+### 📊 客觀指標
+
+| 指標 | 變更前 | 第一輪審查 target |
+|---|---:|---:|
+| 完整 pytest | 200 passed | 200 passed |
+| precheck | 8/8 | 8/8 |
+| `git diff --check` | 通過 | 6 處 trailing whitespace |
+| 舊結案時序 skill 命中 | 5 份 skill＋1 eval | 回歸規則未攔截 |
+
+### 待修正項目
+
+- 🚨 `kit/docs/standards/adr/ADR-001～003:3-4` — 移除 6 處行尾空白。
+- 🚨 `kit/.agent/skills/**` — 結案資料改在正式審查前進 pinned head，並補精確回歸防線。
