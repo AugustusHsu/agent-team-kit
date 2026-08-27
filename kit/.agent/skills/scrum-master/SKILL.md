@@ -5,7 +5,7 @@ description: 當使用者需要「安排 Sprint 規劃」、「拆解任務 (Bre
 
 # Scrum Master 工作指南
 
-> **📏 篇幅例外**：本檔 172 行，超過 `docs/standards/skill_conventions.md` 第 7 節的 150 行軟上限。**理由**：Scrum Master 是唯一貫穿工單生命週期全程的角色——開單前置查核、狀態機遷移、子母任務相依、BACKLOG 重生、退回處置各自都有不可省略的操作步驟。拆檔會讓「開單當下該查什麼」與「收尾該做什麼」分離，而這兩件事必須在同一次閱讀裡都在場。
+> **📏 篇幅例外**：本檔超過 `docs/standards/skill_conventions.md` 第 7 節的 150 行軟上限。**理由**：Scrum Master 是唯一貫穿工單生命週期全程的角色——開單前置查核、狀態機遷移、DAG／Round、BACKLOG 重生與退回處置各自都有不可省略的操作步驟。拆檔會讓「開單當下該查什麼」與「收尾該做什麼」分離，而這兩件事必須在同一次閱讀裡都在場。
 
 > **📋 前置閱讀**：執行任務前，請先閱讀團隊共用的協作守則 `.agent/resources/team_protocol.md`，了解工單生命週期、角色交接規範與命名約定。
 
@@ -89,6 +89,22 @@ description: 當使用者需要「安排 Sprint 規劃」、「拆解任務 (Bre
 
 8. **預留人為介入空間 (Human-in-the-loop)**：
    - Scrum Master 在拆解任務時若發現邊界條件模糊、API 參數不明等狀況，**切勿自行捏造或腦補**。這是系統防護的重要一環。請將疑問事項列入任務單中的「人為補充與確認 (Human-in-the-loop)」區塊，等待使用者回答或確認。
+
+### DAG、Write Scope 與 Round Manifest
+
+- 新建或重新規劃的普通工單一律填 `Blocked By`、`Write Scope`、`Contract`、`Change Set`、
+  `Phase`；歷史工單可五欄全無，但不可只補一部分。`Blocked By` 只存正向 Task ID，
+  **不得手寫**反向 blocks、wave 或 `[P]`。
+- 只有 2～5 張相關工單才建立 `docs/development/rounds/{RoundID}[_slug].md`。Manifest 保存
+  唯一 Round ID、目標、`feature/{topic}` branch、40 字元 opening base SHA 與封閉 Task ID 集合；
+  工單不重複保存 Round ID。建立後先跑 `scan_backlog.py --format graph` 與 `precheck.py`。
+- 並行候選必須同時滿足：DAG 無先後、Write Scope 可證明不重疊、Contract 已在 round base
+  或由輪內前置提供、外部副作用可隔離；任何一項不確定就排序執行。介面顯示的 wave、blocks
+  與候選都是衍生視圖，不得抄回來源文件。
+- Parallel Change 使用同一 `Change Set` 的 `expand`／一至多張 `migrate`／`contract` 普通工單；
+  開 expand 時就建立 contract，且 contract 的 `Blocked By` 必須涵蓋全部 migrate 工單。
+
+正版語意與保守判準見 `docs/standards/parallel_development.md` §2～§3。
 
 ## 任務卡片格式範本
 

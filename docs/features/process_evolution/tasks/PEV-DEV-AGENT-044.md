@@ -8,11 +8,11 @@
 **🔐 資料分級 (Data Class):** —
 **↪️ Execution 覆寫 (Execution Override):** —
 **⛓️ 前置工單 (Blocked By):** PEV-DEV-AGENT-043
-**✍️ 寫入範圍 (Write Scope):** `kit/.agent/resources/task_template.md`、`kit/docs/features/_TEMPLATE/tasks/_EXAMPLE-DEV-BE-001.md`、`kit/.agent/scripts/scan_backlog.py`、`kit/.agent/scripts/precheck.py`、`kit/.agent/skills/scrum-master/SKILL.md`、`tests/test_scan_backlog.py`、`tests/test_precheck.py`
+**✍️ 寫入範圍 (Write Scope):** `kit/.agent/resources/task_template.md`、`kit/docs/features/_TEMPLATE/tasks/_EXAMPLE-DEV-BE-001.md`、`kit/.agent/scripts/scan_backlog.py`、`kit/.agent/scripts/precheck.py`、`kit/.agent/skills/scrum-master/SKILL.md`、`kit/docs/standards/git_workflow.md`、`tests/test_scan_backlog.py`、`tests/test_precheck.py`
 **📜 共用契約 (Contract):** `kit/docs/standards/parallel_development.md`
 **🔁 變更集合 (Change Set):** —
 **🪜 變更階段 (Phase):** —
-**🚥 任務狀態 (Status):** Pending
+**🚥 任務狀態 (Status):** In Review
 **📅 建立時間 (Created):** 2026-08-27T10:18+08:00
 **✅ 完成時間 (Closed):** —
 **🔀 審查載體編號 (PR/MR):** —
@@ -36,18 +36,22 @@
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：新版模板包含五個來源欄位；未含新欄位的歷史工單仍能被掃描，不因遷移前資料中斷 BACKLOG。
-- [ ] AC-02：未知 Task ID、自我依賴、重複依賴與有向循環都有明確錯誤；合法 DAG 產出確定性的拓撲順序、wave 與反向 blocks。
-- [ ] AC-03：Round Manifest 必須有全域 Round ID、目標、branch、40 字元 opening base SHA 與封閉的 2～5 張既有 Task ID；重複歸屬、超額、缺漏皆失敗。
-- [ ] AC-04：並行候選只在 DAG 無邊、Write Scope 不重疊、Contract 已位於 round base、外部副作用可隔離時成立；不可判定時不得誤標可並行。
-- [ ] AC-05：Parallel Change 驗證 expand 建立時已有同 Change Set 的 contract，phase 只接受 `expand|migrate|contract`，且 contract 的 `Blocked By` 涵蓋所有 migrate 工單。
-- [ ] AC-06：測試以 `tmp_path` 建真實 Markdown／manifest，涵蓋合法圖、負向案例與舊格式相容；不使用 mock，測試名稱與 assert 訊息使用繁體中文。
+- [x] AC-01：新版模板包含五個來源欄位；未含新欄位的歷史工單仍能被掃描，不因遷移前資料中斷 BACKLOG。
+- [x] AC-02：未知 Task ID、自我依賴、重複依賴與有向循環都有明確錯誤；合法 DAG 產出確定性的拓撲順序、wave 與反向 blocks。
+- [x] AC-03：Round Manifest 必須有全域 Round ID、目標、branch、40 字元 opening base SHA 與封閉的 2～5 張既有 Task ID；重複歸屬、超額、缺漏皆失敗。
+- [x] AC-04：並行候選只在 DAG 無邊、Write Scope 不重疊、Contract 已位於 round base、外部副作用可隔離時成立；不可判定時不得誤標可並行。
+- [x] AC-05：Parallel Change 驗證 expand 建立時已有同 Change Set 的 contract，phase 只接受 `expand|migrate|contract`，且 contract 的 `Blocked By` 涵蓋所有 migrate 工單。
+- [x] AC-06：測試以 `tmp_path` 建真實 Markdown／manifest，涵蓋合法圖、負向案例與舊格式相容；不使用 mock，測試名稱與 assert 訊息使用繁體中文。
 - [ ] AC-07：`test_scan_backlog.py`、`test_precheck.py`、BACKLOG 重建與 `git diff --check` 通過。
+
+> AC-07 的開發分支證據已通過；核取留待 047 將 `kit/` 同步至根目錄安裝實例後，
+> 由 fresh-context reviewer 以正式安裝入口複驗。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
 - **❓ 需要確認的事項 (Agent 提問)**：無；欄位與推導邊界已由 DN-005 簽核。
-- **✍️ User 補充回覆 (User Input)**：同意建立 `ROUND-001` 與工單 043～047。
+- **✍️ User 補充回覆 (User Input)**：同意建立 `ROUND-001` 與工單 043～047；2026-08-27
+  同意擴大 044 Write Scope，納入 `kit/docs/standards/git_workflow.md` 以同步 precheck 第 9 項。
 
 ## 5. 範圍外 (Out of Scope)
 

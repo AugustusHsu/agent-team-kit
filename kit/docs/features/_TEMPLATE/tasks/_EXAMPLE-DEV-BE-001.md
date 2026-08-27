@@ -7,6 +7,11 @@
 **🧩 必備能力覆寫 (Required Capabilities):** — [逗號分隔，例如 `visual_interaction,user_presence`；只寫超出輪廓預設的硬需求]
 **🔐 資料分級 (Data Class):** — [通常留空採輪廓預設；例外填 public / internal / sensitive / restricted]
 **↪️ Execution 覆寫 (Execution Override):** — [通常留空；例：`profile=codex-cli; scope=single`。round/project 還要 `expires=...`]
+**⛓️ 前置工單 (Blocked By):** — [只填正向硬依賴的 Task ID；無則填 —，不要手寫 blocks／wave／`[P]`]
+**✍️ 寫入範圍 (Write Scope):** [列出本工單唯一可寫的 repo 相對路徑、目錄或 glob]
+**📜 共用契約 (Contract):** — [填已位於 round base 的第 1 層契約路徑；無共享介面填 —]
+**🔁 變更集合 (Change Set):** — [只供 Parallel Change 三階段共用；不用則填 —]
+**🪜 變更階段 (Phase):** — [Change Set 使用 `expand`／`migrate`／`contract`；不用則填 —]
 **🚥 任務狀態 (Status):** Pending / Ready / In Progress / In Review / Done
 **📅 建立時間 (Created):** {YYYY-MM-DDTHH:MM+08:00}
 **✅ 完成時間 (Closed):** —

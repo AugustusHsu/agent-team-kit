@@ -187,7 +187,7 @@ first-parent 是讀取粒度，不在寫入時銷毀過程資料。
 |---|---|---|---|---|
 | 隔離變更 | branch／選用 worktree | branch／選用 worktree | branch／選用 worktree | — |
 | 合併前審查的載體 | Pull Request＋repo review artifact | Merge Request＋repo review artifact | `reviews/<TaskID>.md`／Round Manifest | — |
-| 自動檢查 | Actions | GitLab CI | 合併前手動跑測試 | BACKLOG 是否為最新、工單 Status 值是否合法、工單時間戳是否正確、文件是否有死連結、結案工單是否填了 Closed、AC 全打勾的工單是否已結案、未結案工單的 Assignee 是否合法、Agent runtime 版控政策與秘密邊界是否合法 |
+| 自動檢查 | Actions | GitLab CI | 合併前手動跑測試 | BACKLOG 是否為最新、工單 DAG／Round／Parallel Change 是否有效、工單 Status 值是否合法、工單時間戳是否正確、文件是否有死連結、結案工單是否填了 Closed、AC 全打勾的工單是否已結案、未結案工單的 Assignee 是否合法、Agent runtime 版控政策與秘密邊界是否合法 |
 | 阻擋未通過的合併 | Branch protection＋required checks | Protected branch＋pipeline | 人工紀律＋pinned artifact | — |
 | 審查意見的落點 | PR comment＋repo artifact | MR discussion＋repo artifact | repo artifact | — |
 | 合併方式（§6.1） | Create a merge commit | Merge commit | `git merge --no-ff` | — |
