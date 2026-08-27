@@ -577,6 +577,35 @@ def test_graph_拒絕被丟棄或截短的非法依賴_token(規劃專案: Path)
         assert token in result.stderr, f"非法 token {token!r} 被靜默丟棄：\n{result.stderr}"
 
 
+def test_graph_拒絕破折號與其他來源_token_混用(規劃專案: Path):
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-001", blocked_by="—、TBD")
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-002",
+        blocked_by="—、MOD-DEV-BE-001",
+    )
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-003",
+        external_effects="—、deploy:prod",
+    )
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-004",
+        external_effects="—、N/A",
+    )
+
+    result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
+    assert result.returncode != 0
+    assert "Blocked By 含非法 Task ID token" in result.stderr
+    assert "External Effects 必須使用 category:resource" in result.stderr
+    for token in ("TBD", "N/A"):
+        assert token in result.stderr, f"混合空值中的 {token!r} 被靜默丟棄：\n{result.stderr}"
+    graph = json.loads(result.stdout)
+    assert graph["tasks"]["MOD-DEV-BE-002"]["blocked_by"] == ["MOD-DEV-BE-001"]
+    assert graph["tasks"]["MOD-DEV-BE-003"]["external_effects"] == ["—", "deploy:prod"]
+
+
 def test_round_manifest_產出輪內_wave_blocks_與並行候選(規劃專案: Path):
     _寫規劃工單(規劃專案, "MOD-DEV-BE-001", write_scope="`src/base.py`")
     _寫規劃工單(
@@ -665,6 +694,22 @@ def test_round_manifest_拒絕缺_review_target_空_topic_與不存在_base(規�
         assert 訊息 in result.stderr, f"缺少 {訊息!r} 的 Round 錯誤：\n{result.stderr}"
 
 
+def test_round_manifest_拒絕封閉集合內非法非空資料列(規劃專案: Path):
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-001")
+    _寫規劃工單(規劃專案, "MOD-DEV-BE-002")
+    _寫_round(規劃專案, "ROUND-001", ["MOD-DEV-BE-001", "MOD-DEV-BE-002"])
+    path = 規劃專案 / "docs/development/rounds/ROUND-001_test.md"
+    content = path.read_text(encoding="utf-8").replace(
+        "|---|---|---|\n",
+        "|---|---|---|\n| TBD | 不合法但仍在封閉集合 | Pending |\n",
+    )
+    path.write_text(content, encoding="utf-8")
+
+    result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
+    assert result.returncode != 0
+    assert "Round 封閉集合含非法 Task ID token：TBD" in result.stderr
+
+
 def test_新式規劃欄位不可只填一部分(規劃專案: Path):
     path = 規劃專案 / "docs/features/my_module/tasks/MOD-DEV-BE-001.md"
     path.write_text(
@@ -747,6 +792,31 @@ def test_write_scope_根目錄_glob_無法證明與實際檔案不重疊(規劃�
     round_view = graph["rounds"]["ROUND-001"]
     assert round_view["parallel_candidates"] == []
     assert "write_scope_overlap_or_unknown" in round_view["parallel_blockers"][0]["reasons"]
+
+
+def test_write_scope_與_contract_拒絕_backtick_外殘留路徑(規劃專案: Path):
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-001",
+        write_scope="`src/a.py`、tests/shared.py",
+    )
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-002",
+        write_scope="`tests/shared.py`",
+        contract="`docs/contracts/api.md`、docs/contracts/hidden.md",
+    )
+    _寫_round(規劃專案, "ROUND-001", ["MOD-DEV-BE-001", "MOD-DEV-BE-002"])
+
+    result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
+    assert result.returncode != 0
+    assert "Write Scope 含非法或不完整路徑 token：tests/shared.py" in result.stderr
+    assert "Contract 含非法或不完整契約路徑 token：docs/contracts/hidden.md" in result.stderr
+    round_view = json.loads(result.stdout)["rounds"]["ROUND-001"]
+    assert round_view["parallel_candidates"] == []
+    reasons = round_view["parallel_blockers"][0]["reasons"]
+    assert "write_scope_overlap_or_unknown" in reasons
+    assert "contract_not_ready:MOD-DEV-BE-002" in reasons
 
 
 def test_external_effects_缺來源或作用域重疊時不列並行候選(規劃專案: Path):
@@ -970,6 +1040,26 @@ def test_parallel_change_拒絕_migrate_未位於_expand_之後(規劃專案: Pa
     result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
     assert result.returncode != 0
     assert "migrate 必須位於 expand MOD-DEV-BE-001 之後" in result.stderr
+
+
+def test_parallel_change_拒絕破折號與階段內容混用(規劃專案: Path):
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-001",
+        change_set="—、auth-v2",
+        phase="—",
+    )
+    _寫規劃工單(
+        規劃專案,
+        "MOD-DEV-BE-002",
+        change_set="—",
+        phase="—、expand",
+    )
+
+    result = run_script(規劃專案, "scan_backlog.py", "--format", "graph")
+    assert result.returncode != 0
+    assert "填寫 Change Set 時必須指定 Phase" in result.stderr
+    assert "Phase '—、expand' 不合法" in result.stderr
 
 
 def test_parallel_change_拒絕非法_phase_缺_contract_與漏列_migrate(規劃專案: Path):

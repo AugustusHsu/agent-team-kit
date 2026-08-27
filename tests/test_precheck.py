@@ -373,6 +373,39 @@ def test_dag_有未知依賴時_precheck_會紅(乾淨專案: Path):
     assert "不存在的 Task ID：MOD-DEV-BE-099" in result.stdout
 
 
+def test_round_非法成員資料列會讓_precheck_紅(乾淨專案: Path):
+    (乾淨專案 / TASK).write_text(
+        _工單(
+            status="In Progress",
+            closed="—",
+            planning=_規劃欄位(write_scope="`src/first.py`"),
+        ),
+        encoding="utf-8",
+    )
+    第二張 = 乾淨專案 / "docs/features/my_module/tasks/MOD-DEV-BE-002.md"
+    第二張.write_text(
+        _工單(
+            status="Pending",
+            closed="—",
+            planning=_規劃欄位(write_scope="`src/second.py`"),
+        ).replace("MOD-DEV-BE-001", "MOD-DEV-BE-002"),
+        encoding="utf-8",
+    )
+    _寫_round(乾淨專案, ["MOD-DEV-BE-001", "MOD-DEV-BE-002"])
+    重生(乾淨專案)
+    round_path = 乾淨專案 / "docs/development/rounds/ROUND-001_test.md"
+    content = round_path.read_text(encoding="utf-8").replace(
+        "|---|---|---|\n",
+        "|---|---|---|\n| TBD | 不合法但仍在封閉集合 | Pending |\n",
+    )
+    round_path.write_text(content, encoding="utf-8")
+
+    result = 跑(乾淨專案)
+    assert result.returncode != 0
+    assert "工單 DAG／Round／Parallel Change 是否有效" in result.stdout
+    assert "Round 封閉集合含非法 Task ID token：TBD" in result.stdout
+
+
 def test_round_窄審全勾仍維持_in_review_不算漏關帳(乾淨專案: Path):
     """多工單要等整合 QA 後才在 round 統一結案，舊檢查不能逼 Task 提前 Done。"""
     (乾淨專案 / TASK).write_text(

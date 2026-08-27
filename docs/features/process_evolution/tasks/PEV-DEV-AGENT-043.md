@@ -8,8 +8,8 @@
 **🔐 資料分級 (Data Class):** —
 **↪️ Execution 覆寫 (Execution Override):** —
 **⛓️ 前置工單 (Blocked By):** —
-**✍️ 寫入範圍 (Write Scope):** `kit/docs/standards/parallel_development.md`、`kit/docs/standards/git_workflow.md`、`kit/docs/standards/adr/ADR-001_*.md`～`ADR-003_*.md`、`kit/docs/standards/adr/README.md`、`kit/docs/DOCS_MAP.md`、`kit/.agent/resources/team_protocol.md`、`kit/docs/standards/team_protocol.md`、`kit/.agent/skills/{backend-developer,frontend-developer,devops-engineer,qa-automation-engineer,code-reviewer,scrum-master}/SKILL.md`、`kit/.agent/skills/code-reviewer/evals/evals.json`、`tests/test_kit_integrity.py`、`docs/features/process_evolution/reviews/PEV-DEV-AGENT-043.md`
-**📜 共用契約 (Contract):** —（本工單建立 `kit/docs/standards/parallel_development.md`）
+**✍️ 寫入範圍 (Write Scope):** `kit/docs/standards/parallel_development.md`、`kit/docs/standards/git_workflow.md`、`kit/docs/standards/adr/ADR-001_*.md`、`kit/docs/standards/adr/ADR-002_*.md`、`kit/docs/standards/adr/ADR-003_*.md`、`kit/docs/standards/adr/README.md`、`kit/docs/DOCS_MAP.md`、`kit/.agent/resources/team_protocol.md`、`kit/docs/standards/team_protocol.md`、`kit/.agent/skills/{backend-developer,frontend-developer,devops-engineer,qa-automation-engineer,code-reviewer,scrum-master}/SKILL.md`、`kit/.agent/skills/code-reviewer/evals/evals.json`、`tests/test_kit_integrity.py`、`docs/features/process_evolution/reviews/PEV-DEV-AGENT-043.md`
+**📜 共用契約 (Contract):** —
 **🔁 變更集合 (Change Set):** —
 **🪜 變更階段 (Phase):** —
 **🚥 任務狀態 (Status):** In Review

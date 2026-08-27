@@ -36,6 +36,10 @@
 `External Effects: —` 是「明確沒有外部寫入」，與缺欄的 unknown 不同。`Assignee` 仍是專業角色，
 執行者由 [agent_runtime.md](agent_runtime.md) 的能力路由決定。
 
+六欄的破折號空值必須是**整個欄位的唯一內容**；`—、TBD`、`—、實際值` 等混合表示一律無效。
+清單只要使用 backtick，所有 token 都必須放在 backtick 內，外部只能有分隔符與空白；任何殘留
+文字都視為來源資料不完整，precheck 必須 fail closed，不能靜默丟棄後繼續推導。
+
 ### 2.2 Round Manifest
 
 多工單輪次以 `docs/development/rounds/{RoundID}[_slug].md` 為唯一載體；Round ID 全域遞增，
@@ -48,6 +52,8 @@
 
 manifest **不手寫** wave、反向 blocks 或彙總狀態。介面可顯示由工單 DAG 重算的快照，
 但必須標明是衍生視圖，衝突時回到工單與 manifest 的來源欄位。
+封閉集合表格中除 header／separator 外，每個資料列的第一欄都必須完整匹配 Task ID；非法或
+非空未知列不得略過，否則 manifest 不再是可驗證的封閉集合。
 
 ## 3. 排程與拆解
 

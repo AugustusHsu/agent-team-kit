@@ -131,18 +131,7 @@ def is_explicit_none(value):
     if value is None:
         return True
     text = str(value).strip()
-    return text in {"", "-", "—", "–"} or text.startswith(("—", "–"))
-
-
-def parse_item_list(value):
-    """解析 backtick 清單或逗號／頓號清單，保留順序與重複值供驗證器判斷。"""
-    if is_empty_metadata(value):
-        return []
-    text = str(value).strip()
-    quoted = BACKTICK_RE.findall(text)
-    if quoted:
-        return [item.strip() for item in quoted if item.strip()]
-    return [item.strip() for item in re.split(r"[,，、;；]", text) if item.strip()]
+    return text in {"", "-", "—", "–"}
 
 
 def parse_strict_item_list(value):
@@ -160,6 +149,22 @@ def parse_strict_item_list(value):
     remainder = BACKTICK_RE.sub("", text)
     remainder = re.sub(r"[,，、;；\s]", "", remainder)
     return [item.strip() for item in quoted if item.strip()], ([remainder] if remainder else [])
+
+
+def valid_repo_path_expression(value, *, allow_glob):
+    """驗證 repo-relative 路徑表示；Write Scope 可含 glob，Contract 只能是實際路徑。"""
+    raw = value.strip()
+    if not raw or "\\" in raw or "`" in raw:
+        return False
+    text = raw.removeprefix("./")
+    if (
+        not text
+        or text.startswith(("/", "~", "http://", "https://"))
+        or ":" in text
+        or (not allow_glob and any(char in text for char in "*?[]{"))
+    ):
+        return False
+    return all(segment not in {"", ".", ".."} for segment in text.split("/"))
 
 
 def parse_task_ids(value):
@@ -236,16 +241,34 @@ def parse_task_file(filepath):
     result["blocked_by"], result["invalid_blocked_by"] = parse_task_ids(
         raw_planning["blocked_by"]
     )
-    result["write_scope"] = (
-        parse_item_list(raw_planning["write_scope"])
-        if planning_matches["write_scope"]
-        else None
-    )
-    result["contract"] = (
-        parse_item_list(raw_planning["contract"])
-        if planning_matches["contract"]
-        else None
-    )
+    if planning_matches["write_scope"]:
+        result["write_scope"], invalid_write_syntax = parse_strict_item_list(
+            raw_planning["write_scope"]
+        )
+    else:
+        result["write_scope"], invalid_write_syntax = None, []
+    result["invalid_write_scope"] = [
+        *invalid_write_syntax,
+        *(
+            scope
+            for scope in (result["write_scope"] or [])
+            if not valid_repo_path_expression(scope, allow_glob=True)
+        ),
+    ]
+    if planning_matches["contract"]:
+        result["contract"], invalid_contract_syntax = parse_strict_item_list(
+            raw_planning["contract"]
+        )
+    else:
+        result["contract"], invalid_contract_syntax = None, []
+    result["invalid_contract"] = [
+        *invalid_contract_syntax,
+        *(
+            contract
+            for contract in (result["contract"] or [])
+            if not valid_repo_path_expression(contract, allow_glob=False)
+        ),
+    ]
     raw_external_effects = (
         external_effects_match.group(1).strip().replace("\r", "")
         if external_effects_match
@@ -266,9 +289,11 @@ def parse_task_file(filepath):
         ),
     ]
     result["change_set"] = (
-        None if is_empty_metadata(raw_planning["change_set"]) else raw_planning["change_set"]
+        None if is_explicit_none(raw_planning["change_set"]) else raw_planning["change_set"]
     )
-    result["phase"] = None if is_empty_metadata(raw_planning["phase"]) else raw_planning["phase"]
+    result["phase"] = (
+        None if is_explicit_none(raw_planning["phase"]) else raw_planning["phase"]
+    )
 
     # 標準化 status（移除多餘的描述文字，如「Canceled (因...）」）
     if result.get("status"):
@@ -391,6 +416,24 @@ def validate_task_graph(tasks):
                     "invalid_dependency_token",
                 )
             )
+        if task["invalid_write_scope"]:
+            errors.append(
+                planning_error(
+                    task["file"],
+                    "Write Scope 含非法或不完整路徑 token："
+                    + ", ".join(task["invalid_write_scope"]),
+                    "invalid_write_scope",
+                )
+            )
+        if task["invalid_contract"]:
+            errors.append(
+                planning_error(
+                    task["file"],
+                    "Contract 含非法或不完整契約路徑 token："
+                    + ", ".join(task["invalid_contract"]),
+                    "invalid_contract",
+                )
+            )
         if task["invalid_external_effects"]:
             errors.append(
                 planning_error(
@@ -498,15 +541,22 @@ def parse_round_file(filepath):
 
     section = ROUND_SECTION_RE.search(content)
     task_ids = []
+    invalid_task_ids = []
     if section:
         for line in section.group(1).splitlines():
             if not line.lstrip().startswith("|"):
                 continue
-            first_cell = line.split("|", 2)[1]
-            match = TASK_ID_RE.search(first_cell)
-            if match:
-                task_ids.append(match.group(0))
+            first_cell = line.split("|", 2)[1].strip()
+            if first_cell.lower() == "task id" or re.fullmatch(r":?-{3,}:?", first_cell):
+                continue
+            quoted = re.fullmatch(r"`([^`]+)`", first_cell)
+            token = quoted.group(1).strip() if quoted else first_cell
+            if TASK_ID_RE.fullmatch(token):
+                task_ids.append(token)
+            else:
+                invalid_task_ids.append(token or "<空白>")
     result["task_ids"] = task_ids
+    result["invalid_task_ids"] = invalid_task_ids
     return result
 
 
@@ -641,6 +691,8 @@ def revision_is_commit(root, revision, cache):
 
 
 def contracts_are_ready(root, task, manifest, by_id, revision_cache):
+    if task["invalid_contract"]:
+        return False
     contracts = task["contract"]
     if contracts is None:
         return False
@@ -838,6 +890,15 @@ def build_planning_view(root, all_project_tasks=None):
             )
 
         task_ids = manifest["task_ids"]
+        if manifest["invalid_task_ids"]:
+            errors.append(
+                planning_error(
+                    location,
+                    "Round 封閉集合含非法 Task ID token："
+                    + ", ".join(manifest["invalid_task_ids"]),
+                    "invalid_round_member_token",
+                )
+            )
         duplicate_members = sorted({task_id for task_id in task_ids if task_ids.count(task_id) > 1})
         if duplicate_members:
             errors.append(
@@ -864,7 +925,7 @@ def build_planning_view(root, all_project_tasks=None):
                     "unknown_round_member",
                 )
             )
-        for task_id in set(task_ids):
+        for task_id in sorted(set(task_ids)):
             if task_id in membership:
                 errors.append(
                     planning_error(
@@ -921,8 +982,12 @@ def build_planning_view(root, all_project_tasks=None):
                     reasons.append("dag_order")
                 if wave_by_task.get(left_id) != wave_by_task.get(right_id):
                     reasons.append("different_wave")
-                if not scopes_are_definitely_disjoint(
-                    by_id[left_id]["write_scope"], by_id[right_id]["write_scope"]
+                if (
+                    by_id[left_id]["invalid_write_scope"]
+                    or by_id[right_id]["invalid_write_scope"]
+                    or not scopes_are_definitely_disjoint(
+                        by_id[left_id]["write_scope"], by_id[right_id]["write_scope"]
+                    )
                 ):
                     reasons.append("write_scope_overlap_or_unknown")
                 if task_writes_contract_used_by(by_id[left_id], by_id[right_id]) or task_writes_contract_used_by(

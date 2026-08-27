@@ -17,6 +17,8 @@ Epic／模組只能表達分類，不能證明兩張工單之間沒有內容依�
 
 並行必須同時滿足 DAG 無邊、Write Scope 不重疊、Contract 已進 base 且沒有 peer 同時修改，
 以及雙方都有可證互不重疊的 External Effects 來源。缺欄與不可判定都預設排序。
+六欄的破折號空值只接受精準整欄值；清單使用 backtick 時不得留下未引用 token。Round 封閉
+集合的每個資料列也必須完整匹配 Task ID，任何非法來源列都直接阻擋規劃圖。
 
 ## Rejected alternatives
 

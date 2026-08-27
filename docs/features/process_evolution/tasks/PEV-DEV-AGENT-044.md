@@ -8,7 +8,7 @@
 **🔐 資料分級 (Data Class):** —
 **↪️ Execution 覆寫 (Execution Override):** —
 **⛓️ 前置工單 (Blocked By):** PEV-DEV-AGENT-043
-**✍️ 寫入範圍 (Write Scope):** `kit/.agent/resources/task_template.md`、`kit/docs/features/_TEMPLATE/tasks/_EXAMPLE-DEV-BE-001.md`、`kit/.agent/scripts/scan_backlog.py`、`kit/.agent/scripts/precheck.py`、`kit/.agent/skills/scrum-master/SKILL.md`、`kit/docs/standards/git_workflow.md`、`kit/docs/standards/parallel_development.md`、`kit/docs/standards/adr/ADR-001_task_dag_and_ownership.md`、`tests/test_scan_backlog.py`、`tests/test_precheck.py`
+**✍️ 寫入範圍 (Write Scope):** `kit/.agent/resources/task_template.md`、`kit/docs/features/_TEMPLATE/tasks/_EXAMPLE-DEV-BE-001.md`、`kit/.agent/scripts/scan_backlog.py`、`kit/.agent/scripts/precheck.py`、`kit/.agent/skills/scrum-master/SKILL.md`、`kit/docs/standards/git_workflow.md`、`kit/docs/standards/parallel_development.md`、`kit/docs/standards/adr/ADR-001_task_dag_and_ownership.md`、`tests/test_scan_backlog.py`、`tests/test_precheck.py`、`docs/features/process_evolution/tasks/PEV-DEV-AGENT-043.md`、`docs/features/process_evolution/tasks/PEV-DEV-AGENT-047.md`
 **🌐 外部副作用 (External Effects):** —
 **📜 共用契約 (Contract):** `kit/docs/standards/parallel_development.md`
 **🔁 變更集合 (Change Set):** —
@@ -53,7 +53,8 @@
 - **❓ 需要確認的事項 (Agent 提問)**：無；欄位與推導邊界已由 DN-005 簽核。
 - **✍️ User 補充回覆 (User Input)**：同意建立 `ROUND-001` 與工單 043～047；2026-08-27
   同意擴大 044 Write Scope，納入 `kit/docs/standards/git_workflow.md` 以同步 precheck 第 9 項；
-  同意新增 `External Effects` 來源欄位並納入 `kit/docs/standards/parallel_development.md`。
+  同意新增 `External Effects` 來源欄位並納入 `kit/docs/standards/parallel_development.md`；
+  同意擴大 044 Write Scope，等義正規化 043／047 的規劃來源欄位。
 
 ## 5. 範圍外 (Out of Scope)
 
@@ -61,17 +62,18 @@
 - 不要求一次性補齊所有歷史工單的新欄位。
 
 ## 📝 Code Review 備註
-> 2026-08-27 ❌ CHANGES REQUESTED — 完整報告見 [../reviews/PEV-DEV-AGENT-044.md](../reviews/PEV-DEV-AGENT-044.md)
+> 2026-08-27 第二輪 ❌ CHANGES REQUESTED — 完整報告見 [../reviews/PEV-DEV-AGENT-044.md](../reviews/PEV-DEV-AGENT-044.md)
 
 ### 📊 客觀指標
 | 指標 | 變更前／負向對照 | 變更後 |
 |---|---:|---:|
-| 目標兩檔 | 55 passed、13 failed | 68 passed、0 failed |
-| 全套隔離驗證 | 196 passed、4 baseline failed | 209 passed、4 baseline failed |
+| 目標兩檔 | 55 passed | 83 passed、0 failed |
+| rejected head＋新 tests | 67 passed、16 failed | 83 passed、0 failed |
+| 全套隔離驗證 | reviewed head：219 passed、4 baseline failed | 224 passed、4 baseline failed |
 | precheck／diff／skill | — | 9/9／通過／有效 |
 
-### 待修正項目
-- 🚨 `kit/.agent/scripts/scan_backlog.py:137` — 非法 `Blocked By` token 會被丟棄或截短。
-- 🚨 `kit/.agent/scripts/scan_backlog.py:437-552` — glob 與無來源的外部副作用可能誤標可並行。
-- 🚨 `kit/.agent/scripts/scan_backlog.py:584-623` — migrate 未依賴 expand 仍可通過。
-- 🚨 `kit/.agent/scripts/scan_backlog.py:657-669` — Round 缺 review target 或 opening base 不存在仍可通過。
+### 第二輪修正結果
+- ✅ explicit none 只接受整欄破折號；混合依賴、External Effects、Change Set／Phase 全部報錯。
+- ✅ Write Scope／Contract 保存並拒絕 backtick 外殘留與非法路徑。
+- ✅ Round 封閉集合每個非 header／separator 資料列都必須完整匹配 Task ID。
+- ✅ 043／047 規劃來源完成等義正規化；kit precheck 9/9，拓撲不變。
