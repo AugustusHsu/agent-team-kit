@@ -25,11 +25,7 @@
 
 > 包含狀態為 `Pending` 的工單，等待前置條件完成或人為確認後方可開始。
 
-| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
-|---|---------|------|------|-------------------|---------------|
-| 1 | PEV-DEV-AGENT-042 | 混合代理路由與交接端到端驗證 | process_evolution | qa-automation-engineer | ⏳ Pending |
-
-**小計**：1 張
+*(無)*
 
 ---
 
@@ -39,20 +35,20 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) | 完成時間 |
 |---|---------|------|------|-------------------|---------------|----------|
-| 1 | PEV-DEV-AGENT-041 | 安全遷移本 repo 的 Claude／Codex／GitHub 設定 | process_evolution | devops-engineer | ✅ Done | 2026-08-27T00:27+08:00 |
-| 2 | PEV-DEV-AGENT-040 | 工單與審查流程接入能力路由證據 | process_evolution | scrum-master | ✅ Done | 2026-08-27T00:09+08:00 |
-| 3 | PEV-DEV-AGENT-039 | 實作 route／explain 與失效重路由 | process_evolution | backend-developer | ✅ Done | 2026-08-27T00:01+08:00 |
-| 4 | PEV-DEV-AGENT-038 | 實作 doctor／refresh 與 Claude、Codex、GitHub probes | process_evolution | devops-engineer | ✅ Done | 2026-08-26T23:55+08:00 |
-| 5 | PEV-DEV-AGENT-037 | 實作 agent runtime state、provider registry 與 init | process_evolution | backend-developer | ✅ Done | 2026-08-26T23:46+08:00 |
-| 6 | PEV-DEV-AGENT-036 | installer 支援雙入口種子檔與模板升級 | process_evolution | devops-engineer | ✅ Done | 2026-08-26T23:36+08:00 |
-| 7 | PEV-DEV-AGENT-035 | 建立雙入口模板與供應商 adapter manifests | process_evolution | system-architect | ✅ Done | 2026-08-26T20:10+08:00 |
-| 8 | PEV-DEV-AGENT-034 | 建立跨代理執行標準與任務輪廓 registry | process_evolution | system-architect | ✅ Done | 2026-08-26T20:02+08:00 |
-| 9 | PEV-DEV-AGENT-033 | 依 skill_conventions.md 補齊 13 份 skill 的落差 | process_evolution | tech-lead | ✅ Done | 2026-08-22T04:05+08:00 |
-| 10 | PEV-DEV-AGENT-028 | 立 skill 撰寫標準：skill_conventions.md | process_evolution | system-architect | ✅ Done | 2026-08-22T02:20+08:00 |
+| 1 | PEV-DEV-AGENT-042 | 混合代理路由與交接端到端驗證 | process_evolution | qa-automation-engineer | ✅ Done | 2026-08-27T08:11+08:00 |
+| 2 | PEV-DEV-AGENT-041 | 安全遷移本 repo 的 Claude／Codex／GitHub 設定 | process_evolution | devops-engineer | ✅ Done | 2026-08-27T00:27+08:00 |
+| 3 | PEV-DEV-AGENT-040 | 工單與審查流程接入能力路由證據 | process_evolution | scrum-master | ✅ Done | 2026-08-27T00:09+08:00 |
+| 4 | PEV-DEV-AGENT-039 | 實作 route／explain 與失效重路由 | process_evolution | backend-developer | ✅ Done | 2026-08-27T00:01+08:00 |
+| 5 | PEV-DEV-AGENT-038 | 實作 doctor／refresh 與 Claude、Codex、GitHub probes | process_evolution | devops-engineer | ✅ Done | 2026-08-26T23:55+08:00 |
+| 6 | PEV-DEV-AGENT-037 | 實作 agent runtime state、provider registry 與 init | process_evolution | backend-developer | ✅ Done | 2026-08-26T23:46+08:00 |
+| 7 | PEV-DEV-AGENT-036 | installer 支援雙入口種子檔與模板升級 | process_evolution | devops-engineer | ✅ Done | 2026-08-26T23:36+08:00 |
+| 8 | PEV-DEV-AGENT-035 | 建立雙入口模板與供應商 adapter manifests | process_evolution | system-architect | ✅ Done | 2026-08-26T20:10+08:00 |
+| 9 | PEV-DEV-AGENT-034 | 建立跨代理執行標準與任務輪廓 registry | process_evolution | system-architect | ✅ Done | 2026-08-26T20:02+08:00 |
+| 10 | PEV-DEV-AGENT-033 | 依 skill_conventions.md 補齊 13 份 skill 的落差 | process_evolution | tech-lead | ✅ Done | 2026-08-22T04:05+08:00 |
 
 **小計**：10 張（Done: 10 / Canceled: 0）
 
-> 📦 另有 34 張已歸檔工單未顯示。
+> 📦 另有 35 張已歸檔工單未顯示。
 
 ---
 
@@ -69,8 +65,7 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| ⏳ Pending | 1 | 2.3% |
-| ✅ Done | 42 | 97.7% |
+| ✅ Done | 43 | 100.0% |
 | **總計** | **43** | **100%** |
 
 ### worktree_guard

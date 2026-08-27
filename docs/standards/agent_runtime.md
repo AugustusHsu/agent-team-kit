@@ -196,9 +196,11 @@ GitHub 也不是一個布林值：
 
 | 能力 | 自動探針 | 為何分開 |
 |---|---|---|
+| Git remote URL | `git remote get-url origin`（offline） | 只證明 repo 有可讀的 remote 設定 |
 | Git remote read | `git ls-remote`（online read） | 只證明 remote 可讀 |
 | Git remote write | 人工確認 | 健康檢查不得用 push 製造寫入 |
 | GitHub API read | `gh api user` | 與 git transport 是不同憑證路徑 |
+| GitHub SSH read | `ssh -T git@github.com` | GitHub 成功仍回 exit 1，必須同時驗成功 marker |
 | GitHub API write | 人工確認 | 不以開 issue／PR 作探針 |
 | Codex Cloud Connector | 人工確認＋TTL | App 目前未必有可觀察 API |
 | automated review | 人工確認＋TTL | 屬 repo／平台設定，不能由 SSH 成功推出 |
@@ -234,6 +236,40 @@ scope 是單次。`round`／`project` 必須同時寫 `--override-expires-at`（
 
 人類輸出適合當下判讀；`--json` 是工單與審查載體保存決策證據的介面。零候選回傳非零狀態，
 並逐一列出缺少能力／政策／可用性原因，不選 unknown 或違規 cloud 填空。
+
+## 13. 混合代理的最短操作流程
+
+新專案與既有專案都走同一條狀態機；差別只在既有入口先跑 `migrate`：
+
+```bash
+# 既有專案先預覽；確認候選後才人工接受
+python3 .agent/scripts/agent_runtime.py migrate --dry-run
+
+# 初始化至少一個本機 profile，再跑唯讀健康檢查
+python3 .agent/scripts/agent_runtime.py init --non-interactive \
+  --verified-profile codex-cli --prefer-profile codex-cli
+python3 .agent/scripts/agent_runtime.py doctor --online
+
+# 開工前路由；輸出 JSON 留進 review
+python3 .agent/scripts/agent_runtime.py route --task-file <工單路徑> --explain --json
+```
+
+執行中失效時，不切工單、不改 Assignee、不另開分支。先記下 Task ID、branch、HEAD、
+已完成／待辦 AC 與最後可信驗證，再重路由：
+
+```bash
+python3 .agent/scripts/agent_runtime.py route \
+  --task-file <工單路徑> \
+  --failed-profile <失效 profile> \
+  --task-id <TaskID> --branch <branch> --head <HEAD> \
+  --completed-ac AC-01 --pending-ac AC-02 \
+  --validation 'pytest 194 passed' --failure-type <quota|auth|permission|network> \
+  --json
+```
+
+對 repo write、shell、測試與外部副作用，handoff 預設要求使用者確認；只有純本機唯讀工作
+且專案明示 `--allow-auto-read-handoff` 才能自動接手。審查檔使用出貨 review template，
+保存候選、排除理由、probe 時間、cache 與 handoff，禁止貼 credential 或完整敏感輸出。
 
 ## 相關文件
 
