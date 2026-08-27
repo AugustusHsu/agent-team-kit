@@ -1,7 +1,7 @@
 # 📋 待辦總表 (Backlog)
 
 > **工單來源目錄**：`docs/features/*/tasks/`
-> **工單總數**：45 張
+> **工單總數**：50 張
 
 ---
 
@@ -9,7 +9,11 @@
 
 > 包含狀態為 `In Progress` 或 `Ready` 的工單。
 
-*(無)*
+| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
+|---|---------|------|------|-------------------|---------------|
+| 1 | PEV-DEV-AGENT-043 | 落地並行開發標準與架構決策 | process_evolution | system-architect | 🟢 Ready |
+
+**小計**：1 張（In Progress: 0 / Ready: 1）
 
 ---
 
@@ -25,7 +29,14 @@
 
 > 包含狀態為 `Pending` 的工單，等待前置條件完成或人為確認後方可開始。
 
-*(無)*
+| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
+|---|---------|------|------|-------------------|---------------|
+| 1 | PEV-DEV-AGENT-044 | 實作工單 DAG、欄位與 wave 驗證 | process_evolution | backend-developer | ⏳ Pending |
+| 2 | PEV-DEV-AGENT-045 | 實作輪次分支、worktree 與所有權流程 | process_evolution | devops-engineer | ⏳ Pending |
+| 3 | PEV-DEV-AGENT-046 | 實作 fresh-context panel 與不可變 Review Target | process_evolution | tech-lead | ⏳ Pending |
+| 4 | PEV-DEV-AGENT-047 | 並行流程端到端驗證與安裝同步 | process_evolution | qa-automation-engineer | ⏳ Pending |
+
+**小計**：4 張
 
 ---
 
@@ -65,8 +76,10 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| ✅ Done | 43 | 100.0% |
-| **總計** | **43** | **100%** |
+| 🟢 Ready | 1 | 2.1% |
+| ⏳ Pending | 4 | 8.3% |
+| ✅ Done | 43 | 89.6% |
+| **總計** | **48** | **100%** |
 
 ### worktree_guard
 
@@ -88,10 +101,10 @@
 | [DN-002](../design_notes/DN-002_discord_notification_layer.md) | 🌱 Seed | Discord 作為通知與批准層 | DN-001（本檔的格式）；DN-007（CI 閘門，2026-08-17 開出，解除本欄長期懸空） |
 | [DN-003](../design_notes/DN-003_git_workflow_and_pr_gate.md) | 🎓 Graduated | Git 流程與 PR 閘門 | DN-001（格式） |
 | [DN-004](../design_notes/DN-004_skill_system_realignment.md) | 🎓 Graduated | Skill 體系與現行流程的重新對齊 | DN-001（本檔的格式）；DN-003（git 流程，其落地會先改動 6 份 skill） |
-| [DN-005](../design_notes/DN-005_parallel_task_decomposition.md) | 🌱 Seed | 並行開發的任務拆解與變更傳播 | DN-001（本檔的格式）；DN-003（git 流程，本 DN 視其為「基本層」並在其上擴充） |
-| [DN-006](../design_notes/DN-006_branch_topology_and_isolation.md) | 🔍 Exploring | 分支拓撲與並行隔離 | DN-001（本檔的格式）；DN-003（已畢業的單線 git 流程，本 DN 在其上擴充） |
+| [DN-005](../design_notes/DN-005_parallel_task_decomposition.md) | 🎓 Graduated | 並行開發的任務拆解與變更傳播 | DN-001（本檔的格式）；DN-003（git 流程，本 DN 視其為「基本層」並在其上擴充） |
+| [DN-006](../design_notes/DN-006_branch_topology_and_isolation.md) | 🎓 Graduated | 分支拓撲與並行隔離 | DN-001（本檔的格式）；DN-003（已畢業的單線 git 流程，本 DN 在其上擴充） |
 | [DN-007](../design_notes/DN-007_ci_gate.md) | 🎓 Graduated | CI 閘門：kit 要不要出貨自動檢查，以及檢查什麼 | DN-001（本檔的格式）；DN-003（已畢業，`git_workflow.md` 是本檔要補的那份規範） |
-| [DN-008](../design_notes/DN-008_review_panel_and_context_isolation.md) | 🌱 Seed | 審查的執行形態：panel 模式與 context 隔離 | DN-001（本檔的格式）；DN-005（§2.1 的 panel 是它 §4「放大審查粒度」訴求的落點）；DN-006（§4.2 的重疊區強制人工審查與 panel 方向相反，判準要一起定；隔離載體的選擇與它的合併點耦合）；DN-009（panel 成員可來自不同供應商／執行面，需先有共同能力與可用性判準） |
+| [DN-008](../design_notes/DN-008_review_panel_and_context_isolation.md) | 🎓 Graduated | 審查的執行形態：panel 模式與 context 隔離 | DN-001（本檔的格式）；DN-005（§2.1 的 panel 是它 §4「放大審查粒度」訴求的落點）；DN-006（§4.2 的重疊區強制人工審查與 panel 方向相反，判準要一起定；隔離載體的選擇與它的合併點耦合）；DN-009（panel 成員可來自不同供應商／執行面，需先有共同能力與可用性判準） |
 | [DN-009](../design_notes/DN-009_multi_agent_capability_routing.md) | 🎓 Graduated | 多代理能力路由與可用性 | DN-001（本檔的格式與畢業條件） |
 | [DN-010](../design_notes/DN-010_cross_agent_instruction_and_configuration.md) | 🎓 Graduated | 跨代理入口與設定分層 | DN-001（本檔的格式與畢業條件）；DN-009（供應商／執行面／可用性的名詞與邊界） |
 | [DN-011](../design_notes/DN-011_agent_initialization_and_lifecycle.md) | 🎓 Graduated | 多代理初始化、健康檢查與生命週期 | DN-001（本檔的格式與畢業條件）；DN-009（路由模型與可用性語意）；DN-010（共同／供應商／使用者設定分層） |
