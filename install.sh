@@ -77,7 +77,7 @@ fi
 # 否則會洗掉專案的入口、自訂忽略規則與 BACKLOG，或在未遷移前改變 agent 行為。
 is_seed_file() {
   case "$1" in
-    AGENTS.md | CLAUDE.md | .gitignore | docs/development/BACKLOG.md | docs/features/README.md) return 0 ;;
+    AGENTS.md | CLAUDE.md | .gitignore | docs/development/BACKLOG.md | docs/development/overlap_zones.md | docs/features/README.md) return 0 ;;
     *) return 1 ;;
   esac
 }

@@ -12,7 +12,7 @@
 **📜 共用契約 (Contract):** `kit/docs/standards/parallel_development.md`
 **🔁 變更集合 (Change Set):** —
 **🪜 變更階段 (Phase):** —
-**🚥 任務狀態 (Status):** Pending
+**🚥 任務狀態 (Status):** In Review
 **📅 建立時間 (Created):** 2026-08-27T10:18+08:00
 **✅ 完成時間 (Closed):** —
 **🔀 審查載體編號 (PR/MR):** —
@@ -36,13 +36,16 @@
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：`overlap_zones.md` 是專案版控種子，記錄長期高風險範圍而不複製輪次內 Write Scope；upgrade 保留使用者內容。
-- [ ] AC-02：兩張以上工單「同時活躍」才要求一 branch 一 worktree；建立前檢查 Write Scope／Contract／overlap zone，重疊預設改為排序而非並行。
-- [ ] AC-03：工單分支以 merge commit 進輪次、輪次以 merge commit 進主線；分支名稱刪除後仍由 merge 訊息中的 Task／Round ID 保留可追溯性。
-- [ ] AC-04：真實暫存 repo 同時涵蓋兩張平行工單、main 同期前進、最終整合、main／round 的 first-parent 視圖與 `git branch -d` 安全回收。
-- [ ] AC-05：工單併入輪次後移除其 worktree但保留 branch；輪次完成後只剩主工作目錄，退回時可由原 Task ID／branch 重建。
-- [ ] AC-06：`git rerere` 只列 repo-local 選用項，不改 kit 預設、不版控 rr-cache；重用後仍要求檢查 diff 與重跑測試。
+- [x] AC-01：`overlap_zones.md` 是專案版控種子，記錄長期高風險範圍而不複製輪次內 Write Scope；upgrade 保留使用者內容。
+- [x] AC-02：兩張以上工單「同時活躍」才要求一 branch 一 worktree；建立前檢查 Write Scope／Contract／overlap zone，重疊預設改為排序而非並行。
+- [x] AC-03：工單分支以 merge commit 進輪次、輪次以 merge commit 進主線；分支名稱刪除後仍由 merge 訊息中的 Task／Round ID 保留可追溯性。
+- [x] AC-04：真實暫存 repo 同時涵蓋兩張平行工單、main 同期前進、最終整合、main／round 的 first-parent 視圖與 `git branch -d` 安全回收。
+- [x] AC-05：工單併入輪次後移除其 worktree但保留 branch；輪次完成後只剩主工作目錄，退回時可由原 Task ID／branch 重建。
+- [x] AC-06：`git rerere` 只列 repo-local 選用項，不改 kit 預設、不版控 rr-cache；重用後仍要求檢查 diff 與重跑測試。
 - [ ] AC-07：`is_seed_file()` 與 `tests/test_install.py::test_升級保留種子檔` 同步；安裝、升級與 Git 拓撲測試通過。
+
+> AC-07 的開發分支證據已通過；核取留待 047 將新版流程與種子檔同步至根目錄安裝實例後，
+> 由 fresh-context reviewer 以正式安裝入口複驗。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
