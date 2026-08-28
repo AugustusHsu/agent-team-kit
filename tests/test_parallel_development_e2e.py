@@ -213,7 +213,7 @@ def test_安裝後五工單_dag_wave_contract與條件式_worktree串成完整�
         assert _git(project, "show-ref", "--verify", f"refs/heads/{task_id}").returncode == 0
 
 
-def test_工單進輪次再進當下主線候選保留兩層_first_parent與安全回收(
+def test_工單進輪次且候選正式進_main_後才安全回收(
     tmp_path: Path,
 ):
     """同期 main 前進時，integration candidate 仍要保留 task→round→main 兩層 merge。"""
@@ -267,14 +267,46 @@ def test_工單進輪次再進當下主線候選保留兩層_first_parent與安�
     integration_first_parent = _git(
         repo, "log", "--first-parent", "--format=%s", "integration/ROUND-901"
     ).stdout.splitlines()
+    candidate_refs = _git(
+        repo, "for-each-ref", "--format=%(refname:short)", "refs/heads"
+    ).stdout.splitlines()
+    round_in_main_before_promotion = _git(
+        repo,
+        "merge-base",
+        "--is-ancestor",
+        "feature/e2e-round",
+        "main",
+        check=False,
+    )
 
-    for branch in ("E2E-DEV-AGENT-001", "E2E-DEV-AGENT-002", "feature/e2e-round"):
-        _git(repo, "merge-base", "--is-ancestor", branch, "integration/ROUND-901")
+    assert round_in_main_before_promotion.returncode != 0, "候選通過前 main 不得假裝已含 round"
+    for branch in (
+        "E2E-DEV-AGENT-001",
+        "E2E-DEV-AGENT-002",
+        "feature/e2e-round",
+        "integration/ROUND-901",
+    ):
+        assert branch in candidate_refs, f"候選 QA／panel 完成前不得提早刪除 {branch}"
+
+    _git(repo, "switch", "main")
+    _git(repo, "merge", "--ff-only", "integration/ROUND-901")
+    main_head = _git(repo, "rev-parse", "main").stdout.strip()
+    main_first_parent = _git(
+        repo, "log", "--first-parent", "--format=%s", "main"
+    ).stdout.splitlines()
+    for branch in (
+        "E2E-DEV-AGENT-001",
+        "E2E-DEV-AGENT-002",
+        "feature/e2e-round",
+        "integration/ROUND-901",
+    ):
+        _git(repo, "merge-base", "--is-ancestor", branch, "main")
         _git(repo, "branch", "-d", branch)
 
     assert _parents(repo, task_a_merge) == [opening_base, task_a_head]
     assert task_b_head in _parents(repo, round_head) and len(_parents(repo, round_head)) == 2
     assert _parents(repo, integration_head) == [main_concurrent, round_head]
+    assert main_head == integration_head, "main 未前進時應直接採用已驗證的候選 merge commit"
     assert round_first_parent[:3] == [
         "merge(task): [E2E-DEV-AGENT-002] 併入輪次",
         "merge(task): [E2E-DEV-AGENT-001] 併入輪次",
@@ -285,11 +317,12 @@ def test_工單進輪次再進當下主線候選保留兩層_first_parent與安�
         "main 同期前進",
         "建立 opening base",
     ]
+    assert main_first_parent[:3] == integration_first_parent[:3]
     assert (repo / "main.txt").read_text(encoding="utf-8") == "main moved\n"
     assert (repo / "task-a.txt").read_text(encoding="utf-8") == "A\n"
     assert (repo / "task-b.txt").read_text(encoding="utf-8") == "B\n"
-    refs = _git(repo, "for-each-ref", "--format=%(refname:short)", "refs/heads").stdout
-    assert "E2E-DEV-AGENT" not in refs and "feature/e2e-round" not in refs
+    refs = _git(repo, "for-each-ref", "--format=%(refname:short)", "refs/heads").stdout.splitlines()
+    assert refs == ["main"], "round 正式進 main 後才可只留下 main"
 
 
 def test_review_target漂移與整合失敗歸因只退回受影響層(tmp_path: Path):
