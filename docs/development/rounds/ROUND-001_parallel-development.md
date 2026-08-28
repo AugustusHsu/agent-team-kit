@@ -104,14 +104,26 @@
 
 | Finding ID | Disposition | 理由 | Blocking 回查／重跑證據 |
 |---|---|---|---|
-| — | — | 待 raw findings 全數落盤後逐項處理 | — |
+| `INT-F-001` | `accept` | 固定樹只有 043 可重建最終 APPROVED；044 artifact 停在第五輪 CHANGES REQUESTED，045～047 不存在正式 review artifact，無法證明 Task→Round merge 前完成 pinned fresh-context 窄審。 | 固定 Head 的 `git cat-file -e`：044 exit 0、045～047 exit 128；044 artifact 明載等待第六輪；first-parent 已含 044～047 merge。須從 opening base 重建先審後併 candidate，事後補文字不足。 |
+| `INT-F-002` | `accept` | 043～045 已 Done／Closed，但保留給 047／fresh reviewer 的 AC 仍未核取，結案狀態與驗收紀錄矛盾。 | 固定 Head 已實跑 259 passed、root／kit precheck 各 9/9、installer 零待合併及 diff check；足以核取 043 AC-06、044 AC-07、045 AC-07。047 AC-09 仍刻意保留。 |
+| `INT-F-003` | `accept` | upgrade／migrate 行為命中 `migration`；新增 machine-readable graph、Round／Review Target 契約命中公開 API。QA lane 的未觸發分類與固定 diff 不符。 | `install.sh:75-80,139-145` 與 install regression 固化 migrate 行為；`scan_backlog.py` 對外輸出 `review_target`。第三風險 lane 已補做，仍須使用者人工裁定。 |
+| `QA-E-001` | `accept` | 接受「未發現額外對抗 QA finding」與客觀綠燈；不把單 lane APPROVED 提升為整輪 verdict，也不覆蓋其他 blocker。其風險未觸發分類依 `INT-F-003` 駁回。 | 259 passed、雙 precheck 9/9、graph `errors=[]`、installer dry-run 0／0／82／6／0，且既有 head drift、branch 安全刪除、外部副作用及輪外前置負向測試通過。 |
+| `RISK-F-001` | `accept` | installer 提示的 remediation 不可用：缺 `overlap_zones.md` 時要求 migrate，但 migrate 只處理 AGENTS／CLAUDE。 | `/tmp` 由 Base 首次安裝再以 Head upgrade；migrate dry-run entries 無 `overlap_zones.md`，檔案仍不存在，再次 upgrade 重複告警。須修正 implementation、tests 與文件。 |
+| `RISK-F-002` | `accept` | `Integration Review Target` 僅驗欄位存在，未驗完整 schema、commit SHA、Round ID 或祖先關係，違反不可變 target 語意。 | `/tmp` 以合法兩工單搭配 `Integration Review Target: banana`：graph、BACKLOG、precheck 均 exit 0。須補 fail-closed 實作與 malformed／非 commit／錯 ID／合法 target 回歸。 |
 
-- **Code Reviewer 自己的 lane 完成時間**：—
-- **Raw findings 落盤 commit**：—
-- **未解證據衝突**：—
-- **條件式風險最終人工裁定**：—（四類均未觸發才可填不適用；否則記錄觸發類型、
-  使用者裁定原文與時間）
-- **修正與重跑範圍**：—
+- **Code Reviewer 自己的 lane 完成時間**：早於 raw findings commit
+  `9c1937ead0bba34a6e4bde010cd3c9f145733526`（2026-08-28T16:38:19+08:00）；§5.1
+  原始輸出在讀取其他 lane 前已完成。
+- **Raw findings 落盤 commit**：`9c1937ead0bba34a6e4bde010cd3c9f145733526`
+- **未解證據衝突**：無。固定 diff 已消解 trigger 分類：`migration`、公開 API 已觸發；安全政策、
+  `critical` overlap zone 未觸發。
+- **條件式風險最終人工裁定**：2026-08-28T16:48:42+08:00，觸發類型為 `migration`、
+  公開 API。使用者原文：「同意風險裁定：migration／公開 API 已觸發，五項 blocking 不放行；
+  同意完整修正並以可回復備份 ref 重建 ROUND-001 先審後併拓撲。」
+- **修正與重跑範圍**：`INT-F-002` 與人工裁定屬 metadata；`INT-F-001` 須保留舊 refs 並從
+  opening base 重建先審後併 candidate；`RISK-F-001`、`RISK-F-002` 必須修改 implementation／
+  tests，使舊 target 失效。重建後重做受影響 Task 窄審、整合 QA、三路 panel、reconciliation
+  與最終 fresh-context review。
 
 ## 7. 最終 Review Target 與 Verdict
 
