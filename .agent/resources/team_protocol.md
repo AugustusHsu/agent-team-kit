@@ -52,7 +52,7 @@ Pending → Ready → In Progress → In Review → Done
 | Developer 開始執行工單 | Developer | `In Progress` |
 | Developer 完成開發並提交交付回報 | Developer | `In Review` |
 | Code Reviewer 判定 `[ ✅ APPROVED ]` | Code Reviewer | **維持 `In Review`**（放行訊號，不是結案；見 §1.9） |
-| 結案 commit 已合併進主線 | Developer | `Done` |
+| 含結案資料的 reviewed head 已合併進主線 | Developer | `Done` |
 | Code Reviewer 判定 `[ ❌ CHANGES REQUESTED ]` | Code Reviewer | `In Progress` |
 | Scrum Master 取消工單 | Scrum Master | `Canceled` |
 
@@ -62,7 +62,7 @@ Pending → Ready → In Progress → In Review → Done
 | 欄位 | 填寫時機 | 執行者 |
 |---|---|---|
 | `**📅 建立時間 (Created):**` | 工單首次建立時 | Scrum Master |
-| `**✅ 完成時間 (Closed):**` | Status 改為 `Done` 時——隨**結案 commit** 一併寫入（§1.9） | Developer |
+| `**✅ 完成時間 (Closed):**` | 寫入正式 Review Target 前的**結案 commit**（合併成功才在主線生效，§1.9） | Developer |
 | `**✅ 完成時間 (Closed):**` | Status 改為 `Canceled` 時 | Scrum Master |
 
 - 未完成的工單，`Closed` 欄位保持 `—`（em dash）。
@@ -130,6 +130,10 @@ Pending → Ready → In Progress → In Review → Done
 `docs/features/{模組}/tasks/{TaskID}.md`。
 **沒有工單的臨時工作，一律先開一張最小工單再開分支。**
 
+同一目標有 2～5 張相關工單時，另建短命 `feature/{topic}` round branch；Round Manifest、
+DAG、Write Scope、Contract、條件式 worktree 與 panel 的正版見
+[`docs/standards/parallel_development.md`](../../docs/standards/parallel_development.md)。
+
 **分支與審查載體的生命週期對映工單狀態：**
 
 | 工單狀態 | 分支 | 審查載體（PR／MR／工單審查報告） |
@@ -138,18 +142,21 @@ Pending → Ready → In Progress → In Review → Done
 | `In Progress` | **建立分支**，分支名 = Task ID | 首次推送後開**草稿**，並把編號回填工單 |
 | `In Progress` → `In Review` | **停止寫入**——任何寫入都會讓審查對象漂移 | 草稿 → **正式請求審查** |
 | `In Review` → `In Progress` | **恢復寫入**，同一分支繼續修正 | 轉回草稿 |
-| `In Review` → `Done` | 結案 commit → 合併 → 刪除分支 | **已合併** |
+| 多工單窄審通過 | merge commit 進 round；移除 worktree但保留 Task branch | 工單維持 `In Review` |
+| `In Review` → `Done` | reviewed head 進 main 後安全刪除 branch | **已合併** |
 | → `Canceled` | 分支內有 commit 時**必須詢問使用者**保留或丟棄，不可逕自刪除 | 關閉 |
 
 - **不存在 `In Progress` → `Done` 的捷徑**，故每張工單必然經歷 `In Review`。
 - **開發過程中隨時可以 commit，不必等審查通過。** 反過來做會讓 `In Review` 期間
   沒有任何 ref 指著變更，一次 `git checkout`／`git reset` 就永久消失。
 - **`Done` = 已合併，不是 APPROVED。** APPROVED 只是放行訊號；合併還可能失敗。
-- **`Done` 的前置條件**：結案 commit 已合併進主線，且分支已刪除。
-- **結案 commit 在合併前寫入、於合併後生效。** 合併失敗它就不在主線，
-  工單自動維持 `In Review`，不需要任何回滾動作。
-- **回填的是審查載體的編號，不是 commit SHA**（合併會產生全新的 SHA），
-  且在**開 PR 當下**就回填，不等結案。
+- **`Done` 的前置條件**：含結案資料的 pinned head 已合併主線，且 branch 已安全刪除。
+- **結案 commit 必須在正式審查前寫入、納入 Review Target。** 合併失敗它就不在主線，
+  工單在主線自動維持原狀；APPROVED 後再追加 commit 會改 head，使核可失效。
+- **多工單輪次的工單在進 round 後仍是 `In Review`。** 整合 QA 通過後，由 round 上一顆
+  審查前結案 commit 一次寫入全部 `Done`／Closed，再固定 round target 做 panel。
+- **回填的是審查載體編號，不是 commit SHA**，且在開 PR／MR 當下就回填；
+  Review Target 的 SHA 寫在 review artifact 或 Round Manifest。
 
 > 📌 **本節只定義「工單走到這一步該做什麼」。** 分支怎麼開、commit 怎麼打、
 > 推送授權、合併與刪分支怎麼做、換平台要對應哪些能力，一律見
@@ -182,9 +189,8 @@ Pending → Ready → In Progress → In Review → Done
 - **上一次的同意不延用到下一次。** 每次交付各自取得一次同意。
 - 使用者要求修改訊息時，改完須**重新呈現完整訊息**再確認，不可只回覆「已修正」。
 - 審查退回（CHANGES REQUESTED）後重新交付時，**訊息須重新呈現、重新取得同意**。
-- **合併時產生的訊息同樣適用，而且它才是最終進入主線的那一則。** 無論是 squash
-  合併的訊息，還是非 fast-forward 合併自動寫的 `Merge branch '...'`，都從未經過
-  使用者過目——這是本閘門最容易漏掉的路徑，合併前必須先呈現。
+- **合併時產生的訊息同樣適用。** Task → round、Task → main、round → main 的 merge commit
+  都會進共享歷史；Git 自動產生的 `Merge branch '...'` 從未經使用者過目，合併前必須先呈現。
 
 commit message 的格式、Emoji 對照與**禁止寫入的內容**（AI 署名 trailer、對話脈絡、
 工具／session 內部狀態），一律以
@@ -315,15 +321,21 @@ CI runner 沒有 agent 的 context，shell 輸出必然保真，該檢查會永�
   - **🚨 矛盾與風險警告**: 列出開發過程中發現的任何風險或架構衝突（無則填「無」）。
   - **🧪 驗證/測試建議**: 提供具體的驗證方法（`curl` 指令、`pytest` 指令、或瀏覽器頁面路徑）。
 - 交付回報連同工單原文一併提交給 Code Reviewer。
+- **正式審查前先固定 Review Target。** 單張工單先在 Task branch 寫入 Status → `Done` 與 Closed；
+  多工單輪次的 Task 維持 `In Review`。兩者都記錄完整 base SHA、head SHA 與 Task ID，head 變動就重審。
 - **交付回報須附上分支上實際的 commit message 原文**（依
   `.agent/workflows/commit-message.md` 產出），與報告**一併呈交、一次表態**。
   變更**此時已經 commit 並推送**，訊息可用 `--amend` 修改（§1.10）。
 - 審查者可只針對報告表態退回；退回時訊息一併作廢，重新交付須重新呈現。
-  通過後由 Developer 依 §1.9 做結案 commit、合併、刪除分支。
+  單張工單先把結案資料納入正式 Review Target；多工單工單窄審通過後只合併進 round，
+  結案資料待整合 QA 通過後由 round 統一寫入。兩者皆依 §1.9／git workflow §6.2 收尾。
 
 ### 2.3 Code Reviewer → Done / 退回
-- Code Reviewer 審查後產出標準化審查報告（含 Verdict: APPROVED 或 CHANGES REQUESTED）。
-- 若 APPROVED，**工單狀態維持 `In Review`**——APPROVED 是放行訊號，不是結案。接著由 Developer 做**結案 commit**（Status → `Done`、填 Closed；審查載體編號早在開 PR／MR 當下就已回填）、合併、刪除分支；**合併完成之後工單才是 `Done`**——見 §1.9。
+- 能產生 APPROVED 的 Code Reviewer 必須使用與開發隔離的 fresh context，對 pinned
+  `base SHA + head SHA + Task/Round ID` 產出標準化報告；同 session 換角色只能自查。
+- 若單張工單 APPROVED，reviewed head 不得再變動，接著以 merge commit 進 main；若為多工單輪次的
+  工單窄審 APPROVED，則以 merge commit 進 round 並維持 `In Review`，整輪完成 QA、結案資料與
+  round panel 後才一起進 main。**合併進主線之後工單才正式 `Done`**——見 §1.9。
 - 若 CHANGES REQUESTED，工單退回 `In Progress`，Developer 根據報告修正。
 - **審查證據來源：交付回報是線索，不是證據。**
   - 每一條 AC 的通過與否，必須回到**程式碼、diff、或實際跑出來的輸出**判定。
@@ -337,7 +349,12 @@ CI runner 沒有 agent 的 context，shell 輸出必然保真，該檢查會永�
   - **連「實際輸出」本身都要存疑**：輸出可能在進入 context 前就被中間層改寫，
     而最嚴重的那種失效**不留任何提示**。取證前依 **§1.12** 驗證通道保真；
     在未通過的通道上跑出來的輸出，不得作為審查證據。
-- **審查紀錄的落點 (Write-back)：完整報告進 `reviews/`，工單只留結論與指標。**
+- **審查紀錄的落點 (Write-back)：完整報告進 `reviews/`，工單只留結論與指標；
+  APPROVED 後不得為寫回而修改 reviewed head。**
+  - CHANGES REQUESTED 沒有可沿用的核可：退回後可直接在 Task branch 寫報告、Status、AC 與規格修正，
+    再固定新 target。
+  - APPROVED 時，正式輸出先綁定 target；審查檔、工單結論與尚待補記的 checklist 由目的端
+    merge commit 一併帶入 round／main，不回頭改 Task head。多工單的這些 metadata 還會進 round panel。
   - **完整審查報告**寫入 `docs/features/<模組>/reviews/<TaskID>.md`——一張工單一個檔，
     多輪審查在同一檔內**由新到舊追加**，不另開檔。內容即 `code-reviewer` SKILL.md §4
     的完整報告：AC 逐條核對表、重大瑕疵與建議改法、Nitpicks、僅人工判讀的部分。
@@ -357,6 +374,38 @@ CI runner 沒有 agent 的 context，shell 輸出必然保真，該檢查會永�
 - **實際路由證據寫進審查檔，不寫回 Assignee。** 至少記 task profile／override、選中的
   execution profile、候選排除理由、probe 時間、是否使用過期 cache 與中途交接。
   `docs/standards/agent_runtime.md` §7／§12 是正版；只寫「這次用 Codex」不構成可重建證據。
+
+### 2.4 多工單輪次 Panel 與 Reconciliation
+
+本節定義角色交接順序；panel 的人數、觸發條件與完成閘門以
+`docs/standards/parallel_development.md` §7 為正版。單張工單只做 §2.3 的窄審，**不為形式啟動
+panel**；多工單輪次則在所有工單通過窄審並完成整合 QA 後，依下列順序執行：
+
+1. **固定候選對象**：以完整 `base SHA + head SHA + Round ID` 交給所有 lane。PR／MR 與 branch
+   diff 只是介面；任何 lane 都必須在報告中逐字重述 target。能簽發正式 APPROVED 的執行者必須
+   使用與開發隔離的 fresh context；同 session 換角色只算自查。
+2. **先獨立取證**：基線為整合語意與對抗驗證兩個 lane。`code-reviewer` 必須先完成自己的整合
+   語意 lane，才可讀取另一 lane 的 finding。安全政策、migration、公開 API 或命中
+   `overlap_zones.md` 的 `critical` 範圍時，才增加第 3 位風險專家並保留使用者最終閘門；
+   任一類觸發都必須在 Round Manifest 的「條件式風險最終人工裁定」記錄觸發類型、使用者
+   裁定原文與時間，只有四類都未觸發時才可填不適用。不以固定第三人增加一般輪次成本，
+   也不要求特定模型、供應商或模型多樣性。
+3. **Raw findings 先落盤**：每筆至少包含 `ID`、`severity`、`claim`、`file/line`、可重跑
+   `evidence`、`recommended verdict` 及其實際審查 target。所有 lane 的原始輸出先寫入唯一的
+   Round Manifest，**未落盤不得開始 reconciliation**；不另建重複的 round review 檔。
+4. **逐項 reconciliation**：`code-reviewer` 對每筆標示 `accept|reject|duplicate|defer` 與理由。
+   blocking finding 必須回到原始證據重跑；證據衝突仍無法消解時停止，不得投票或取多數決，
+   依 §1.2 詢問使用者。修正若改到實作，舊 target 失效並只重跑受影響 lane。
+5. **固定最終 Review Target**：QA、raw findings、reconciliation、blocking 回查與必要人工裁定
+   都已落盤後，重新固定完整 `base SHA + head SHA + Round ID`。`code-reviewer` 必須對最終 target
+   重新確認候選到最終 head 的差異；只有 panel 證據與裁定 metadata 可沿用原 lane 證據，任何
+   實作或測試變更都要重跑受影響 lane。正式 verdict 只能綁這個最終 target，APPROVED 後不得
+   再改 reviewed head。
+
+Review Target 的 head SHA 不要求自我嵌入被審 commit（commit 無法可靠保存自己的 SHA）。正式輸出
+先在審查報告綁定 target；APPROVED 的 target、verdict 與尚待補記的審查 metadata 依 §2.3 由
+**目的端 merge commit** 寫回 Round Manifest，不回頭修改 reviewed round head。合併結果相對核准
+head 只准新增這些 metadata；若混入實作變更，視為 head 漂移並重新審查。
 
 ---
 

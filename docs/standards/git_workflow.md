@@ -1,317 +1,183 @@
 # 🔀 Git 流程與 PR 閘門 (Git Workflow)
 
-> 本檔是 git 操作的**正版**：分支怎麼開、commit 什麼時候打、審查在哪裡發生、
-> 怎麼合併與收尾。
->
-> 與協作守則的分工：[`.agent/resources/team_protocol.md`](../../.agent/resources/team_protocol.md)
-> §1.9／§1.10 回答「工單走到這一步該做什麼」（狀態機），
-> **本檔回答「git 這件事該怎麼做」（操作手冊）**。兩邊不重述彼此的內容。
+> 本檔是 Git 操作的**正版**：分支怎麼開、commit 何時寫、審查在哪裡發生、怎麼合併與收尾。
+> 工單狀態與角色交接見 [team_protocol](team_protocol.md)；多工單的 DAG、所有權、整合驗證與
+> panel 見 [parallel_development.md](parallel_development.md)。
 
-**平台預設為 GitHub。** 但規則本身描述的是**能力**，不是指令——kit 不說
-「必須開 GitHub PR」，而說「必須有一個地方讓審查在合併前發生」。
-凡是換 git server 就要重新對應的規則，都標了「平台相關」標記；
-§8 給出三種平台的對應答案，§9 把標記處彙整成換平台檢查清單。
-
----
+平台預設為 GitHub，但規則描述的是能力，不把 PR／MR 當成歷史的唯一載體。凡是換 git server
+就要重新對應的規則，都標了「平台相關」；§8 與 §9 提供對照。
 
 ## 1. 核心原則
 
-以下三條**不可協商**，換任何平台都成立。後面所有規則都是它們的展開。
-
 | # | 原則 | 為什麼不可協商 |
 |---|---|---|
-| 1 | **一張工單 = 一個分支，分支名 = Task ID** | 使 `git branch` 的每一行都對得回一張工單。對不回去的分支＝沒人知道它在做什麼 |
-| 2 | **合併前必須通過審查** | 審查若發生在合併後，發現問題時錯誤已經是「唯一事實」的一部分 |
-| 3 | **已合併的主線是唯一事實** | 分支上的東西只是提案。判斷「現在的系統長什麼樣」一律看主線 |
+| 1 | **一張工單 = 一條 Task ID 分支** | branch 必須能直接追溯到工作來源 |
+| 2 | **合併前必須通過固定對象的審查與自動檢查** | 合併後才查，錯誤已進共享事實；只看浮動 head 則核可無法重建 |
+| 3 | **所有進入共享分支的合併都保留 merge commit** | branch ref 刪除、平台更換後，拓撲與過程 commits 仍留在 Git 物件中 |
+| 4 | **主線是唯一生效事實；round 是尚未生效的整合候選** | branch 上的 Done 預告或 panel 資料只有合併成功才會進主線 |
 
-**沒有工單的臨時工作，一律先開一張最小工單再開分支**——這是原則 1 的直接推論。
+沒有工單的臨時工作，一律先開最小工單再開 branch。多工單輪次額外使用短命
+`feature/{topic}` round branch，但不取代每張工單的 Task ID branch。
 
-## 2. 工單 × git 狀態對映
+## 2. 工單 × Git 狀態對映
 
-工單狀態是唯一來源，分支與 PR 是它的鏡像。
+工單狀態是唯一來源，branch 與審查載體是鏡像：
 
-| 工單狀態 | 分支 | PR |
+| 工單狀態 | Task ID branch | 審查／合併 |
 |---|---|---|
 | `Ready` | — | — |
-| `In Progress` | 建立 `{TaskID}` | 首次 push 後開 **Draft PR** |
-| `In Review` | 停止寫入 | Draft → **Ready for Review** |
-| 退回 → `In Progress` | 恢復寫入 | Ready → Draft |
-| `Done` | 合併後刪除 | **Merged** |
+| `In Progress` | 建立／恢復寫入 | 首次 push 後開草稿載體 |
+| `In Review` | 停止寫入；head 固定 | 正式窄審；通過後才能進 round／main |
+| 多工單窄審通過 | branch 保留、worktree 移除 | merge commit 進 round；工單仍 `In Review` |
+| `Done` | 合併成功後安全刪除 | 單張已進 main，或所屬 round 已進 main |
 
-**隨表的五條裁定：**
-
-1. **`Done` = merged，不是 APPROVED。** APPROVED 之後還有 merge 這一步會失敗
-   （衝突、CI 紅燈）。標早了，BACKLOG 就在說謊。
-2. **工單 `In Review` 保留，不被 PR 上的 review 取代。** BACKLOG 是從工單生成的，
-   PR 狀態進不了 BACKLOG——**工單是唯一來源，PR 是它的鏡像**。
-3. **Draft PR 在 `In Progress` 首次 push 時就開**，不等交付。早開的收益是 CI 早跑，
-   問題在寫的當下發現，而不是交付之後才發現。
-4. **CI 紅燈硬擋合併。** 不擋的話，PR 只是個好看的 diff 檢視器，不是閘門。
-5. **合併用 squash。** 這條同時解掉一個看似矛盾之處：既然開發途中就能 commit
-   （§4），PR 內必然有多顆過程 commit，與「一張工單一個 commit」衝突。
-   squash 讓兩者**同時成立**——過程 commit 留在 PR 內可追溯，主線上仍是一張工單一顆。
-
-> ⚠️ **「留在 PR 內可追溯」是這條裁定的前提，不是附帶效果。**
-> squash 會丟棄過程 commit，是 PR 接住了它們，這個代價才付得起。
-> **沒有 PR 的專案前提不成立**——照字面 squash 完再刪分支，過程 commit 直接消失，
-> 沒有任何東西接住。合併方式因此必須降級，見 §6.1 與 §8.3。
-
-**粒度：**
-
-| 物件 | 是什麼 | 對工單的數量關係 |
-|---|---|---|
-| **工單** | 一個可獨立驗收的變更單位 | — |
-| **分支** | 工單的實體位置 | **1 : 1** |
-| **PR** | 工單的審查容器 | **1 : 1**（反向不成立，見下） |
-| **commit** | 開發過程的存檔點 | **1 : N** |
-
-> 📌 **每張工單一個 PR，但不是每個 PR 都有工單。** 主線受保護之後，
-> 未開工單的變更（例如流程文件的討論性修改）同樣推不上主線，也必須走 PR。
-> **不要為此開後門**（admin bypass）：後門一旦存在就會被習慣性使用，保護等於形同虛設。
+`APPROVED` 是對 pinned Review Target 的放行，不是 `Done`。單張工單的結案資料必須先寫入
+reviewed head；多工單輪次則在 round 最終候選一次寫入全部結案資料，再做 round panel。
+正式核可後不得追加會改 head 的結案 commit。
 
 ## 3. 分支
 
-- **分支名 = Task ID**，不加前綴、不加描述。
-- **建立時機**：工單 `Ready` → `In Progress` 的當下，從最新的主線切出。
-- **刪除時機**：合併完成之後。刪除前必須先驗證確實已合併（§6.4）。
-- **工單轉 `Canceled` 時，分支內若已有 commit，必須詢問使用者保留或丟棄**，
-  不可逕自刪除。
+- **Task branch 名 = Task ID**，不加描述。
+- **Round branch 名 = `feature/{topic}`**，一輪一個清楚目標與 2～5 張封閉工單，輪次完即刪。
+- 單張工單從最新主線／既有整合線建立；多工單依 Round Manifest 的 opening base 與 DAG 建立。
+- 無依賴且通過 Write Scope／Contract／External Effects 檢查者可從相同 base 平行開出；有依賴者等前置
+  merge 進 round 再開工，不以隱性堆疊取代 DAG。
+- 工單取消且 branch 已有 commit 時，必須詢問使用者保留或丟棄，不得逕自刪除。
 
 ### 3.1 推送授權
 
 | 對象 | 授權 |
 |---|---|
-| `{TaskID}` 分支 | **可自由推送**，不需逐次徵詢 |
-| 主線與任何受保護分支 `[平台相關]` | **一律需要當次明確同意** |
+| Task ID branch | 可依專案政策推送；本 repo 未經使用者當下說「push」不得主動推送 |
+| round、main 與任何受保護共享分支 `[平台相關]` | 一律需要當次明確同意 |
 
-「不要隨便 push」保護的其實是**共享歷史**，不是 push 這個動作本身。
-一條只有自己在用的 `{TaskID}` 分支被推上去，不影響任何人的工作，
-而且推上去反而讓變更多一份遠端備份——正好補上 §4 要講的遺失風險。
+推送與合併分開授權；commit 完成不代表可以 push，Task branch 可推也不代表可以進共享分支。
 
-## 4. commit
+## 4. Commit
 
-**開發過程中隨時可以 commit，不必等審查通過。**
+開發過程中可隨時在 Task branch commit，不必等審查通過。一張工單可有多顆過程 commit；
+它們會透過 merge topology 保留，`--first-parent` 則提供乾淨的人讀視角。
 
-這條的決定性理由不是 PR 相容性，而是**相反的做法會弄丟工作**：
-若規定「審查通過才 commit」，那麼整個 `In Review` 期間**沒有任何 ref 指著變更**，
-它只存在於工作目錄與暫存區。任何 `git checkout`／`git reset`／清理動作
-都會使它**永久消失**。commit 並推送之後，這個風險自然消失。
-
-- 一張工單在分支上可以有多顆 commit；主線上**讀起來**仍是一張工單一行
-  （實際怎麼合併依平台而定，見 §6.1）。一輪同時進行多張工單時是**一輪一行**，
-  見 §7.2。
-- **commit message 的 HITL 複查閘門依然成立，但它在「進入主線」那一刻，
-  不在每一顆 commit**，見
-  [`.agent/resources/team_protocol.md`](../../.agent/resources/team_protocol.md) §1.10。
-  `{TaskID}` 分支上的中間 commit **不需事前取得同意**——理由與 §3.1「可自由推送」
-  同源：閘門保護的是**共享歷史**，不是 commit 這個動作本身。一條只有自己在用的
-  分支上寫了什麼，改天用 `git commit --amend`（單顆）或合併訊息（多顆）就能改寫。
-  複查對象因此是**「已經寫下、可修改的訊息」**，不是「即將寫下的草稿」。
-- 訊息格式、Emoji 對照與**禁止寫入的內容**，一律以
+- Task branch 的中間 commit 不需逐顆取得訊息同意。
+- 直接在 round／main 做 commit，以及任何 Task → round、Task → main、round → main 的 merge 訊息，
+  都適用 `team_protocol.md` §1.10 的當次使用者複查。
+- 多工單 round 的審查前結案 commit 直接寫在共享 round，必須先呈現訊息並取得當次同意。
+- 訊息格式與禁止內容一律以
   [`.agent/workflows/commit-message.md`](../../.agent/workflows/commit-message.md) 為正版。
 
-## 5. PR
+## 5. 審查載體
 
-PR 是**工單的審查容器**。以下規則描述它必須提供的能力。
+PR／MR 或本地 review artifact 是操作介面；審查正版一律是
+`base SHA + head SHA + Task/Round ID`。
 
-- **合併前審查的載體 `[平台相關]`**：必須有一個地方讓審查在合併前發生，
-  且該處能同時看到完整 diff 與工單。
-- **開啟時機與草稿狀態 `[平台相關]`**：`In Progress` 首次推送時就開，
-  並標記為「尚未請求審查」；交付時（`In Progress` → `In Review`）才轉為正式請求審查。
-  退回時轉回草稿。
-- **自動檢查 `[平台相關]`**：PR 上必須跑得起專案的測試，且結果對審查者可見。
-- **審查意見的落點 `[平台相關]`**：審查意見必須有固定落點，且**必須依
-  `team_protocol.md` §2.3 回寫工單**——PR 上的討論串不會進 BACKLOG，
-  只有工單會。
+- **合併前審查載體 `[平台相關]`**：必須同時可取得 pinned diff、工單與第 1 層文件。
+- **草稿 ↔ 正式請求 `[平台相關]`**：`In Progress` 首次推送開草稿，交付才轉正式；退回轉草稿。
+- **自動檢查 `[平台相關]`**：載體上必須看得到對同一 head 執行的檢查結果。
+- **意見落點 `[平台相關]`**：平台討論仍須回寫 repo 內 review artifact；平台資料不是唯一來源。
 
-**PR 描述至少要寫**：對應的 Task ID、本次變更做了什麼、怎麼驗證。
-不要在 PR 描述裡重複工單已有的內容，附上工單路徑即可。
+PR 描述至少寫 Task／Round ID、做了什麼、驗證指令與 Review Target；已有工單內容只附路徑，
+不複製成第二份規格。
 
 ## 6. 合併與收尾
 
-### 6.1 合併方式
+### 6.1 合併方式：所有共享方向保留 merge commit
 
-- **合併方式取決於有沒有審查載體平台**：
-  - 有 PR／MR → **squash**。主線上一張工單一顆 commit，
-    過程 commit 由載體接住（§2 裁定 5）。
-  - 無遠端 → **`--no-ff`**。沒有載體接住時，§2 裁定 5 的前提不成立，
-    改由主線歷史保存過程 commit；讀取時用 `--first-parent`，
-    一樣是一張工單一行（一輪多張工單時是一輪一行，見 §7.2）。見 §8.3。
-- **合併 commit 的訊息第一行必須含 Task ID**，形如
-  `<類型>: [{TaskID}] <主旨>`（一輪多張工單共用一顆合併 commit 時的寫法見 §7.3）。
-  分支名就是 Task ID（§3.1），而
-  **分支名不會自動進入 commit 物件**——自訂合併訊息會蓋掉 git 預設的
-  `Merge branch '{TaskID}'`，於是 `--no-ff` 保住的只剩拓撲，
-  `git log --graph` 上是一條**無名側支**；squash 連拓撲都沒有。
-  - **不能只靠 reflog 補救。** reflog 是純本機檔案，`git clone` 與 `git push`
-    都不會帶走，且預設 90 天過期（`gc.reflogExpire`）。分支名沒寫進訊息，
-    等於換一台機器、或過了三個月，就再也查不出這顆 commit 屬於哪張工單。
-  - 這條**與平台無關**，兩種合併方式都適用。
-- **合併訊息必須先經使用者當次複查同意**（`team_protocol.md` §1.10）。
-  §4 對分支上中間 commit 的豁免**到這裡為止**：這則訊息就是進入主線的那一則，
-  它是整張工單唯一一定會被讀到的敘述。
-  - **也正因為中間 commit 沒有逐顆把關，拓撲更不能丟。** 側支是唯一能回頭看
-    「這張工單當初怎麼一步步做的」的地方；抹平之後，未經複查的過程就只剩
-    一則事後總結，出事時無從二分定位。
-- **阻擋未通過的合併 `[平台相關]`**：審查未通過或自動檢查紅燈時，
-  合併動作必須在**機制上**被擋住，不能只靠自律。
-- **合併的執行方式 `[平台相關]`**：由平台的合併動作完成，
-  合併訊息使用工單那則經過複查的 commit message 原文。
+平台有無 PR 都不改變歷史語意：
 
-### 6.2 結案 commit：寫入時點 ≠ 生效時點
+```bash
+git merge --no-ff <來源分支> -F <經當次複查的訊息檔>
+```
 
-**問題**：把工單 Status 改成 `Done` 本身是一次檔案修改，需要 commit。
-但此時 PR 正要合併——改在分支上等於「還沒合併就宣告 Done」，
-改在主線上則需要再開一個 PR 才推得上去，**會無限遞迴**。
-
-**根本原因**：工單狀態是**版控裡的資料**，而它要記錄的事件（已合併）發生在
-**版控之外**。這是阻抗不匹配，不是流程沒設計好。
-
-**解法：把寫入時點與生效時點分開。**
-
-| # | 誰 | 動作 |
+| 方向 | merge 訊息第一行 | first-parent 視角 |
 |---|---|---|
-| 1 | Code Reviewer | 審查通過——**工單此時仍是 `In Review`** |
-| 2 | Developer | 在 `{TaskID}` 分支做**結案 commit**：Status → `Done`、填 Closed（PR 編號早在開 PR 當下就填好了，見 §6.3） |
-| 3 | Developer | 依 §6.1 合併——方式看平台，訊息第一行帶 Task ID |
-| 4 | — | 主線上工單即為 `Done`，刪除分支 |
+| Task → main | 完整 Task ID | main 一張工單一行 |
+| Task → round | 完整 Task ID | round 一張工單一行 |
+| round → main | Round ID；Body 逐張列完整 Task ID | main 一輪一行 |
 
-第 2 步看似「預告」，但**它不會說謊**：結案 commit 只有在合併成功時才會出現在
-主線上。合併失敗，那顆 commit 就不在主線，工單在主線上仍是 `In Review`
-——**狀態自動正確，不需要任何回滾動作**。
+禁止 squash merge 與 rebase merge：它們會抹平已核准保留的側支拓撲。PR／MR 繼續負責 review、
+CI 與權限；Git merge commit 負責可攜歷史。
 
-> 📌 「工單是唯一來源」指的是**主線上的工單**，不是分支上的。
-> 分支上的預告不影響唯一來源。
+- **阻擋未通過合併 `[平台相關]`**：Review Target 不符、正式審查未通過或檢查紅燈時，
+  機制上必須擋住，不能只靠自律。
+- **執行合併 `[平台相關]`**：平台必須選「Create a merge commit」或等價操作，並使用經當次
+  複查的訊息原文；無平台則使用上方 `--no-ff` 指令。
 
-### 6.3 回填 PR 編號，不是 commit SHA
+### 6.2 結案資料必須在正式審查 head 內
 
-**回填工單的識別碼 `[平台相關]`**：填 **PR 編號**，未使用 PR 平台時填 `—`。
+版控工單描述的是主線事實，但 `Done` 要記錄的事件正是「即將合併」。解法是讓 branch 上先寫
+結案資料，只有 merge 成功時才進主線；merge 失敗，主線工單仍維持原狀。
 
-理由：squash 合併會產生**全新的 SHA**，與分支上任何一顆都不同，
-因此想在合併前就把最終的 SHA 寫進工單，**物理上做不到**。PR 編號則是
-**開 PR 當下就確定、永不改變**，而且能反查全部過程 commit 與審查紀錄。
+**單張工單：**
 
-**回填時點在開 PR 當下**（`In Progress` 階段），不等結案 commit。
-理由是交付回報發生在審查通過之前，那時工單裡若還沒有 PR 編號，
-審查者無從找起。提前之後，工單自己就是唯一來源，交付回報不必重複貼連結。
-結案 commit 只負責改 `Status` 與 `Closed`。
+1. Developer 完成內容與測試，Status → `In Review`，完成自查。
+2. 在 Task branch 寫入結案資料（Status → `Done`、Closed），固定 base／head／Task ID。
+3. fresh-context reviewer 對該最終 head 正式審查；退回則同 branch 修正並重新固定 target。
+4. APPROVED 後不再改 head，merge commit 進 main；成功後安全刪 branch。
 
-### 6.4 刪除分支前的驗證
+**多工單輪次：**
 
-**「已合併」的訊號 `[平台相關]`**：以平台回報的合併狀態為準。
-**驗證方式隨 §6.1 選的合併方式而不同，兩條路不可混用。**
+1. 各 Task branch 固定 target、窄審通過後逐張 merge commit 進 round，Task 仍 `In Review`。
+2. 對「當下 main＋round」做整合 QA；失敗依 `parallel_development.md` §6 退回。
+3. round 上以一顆經同意的結案 commit 寫入全部 Task `Done`／Closed 與 manifest 放行資料。
+4. 固定 round target 並跑 fresh-context panel；APPROVED 後不再改 head。
+5. round merge commit 進 main；成功後安全刪除全部 Task／round branches。
 
-**squash 合併（有 PR／MR 平台）**：
+這個順序讓「head 改變就失效」能成立，也避免 APPROVED 後追加結案 commit 的死循環。
 
-> ⚠️ `git branch -d` 的「未合併」警告在 squash 下**必然出現**——
-> squash 產生的是一顆全新 commit，分支上的過程 commit 都不是它的祖先。
-> **禁止**看到失敗就改用 `-D`——那會在真的沒合併時安靜地丟掉工作。
->
-> ⚠️ **`git merge-base --is-ancestor` 不可用作 squash 的判準**，它永遠回非 0。
-> squash 保證的是**內容**進了主線，不是 commit 進了主線。要比對的是樹：
->
-> ```bash
-> # 合併後立刻執行。相同 = 分支內容確實已進主線
-> test "$(git rev-parse <分支>^{tree})" = "$(git rev-parse <合併目標>^{tree})"
-> ```
->
-> 這條比對**只在合併後、其他變更落地前成立**。若主線已經前進，
-> 改拿分支的樹與那顆 squash commit 的樹比對。
+### 6.3 回填審查載體編號
 
-**`--no-ff` 合併（無遠端）**：
+**回填識別碼 `[平台相關]`**：使用 PR／MR 時在開啟當下填編號；無平台填 `—`。
+Review Target 的 SHA 與正式結果寫在 review artifact／Round Manifest，不塞進這個欄位。
 
-> `--no-ff` 讓分支尖端成為合併 commit 的第二個 parent，上面兩個問題都不存在：
->
-> ```bash
-> git merge --no-ff <分支> -F <經複查的訊息檔>   # 第一行含 Task ID，見 §6.1
-> git branch -d <分支>                          # 成功即為「已合併」的證明
-> ```
->
-> **不必比對樹，也永遠不該動用 `-D`。** `git branch -d` 本身就是驗證——
-> 它拒絕刪除未合併的分支，那道拒絕正是這裡要的保險。
+### 6.4 刪除 branch 前的驗證
 
-## 7. 並行擴充
+**已合併訊號 `[平台相關]`**：平台回報 merge commit 已建立，且本地確認來源 head 是目標祖先；
+無平台直接以安全刪除作最後防線：
 
-**單線開發（同一時間只有一張工單在進行）到 §6 為止規則就齊了，可以跳過本節。**
-本節只補一件事：**同一輪有多張工單時，它們怎麼進主線。**
-一輪該放哪幾張工單（拆分規則）不在本節範圍。
-
-### 7.1 拓撲：各自開分支、堆疊、只合併最上層
-
-§1 核心原則 1「一張工單 = 一個分支」在多工單下**原封不動**，變的只有合併次數：
-
-1. 每張工單仍各自開分支，**分支名 = Task ID**（§3）。
-2. 後一張從**前一張的分支**開出去，不從整合分支開——依內容依賴堆疊成一條線。
-3. **整輪只合併一次**：對最上層那條做 `--no-ff`，中途不合併任何一條回整合分支。
-
-```
-*   8f3c2a1 🔧 merge(round): [ABC-DEV-BE-003／002／001] 本輪三張工單   ← 主線唯一一顆
-|\
-| * 30251e6 refactor: [ABC-DEV-BE-001] 抽出共用查詢層
-| * 61bcd3d fix: [ABC-DEV-BE-002] 移除硬編碼路徑
-| * e2ca4a1 feat: [ABC-DEV-BE-003] 加入匯出端點
-|/
-* 6d6dcf6 （本輪的起點）
+```bash
+git merge-base --is-ancestor <來源分支> <目標分支>
+git branch -d <來源分支>
 ```
 
-**為什麼中途不合併。** 中途 merge 會讓還沒合併的分支的 base 前進，於是每合併一次、
-剩下的分支就得 rebase 一次，否則主線會長出階梯狀的交錯圖形。
-**rebase 的需求來自「base 前進」，不來自「堆疊」**——不中途合併，base 不動，
-整輪一次 rebase 都不必做。這是本形狀最實際的好處，不只是圖形比較好看。
+禁止把失敗改成 `git branch -D`。多工單 round 中，Task branch merge 進 round 後先保留 ref；
+round merge main 後，內層 Task commits 經巢狀 merge 仍是 main 祖先，所有 branch 都應能 `-d`。
 
-**為什麼堆疊而不是各自從起點平行開。** 平行分支動到同一個檔案時，衝突會集中在
-最後幾次合併一起爆開，而且沒有先後順序可循；堆疊是把順序**先講清楚**，
-後一張看得到前一張的成果。彼此無依賴時堆疊也只是多一層無害的祖先關係。
+## 7. 多工單工作輪次
 
-**`git branch -d` 逐張仍然成立，§6.4 不必改。** 下層 commit 是上層的祖先，
-最上層一合併，整疊同時成為主線的祖先——每條分支各自 `git branch -d` 都會成功。
-§6.4「成功即為已合併的證明」在本形狀下**逐張有效**，`Done` 的判定與單線完全一樣。
+### 7.1 開輪
 
-### 7.2 主線的讀法：一輪一行
+1. 以最新 main 建立 `feature/{topic}`，把完整 SHA 寫入 Round Manifest。
+2. 驗證 2～5 張封閉 Task ID、DAG、Write Scope、Contract 與 `External Effects` 來源欄位。
+3. 由來源資料推導 wave；同 wave 只有符合全部放行條件者才可同時活躍。
+4. 兩張以上同時活躍時，每條 Task branch 一個 worktree；否則使用主工作目錄即可。
 
-§4 與 §6.1 的「主線讀起來一張工單一行」是**單線情境**的說法。
-本形狀下 `--first-parent` 是**一輪一行**：
+### 7.2 Task 合併進 round
+
+每張工單各自完成 pinned 窄審，再用 merge commit 進 round。合併前呈現完整訊息並取得當次同意。
+合併後立即移除該 Task worktree，但 branch 與 `In Review` 狀態保留到整輪進 main。
+
+前置 Task 已進 round 後，依賴它的下一 wave 才能從目前 round head 開工。若 main 期間出現必要且
+命中本輪 Contract／Write Scope 的變更，停止受影響工單，在 round 層統一適應，不讓各 branch
+自行按日曆 rebase。
+
+### 7.3 整合、panel 與 round merge
+
+所有 Task 進 round 後，以當下 main 建立整合候選並執行 QA。通過後依 §6.2 寫審查前結案 commit、
+固定 Round Review Target、執行 panel 與 reconciliation；關鍵 overlap zone 保留最終人為閘門。
+
+round merge 訊息第一行寫 Round ID，Body 每張 Task ID 一行，取得當次同意後才進 main。
+main 成功後重建 BACKLOG、完成 Round Manifest、移除 worktrees，最後安全刪除 Task／round branches。
+
+### 7.4 歷史讀法
 
 | 想看什麼 | 指令 |
 |---|---|
-| 主線有哪幾輪 | `git log --oneline --first-parent` |
-| 某一輪含哪幾張工單 | `git log --oneline <merge>^1..<merge>^2` |
-| 某張工單在哪一輪進主線 | `git log --grep=<TaskID>`（**不是** `--oneline \| grep`，見 §7.3） |
+| main 有哪些輪次／單張工單 | `git log --oneline --first-parent main` |
+| round 依序合入哪些 Task | `git log --oneline --first-parent <round>` |
+| 展開完整巢狀拓撲 | `git log --oneline --graph --decorate --all` |
+| 反查某 Task／Round | `git log --all --grep=<ID>` |
 
-**工單粒度沒有消失。** 側支上每顆 commit 仍各自帶著自己的 Task ID（§4），
-只是不再出現在 `--first-parent` 那一行——換一個指令就看得到。
-`--first-parent` 是人讀慣例：kit 出貨的腳本沒有一支依賴它的行數。
-專案若自建了依賴它的工具，改用上表第二列取得逐張粒度。
-
-### 7.3 合併訊息：第一行縮寫，Body 列完整 ID
-
-§6.1 要求合併訊息第一行含 Task ID。一輪多張時完整 ID 一行放不下，規則是：
-
-- **第一行**：共用前綴只寫一次，形如 `[ABC-DEV-BE-003／002／001]`。
-- **Body**：**每張工單各一行、寫完整 ID**，沿用 `- **<TaskID>**：<做了什麼>`。
-
-Body 的完整 ID **不是為了好看，是主線視角下反查的唯一入口**。第一行縮寫時實測：
-
-| 查法 | 結果 |
-|---|---|
-| `git log --grep=ABC-DEV-BE-002` | ✅ 找得到 merge commit **與工單自己那顆 commit** |
-| `git log --oneline \| grep ABC-DEV-BE-002` | ✅ 找得到工單自己那顆——`--no-ff` 保留了它 |
-| `git log --oneline --first-parent \| grep ABC-DEV-BE-002` | ❌ **找不到**——側支在這個視角下全部隱形 |
-
-前兩列查得到，是因為 `--no-ff` 保留了側支，而工單自己那顆 commit 的第一行
-帶著完整 Task ID（§4）。**即使工單分支已經 `branch -d` 回收**，該 commit 仍在
-merge 之後的可達歷史裡，兩種查法都掃得到。
-
-真正失效的是第三列。`git log --oneline --first-parent` 是 §7.2 的一輪一行，
-也是 §8.3 在沒有 PR 時明文建議的主線讀法——該視角下只剩 merge commit 那一行。
-Body 若不列完整 ID，這一行就只有縮寫，**「這張工單屬於哪一輪」再也無從得知**：
-§7.1 把一輪收成一顆 merge 之後，Body 是唯一還記得住工單粒度的地方。
-§6.1「不能只靠 reflog 補救」的理由在這裡同樣成立。
-
-合併訊息一樣要先經使用者當次複查同意（§6.1）。
-
-> 📌 規則只有一套，內部分「基本」與「並行擴充」兩節，不做單人版／多人版兩份規範——
-> **多人開發包含單人開發**，單線專案讀基本節就完整可用。
+first-parent 是讀取粒度，不在寫入時銷毀過程資料。
 
 ## 8. 平台適配
 
@@ -319,136 +185,72 @@ Body 若不列完整 ID，這一行就只有縮寫，**「這張工單屬於哪�
 
 | kit 要求的能力 | GitHub（預設） | GitLab | 無遠端／純本地 | 檢查內容 |
 |---|---|---|---|---|
-| 隔離變更 | branch | branch | branch | — |
-| 合併前審查的載體 | **Pull Request** | Merge Request | 審查檔 `docs/features/<模組>/reviews/<TaskID>.md` | — |
-| 自動檢查 | **Actions** | GitLab CI | 合併前手動跑測試 | BACKLOG 是否為最新、工單 Status 值是否合法、工單時間戳是否正確、文件是否有死連結、結案工單是否填了 Closed、AC 全打勾的工單是否已結案、未結案工單的 Assignee 是否合法、Agent runtime 版控政策與秘密邊界是否合法 |
-| 阻擋未通過的合併 | Branch protection ＋ required checks | Protected branch ＋ pipeline | 人工紀律 | — |
-| 審查意見的落點 | PR review comment | MR discussion | 同上 | — |
-| 合併方式（§6.1） | squash | squash | **`--no-ff`** | — |
-| 「已合併」的訊號 | PR merged | MR merged | `git branch -d` 成功（§6.4） | — |
+| 隔離變更 | branch／選用 worktree | branch／選用 worktree | branch／選用 worktree | — |
+| 合併前審查的載體 | Pull Request＋repo review artifact | Merge Request＋repo review artifact | `reviews/<TaskID>.md`／Round Manifest | — |
+| 自動檢查 | Actions | GitLab CI | 合併前手動跑測試 | BACKLOG 是否為最新、工單 DAG／Round／Parallel Change 是否有效、工單 Status 值是否合法、工單時間戳是否正確、文件是否有死連結、結案工單是否填了 Closed、AC 全打勾的工單是否已結案、未結案工單的 Assignee 是否合法、Agent runtime 版控政策與秘密邊界是否合法 |
+| 阻擋未通過的合併 | Branch protection＋required checks | Protected branch＋pipeline | 人工紀律＋pinned artifact | — |
+| 審查意見的落點 | PR comment＋repo artifact | MR discussion＋repo artifact | repo artifact | — |
+| 合併方式（§6.1） | Create a merge commit | Merge commit | `git merge --no-ff` | — |
+| 「已合併」的訊號 | merge commit＋祖先檢查 | merge commit＋祖先檢查 | `git branch -d` 成功 | — |
 
-**只要一個平台能填滿這七列，就能套用本流程。**
-填不滿的列，要在專案 `CLAUDE.md` 註明降級方式。
-
-「檢查內容」欄不是平台能力，是 kit 出貨的 `.agent/scripts/precheck.py` **實際跑的項目**。
-它只涵蓋第 1 層「流程有沒有被遵守」——這一層跟技術棧無關、輸入全在 repo 內，
-所以 kit 有資格替所有專案定義。第 2 層「這個專案的測試跑不跑得動」跟技術棧綁定，
-kit 出貨的 workflow 完全不碰第 2 層（見 `.github/workflows/kit-precheck.yml`）。
-
-**這一欄與腳本必須逐項對得起來。** 表格多寫一項而腳本沒跑，就是承諾了一個不存在的閘門
-——這正是本節原本的毛病：規範三處指向 CI，而 kit 一份 CI 都沒出貨。
-新增或移除檢查項時，`precheck.py` 的 `CHECKS` 與這一欄要一起改。
+只要平台能填滿七列就能套用。自動檢查列必須與 `.agent/scripts/precheck.py` 的 `CHECKS` 逐項一致；
+專案技術棧測試屬第 2 層，由專案自己的 workflow 負責。
 
 ### 8.2 GitHub 設定要求
 
-主線必須設為**受保護分支**，否則 §3.1 的推送授權與 §6.1 的合併阻擋
-都只是口頭約定。
+main 與實際使用的 `feature/**` 必須受保護：
 
-| 設定 | 值 | 依據 |
+| 設定 | 值 | 理由 |
 |---|---|---|
-| 禁止直接 push | ✅ 開 | §3.1 |
-| 合併前必須經過 PR | ✅ 開 | §1 原則 2 |
-| 合併前必須通過 CI | ✅ 開 | §6.1 |
-| 允許的合併方式 | **只留 squash** | §6.1 |
-| Dismiss stale pull request approvals when new commits are pushed | ❌ **必須關** | 見下 |
+| 禁止直接 push | 開 | 共享歷史要經當次同意與檢查 |
+| 合併前必須經 PR／checks | 開 | §1 原則 2 |
+| 允許的合併方式 | **只留 merge commit**；關閉 squash／rebase merge | §1 原則 3 |
+| Dismiss stale approvals | 開（若平台 approval 是正式 verdict） | head 改變必須使舊核可失效 |
+| Required approvals | 單一協作者預設 0；有獨立人類 reviewer 才提高 | PR 作者不能核可自己，避免永久死鎖 |
 
-> ⚠️ **"Dismiss stale pull request approvals" 一定要關。**
-> 開著的話，§6.2 第 2 步的結案 commit 會讓第 1 步剛拿到的 approve 失效；
-> 重新 approve 之後又還是得推結案 commit，再度失效——**死循環，PR 永遠合不進去**。
+分支樣式必須是 `feature/**`，不是不跨 `/` 的 `feature/*`。本 repo 只有一名協作者時，
+fresh-context AI review 證據寫入 repo artifact，不能把平台的 Required approvals 誤設為 1。
 
-### 8.3 沒有 PR 時的降級
+### 8.3 沒有 PR 時
 
-有兩種情形會走到這裡，**共通點是「沒有 PR 當審查載體與閘門」**，差別在有沒有遠端。
+沒有 PR 不降低 Review Target、fresh context、測試或 merge topology：工單用
+`docs/features/<模組>/reviews/<TaskID>.md`，round 用 Round Manifest；APPROVED 也必須落盤。
+合併使用 `git merge --no-ff`，訊息照樣先取得當次同意。
 
-#### （a）完全沒有遠端
-
-沒有遠端時，審查載體改為審查檔 `docs/features/<模組>/reviews/<TaskID>.md`——
-此情境下 **APPROVED 也必須寫**，否則 repo 裡不會留下任何審查紀錄，載體等於是空的。
-合併前手動跑完測試，工單的審查載體編號欄位填 `—`
-（審查檔與工單的分工見 `.agent/resources/team_protocol.md` §2.3）。
-**§1 三條核心原則不降級**。
-
-**合併方式降級為 `--no-ff`（§6.1）。** §2 裁定 5 是拿「過程 commit 留在 PR 內
-可追溯」換到 squash 的，沒有 PR 就付不出這個對價——squash 完再刪分支，過程 commit
-成為 dangling object，gc 一跑就永久消失。`--no-ff` 把它們留在主線歷史裡，
-而「一張工單一顆 commit」改由讀取時的 `--first-parent` 達成：
-**細節在讀的時候略過，而不是在寫的時候銷毀。**
-
-`Done` 的訊號隨之改為 `git branch -d` 成功（§6.4）：
-
-```bash
-git switch main
-# 訊息第一行必須含 Task ID（§6.1）——例：✨ feat: [ABC-DEV-BE-001] 加入匯出端點
-git merge --no-ff <工單分支> -F <經複查的訊息檔>
-git branch -d <工單分支>            # 成功 = 已合併，這就是 Done 的訊號
-git log --oneline --first-parent    # 主線一張工單一行，且每行都看得到 Task ID
-```
-
-一輪同時合併多張工單時，上面第 2 行改為只合併堆疊最上層那條，
-`--first-parent` 隨之變成一輪一行——`branch -d` 逐張仍然成功。見 §7。
-
-#### （b）有遠端，但不開 PR
-
-開發全程在整合分支上、用 `--no-ff` 合併，遠端只當備份與協作點。
-審查載體與合併方式都比照（a）——**沒有 PR 就付不出 squash 的對價，一樣降級為 `--no-ff`**。
-
-**跟（a）唯一的實質差別是自動檢查跑得起來，因此不准降級成人工紀律。**
-（a）沒有遠端，CI 無處可跑，§8.1「自動檢查」那列只能退回「合併前手動跑測試」；
-（b）有遠端，Actions 跑得動，那一列不降級。
-
-⚠️ **但預設的觸發條件會讓它形同不存在。** 多數 workflow 範本寫的是：
+有遠端但不開 PR 時，自動檢查仍必須在合併前跑。workflow 需監聽所有工作分支：
 
 ```yaml
 on:
   push:
-    branches: [main]
+    branches: ['**']
   pull_request:
 ```
 
-這個模式下兩個觸發條件**都不會發生**——commit 進不了 `main`（要先合併），
-也沒有 PR。結果是 repo 裡躺著一份綠色的 CI 設定，而整批 commit 從合併前到合併後
-從未被檢查過一次。**這比沒有 CI 更糟：它讓人以為已經檢查過了。**
-
-處置是**改觸發條件**，不是改用 PR：
-
-```yaml
-on:
-  push:
-    branches: ['**']      # 工單分支與整合分支都要跑，不是只有主線
-  pull_request:
-```
-
-kit 出貨的 `.github/workflows/kit-precheck.yml` 已經是這個設定。
-**它刻意不叫 `ci.yml`**——多數專案已經有自己的 `ci.yml`，撞名會在升級時衝突。
-第 2 層留在你自己的 workflow 裡，kit 不碰那份檔案。
-
-**驗收方式是看 run，不是看 YAML。** 語法正確不等於有被觸發——
-第一次設定完，推一顆 commit 上去，用 `gh run list --branch <分支>` 確認真的出現 run。
-沒有 run 就等於這一節沒生效。
+kit 的 `.github/workflows/kit-precheck.yml` 已採此設定；驗收要查看實際 run，不只閱讀 YAML。
 
 ## 9. 換平台檢查清單
 
-換 git server 時，逐條確認新平台怎麼滿足下列九項。**正文標記了平台相關的
-共九處，與本清單一一對應**——數量對不上就是有一處漏改。
+正文共有九處平台相關能力，換 git server 時逐條對應：
 
 ```bash
-grep -c '\[平台相關\]' docs/standards/git_workflow.md   # 應為 9，與本清單的 9 列一一對應
+grep -c '\[平台相關\]' docs/standards/git_workflow.md   # 應為 9
 ```
 
 | # | 出處 | 要對應的能力 |
 |---|---|---|
-| 1 | §3.1 | 受保護分支怎麼設、哪些分支算受保護 |
-| 2 | §5 | 合併前審查的載體是什麼 |
-| 3 | §5 | 有沒有「草稿 ↔ 請求審查」的狀態切換 |
-| 4 | §5 | 自動檢查跑在哪、結果對審查者可見嗎 |
-| 5 | §5 | 審查意見的固定落點在哪 |
-| 6 | §6.1 | 用什麼機制擋住未通過的合併 |
-| 7 | §6.1 | 合併方式（squash／`--no-ff`）怎麼執行、合併訊息從哪來 |
-| 8 | §6.3 | 回填工單的識別碼是什麼（無則填 `—`） |
-| 9 | §6.4 | 「已合併」的訊號是什麼 |
+| 1 | §3.1 | 受保護共享分支與 push 授權 |
+| 2 | §5 | 合併前 pinned 審查載體 |
+| 3 | §5 | 草稿與正式請求狀態 |
+| 4 | §5 | 同一 head 的自動檢查 |
+| 5 | §5 | 意見回寫 repo artifact |
+| 6 | §6.1 | 阻擋未通過合併 |
+| 7 | §6.1 | 執行 merge commit 與訊息來源 |
+| 8 | §6.3 | 工單回填的載體識別碼 |
+| 9 | §6.4 | 已合併訊號與祖先驗證 |
 
 ## 相關
 
-- 工單生命週期與狀態機：[`.agent/resources/team_protocol.md`](../../.agent/resources/team_protocol.md) §1.9／§1.10
+- 多工單排程、所有權與審查：[parallel_development.md](parallel_development.md)
+- 工單生命週期與狀態機：[team_protocol.md](team_protocol.md)（指向 `.agent/resources` 正版）
 - Commit message 正版：[`.agent/workflows/commit-message.md`](../../.agent/workflows/commit-message.md)
-- 文件分檔與交叉引用守則：[documentation_conventions.md](documentation_conventions.md)
+- 文件分檔與交叉引用：[documentation_conventions.md](documentation_conventions.md)

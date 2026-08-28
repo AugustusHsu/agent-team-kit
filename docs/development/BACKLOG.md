@@ -23,8 +23,9 @@
 | 2 | PEV-DEV-AGENT-044 | 實作工單 DAG、欄位與 wave 驗證 | process_evolution | backend-developer | In Review |
 | 3 | PEV-DEV-AGENT-045 | 實作輪次分支、worktree 與所有權流程 | process_evolution | devops-engineer | In Review |
 | 4 | PEV-DEV-AGENT-046 | 實作 fresh-context panel 與不可變 Review Target | process_evolution | tech-lead | In Review |
+| 5 | PEV-DEV-AGENT-047 | 並行流程端到端驗證與安裝同步 | process_evolution | qa-automation-engineer | In Review |
 
-**小計**：4 張
+**小計**：5 張
 
 ---
 
@@ -32,11 +33,7 @@
 
 > 包含狀態為 `Pending` 的工單，等待前置條件完成或人為確認後方可開始。
 
-| # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
-|---|---------|------|------|-------------------|---------------|
-| 1 | PEV-DEV-AGENT-047 | 並行流程端到端驗證與安裝同步 | process_evolution | qa-automation-engineer | ⏳ Pending |
-
-**小計**：1 張
+*(無)*
 
 ---
 
@@ -76,8 +73,7 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟡 In Review | 4 | 8.3% |
-| ⏳ Pending | 1 | 2.1% |
+| 🟡 In Review | 5 | 10.4% |
 | ✅ Done | 43 | 89.6% |
 | **總計** | **48** | **100%** |
 

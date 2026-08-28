@@ -5,7 +5,7 @@ description: 當使用者需要「安排 Sprint 規劃」、「拆解任務 (Bre
 
 # Scrum Master 工作指南
 
-> **📏 篇幅例外**：本檔 172 行，超過 `docs/standards/skill_conventions.md` 第 7 節的 150 行軟上限。**理由**：Scrum Master 是唯一貫穿工單生命週期全程的角色——開單前置查核、狀態機遷移、子母任務相依、BACKLOG 重生、退回處置各自都有不可省略的操作步驟。拆檔會讓「開單當下該查什麼」與「收尾該做什麼」分離，而這兩件事必須在同一次閱讀裡都在場。
+> **📏 篇幅例外**：本檔超過 `docs/standards/skill_conventions.md` 第 7 節的 150 行軟上限。**理由**：Scrum Master 是唯一貫穿工單生命週期全程的角色——開單前置查核、狀態機遷移、DAG／Round、BACKLOG 重生與退回處置各自都有不可省略的操作步驟。拆檔會讓「開單當下該查什麼」與「收尾該做什麼」分離，而這兩件事必須在同一次閱讀裡都在場。
 
 > **📋 前置閱讀**：執行任務前，請先閱讀團隊共用的協作守則 `.agent/resources/team_protocol.md`，了解工單生命週期、角色交接規範與命名約定。
 
@@ -90,6 +90,28 @@ description: 當使用者需要「安排 Sprint 規劃」、「拆解任務 (Bre
 8. **預留人為介入空間 (Human-in-the-loop)**：
    - Scrum Master 在拆解任務時若發現邊界條件模糊、API 參數不明等狀況，**切勿自行捏造或腦補**。這是系統防護的重要一環。請將疑問事項列入任務單中的「人為補充與確認 (Human-in-the-loop)」區塊，等待使用者回答或確認。
 
+### DAG、Write Scope 與 Round Manifest
+
+- 新建或重新規劃的普通工單一律填 `Blocked By`、`Write Scope`、`External Effects`、`Contract`、
+  `Change Set`、`Phase`；歷史工單可原五欄全無，已採原五欄但缺 `External Effects` 也可讀，
+  但缺欄代表副作用未知、不得取得並行資格。`Blocked By` 只存完整的正向 Task ID，
+  **不得手寫**反向 blocks、wave 或 `[P]`。破折號只有在它是整欄唯一內容時才代表無值；
+  不得寫成 `—、TBD` 或混入實際 token。清單使用 backtick 時，每個 token 都要完整包住，
+  不能把未引用內容留在外面讓 parser 猜測。
+- 只有 2～5 張相關工單才建立 `docs/development/rounds/{RoundID}[_slug].md`。Manifest 保存
+  唯一 Round ID、目標、`feature/{topic}` branch、40 字元 opening base SHA 與封閉 Task ID 集合；
+  工單不重複保存 Round ID。集合表每個資料列都必須是完整 Task ID，不能用 TBD 或非法列占位；
+  建立後先跑 `scan_backlog.py --format graph` 與 `precheck.py`。
+- 並行候選必須同時滿足：DAG 無先後、Write Scope 可證明不重疊、Contract 已在 round base
+  或由輪內前置提供且沒有同 wave peer 正在修改、兩邊 `External Effects` 的
+  `category:resource` 外部寫入作用域可證隔離；
+  `—` 只在明確無外部寫入時使用。缺欄、glob、格式不合法或任何一項不確定就排序執行。
+  介面顯示的 wave、blocks 與候選都是衍生視圖，不得抄回來源文件。
+- Parallel Change 使用同一 `Change Set` 的 `expand`／一至多張 `migrate`／`contract` 普通工單；
+  開 expand 時就建立 contract，且 contract 的 `Blocked By` 必須涵蓋全部 migrate 工單。
+
+正版語意與保守判準見 `docs/standards/parallel_development.md` §2～§3。
+
 ## 任務卡片格式範本
 
 在產出任何 Ticket 時，**必須嚴格遵循專案的預設格式範本**。
@@ -120,7 +142,9 @@ Scrum Master 負責工單初始狀態的設定與 Pending → Ready 的推進：
 
 工單的日期追蹤是生命週期管理的關鍵。Scrum Master 負責 **建立時間 (Created)** 的填寫：
 - **建立工單時**：必須在 `**📅 建立時間 (Created):**` 欄位填入當前時間，格式為 ISO 8601（例如 `2026-04-22T16:04+08:00`）。
-- **完成時間 (Closed)**：由 Code Reviewer 在審查通過（`Done`）或 Scrum Master 在標記 `Canceled` 時填寫 `**✅ 完成時間 (Closed):**` 欄位。未完成的工單此欄位保持 `—`。
+- **完成時間 (Closed)**：單張工單由 Developer 在正式審查前的結案 commit 填寫；多工單輪次由
+  round 在整合 QA 通過後、panel 前的結案 commit 統一填寫；`Canceled` 由 Scrum Master 填寫。
+  這些資料只有合併進主線才生效，未完成的工單在主線仍保持 `—`。
 
 ### 📌.1 母子工單狀態連動規則 (Parent-Child Status Linkage)
 

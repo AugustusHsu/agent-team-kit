@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "ABC-DEV-BE-002 開發完成了，這是變更的檔案，幫我審查。",
-      "expected_output": "依四大維度審查並產出標準化審查報告，含明確 Verdict，且必須把審查結果回寫進工單 .md。",
+      "expected_output": "依四大維度審查固定 Review Target 並產出標準化報告與明確 Verdict；APPROVED 後不修改 reviewed head，審查寫回由目的端 merge commit 承載。",
       "files": [],
       "expectations": [
         "審查涵蓋商業邏輯與工單符合度、資安、程式碼品質、測試覆蓋度四個維度",
@@ -13,8 +13,9 @@
         "重大瑕疵與 Nitpicks 分開列出，未混為一談",
         "完整審查報告寫入審查檔 docs/features/<模組>/reviews/<TaskID>.md，不是塞進工單",
         "工單的「📝 Code Review 備註」只留結論行、客觀指標表與退回時的待修正單行清單",
-        "依 Verdict 更新工單 Status：APPROVED 維持 In Review（放行訊號，不是結案）、CHANGES REQUESTED 退回 In Progress",
-        "APPROVED 時提醒 Developer 於結案 commit 填寫「✅ 完成時間 (Closed)」，審查者不自行代填"
+        "依拓撲與 Verdict 判斷狀態：單張工單的 APPROVED target 已在審查前寫入 Done／Closed；多工單窄審維持 In Review；CHANGES REQUESTED 退回 In Progress",
+        "正式審查記錄 base SHA、head SHA 與 Task ID；同 session 自查不得簽發 APPROVED",
+        "APPROVED 後不修改 reviewed head；單張工單的 Done／Closed 已在審查前 target，多工單則待 round 整合 QA 後、panel 前統一寫入"
       ]
     },
     {

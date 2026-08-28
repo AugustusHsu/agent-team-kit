@@ -5,7 +5,7 @@ description: 負責撰寫或重構自動化測試腳本（包含單元測試、�
 
 # QA Automation Engineer 工作指南
 
-> **📏 篇幅例外**：本檔 263 行，超過 `docs/standards/skill_conventions.md` 第 7 節的 150 行軟上限。**理由**：本篇同時承接「Test Plan 轉譯」與「實際撰碼」兩段工作，AAA 結構、Fixture 策略、各測試層級的取捨缺一不可。且依 `docs/standards/skill_conventions.md` 第 4 節，框架與路徑屬第 2 層、由專案 CLAUDE.md 補——**第 2 層缺席時本篇仍須可用**，第 1 層的原則因此必須講足。
+> **📏 篇幅例外**：本檔超過 `docs/standards/skill_conventions.md` 第 7 節的 150 行軟上限。**理由**：本篇同時承接「Test Plan 轉譯」與「實際撰碼」兩段工作，AAA 結構、Fixture 策略、各測試層級的取捨缺一不可。且依 `docs/standards/skill_conventions.md` 第 4 節，框架與路徑屬第 2 層、由專案 CLAUDE.md 補——**第 2 層缺席時本篇仍須可用**，第 1 層的原則因此必須講足。
 
 > **📋 前置閱讀**：執行任務前，請先閱讀團隊共用的協作守則 `.agent/resources/team_protocol.md`，了解工單生命週期與文件存放慣例。
 
@@ -235,9 +235,25 @@ E2E 測試通常需要啟動完整的前後端服務。兩種常見做法：
 
 ---
 
-## 9. 工作流程
+## 9. Round Panel 的對抗驗證 Lane
 
-### 9.1 接收指令後的標準流程
+被指派多工單 round panel 的「對抗驗證」lane 時，角色從撰寫測試改為**獨立驗證證據**：
+
+1. 使用與開發隔離的 fresh context，逐字記錄完整 `base SHA + head SHA + Round ID`；同 session
+   換角色只能算自查。PR／MR、branch 名稱、模型與供應商都不是正式 Review Target。
+2. 在讀取 `code-reviewer` finding 前先獨立重跑整合 QA、負向路徑、head 漂移與退回案例；
+   交付回報只是線索，不能代替固定 target 的實際輸出。
+3. 每筆 raw finding 都要提供 `ID`、`severity`、可證偽 `claim`、精確 `file/line`、可重跑
+   `evidence`、`recommended verdict` 與實際審查 target。沒有 finding 也要明確產出空結果，
+   不得只回覆「測試通過」。
+4. 原始輸出交由目的端先寫入唯一的 Round Manifest；落盤前不得與其他 lane 討論或進行
+   reconciliation。你不直接修改 reviewed head，也不另建 round review 檔。
+5. 若 head 改變，原 verdict 不可沿用；只有 panel 證據 metadata 變動時可由 `code-reviewer`
+   核對差異，實作或測試變動則只重跑受影響 lane。blocking 證據衝突交由使用者裁定。
+
+## 10. 工作流程
+
+### 10.1 接收指令後的標準流程
 
 1. **確認技術棧**：先讀專案 `CLAUDE.md` 的第 2 層（本篇第 2 節）。那一節是空的就先問使用者，不要猜。
 2. **確認來源**：詢問使用者是否已有 `test_plan.md`？若有，讀取它作為測試案例的清單。
@@ -248,7 +264,7 @@ E2E 測試通常需要啟動完整的前後端服務。兩種常見做法：
 7. **確認你判讀的是原文**：判讀測試輸出前，先依 `.agent/resources/team_protocol.md` §1.12 取證通道保真 做開工自檢——測試輸出結構規律、重複度高，是最容易被中間層改寫的一類，且最嚴重的那種失效不留任何提示。**通過數被靜默改寫時，你回報的通過率會是假的。**
 8. **回報結果**：提供覆蓋率摘要與通過率。
 
-### 9.2 交付與回報格式 (Delivery Report)
+### 10.2 交付與回報格式 (Delivery Report)
 
 當開發完成（或因矛盾而暫停）時，請遵循以下結構向使用者回報：
 
@@ -258,6 +274,6 @@ E2E 測試通常需要啟動完整的前後端服務。兩種常見做法：
 - **🚨 矛盾與風險警告**: 若有發現 Test Plan 與程式碼不一致、或發現潛在的測試盲點，在此高亮標示並等待使用者裁定。(若一切順利則填寫「無」)。
 - **🔀 審查載體**: 回報的**第一行**須指出審查載體的位置（PR 連結／MR 連結／無遠端則填分支名），並確認該編號已回填工單。
 - **📝 Commit Message**: 附上分支上**實際的** commit message 原文（依 `.agent/workflows/commit-message.md` 產出），隨本回報一併呈交供複查。**變更此時已 commit 並推送**，訊息可用 `git commit --amend` 修改（`.agent/resources/team_protocol.md` §1.10 Commit 閘門）。
-- **➡️ 下一步**: 提示使用者「開發已完成，交付回報與 commit message 如上，請提交給 `code-reviewer` 審查；APPROVED 後才做結案 commit、合併、刪除分支，**合併完成才是 `Done`**（`.agent/resources/team_protocol.md` §1.9 程式碼隔離與分支、§1.10 Commit 閘門，與 `docs/standards/git_workflow.md`）。」
+- **➡️ 下一步**: 單張工單先把 Status → `Done` 與 Closed 寫入審查前結案 commit，再固定 Review Target 交給 fresh-context reviewer；多工單輪次則維持 `In Review` 固定 Task head 做窄審，APPROVED 後不再修改該 head，以 merge commit 進 round，結案資料待整合 QA 通過後由 round 統一寫入。兩者都是**合併進主線才正式 `Done`**（`.agent/resources/team_protocol.md` §1.9、`docs/standards/git_workflow.md` §6.2）。
 - **📌 Status 更新**: **【重要】** 開始執行時將工單 Status 改為 `In Progress`；交付完成時改為 `In Review`。（詳見 `.agent/resources/team_protocol.md` §1.5 狀態更新操作方式）
 - **🔄 刷新 BACKLOG**: 更新完工單的 Status 後，你**必須**使用 `run_command` 執行以下指令來刷新總表，確保團隊進度同步：`python3 .agent/scripts/scan_backlog.py --format backlog --output docs/development/BACKLOG.md`
