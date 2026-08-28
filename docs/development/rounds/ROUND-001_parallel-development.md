@@ -44,8 +44,9 @@
   已依開輪人工所有權裁定分流，沒有在掃描器落地後反向改寫歷史。
 - **Overlap zones**：`docs/development/overlap_zones.md` 尚未登記長期 `critical`／`high` 熱區，
   本輪未取得任何例外豁免。
-- **條件式第 3 位風險專家**：目前未觸發；若正式 integration target 顯示安全政策、migration、
-  公開 API 或 `critical` overlap zone，panel 前改為觸發並保留使用者最終閘門。
+- **條件式第 3 位風險專家**：已觸發並完成獨立取證。整合語意 lane 判定 `migration`，
+  風險專家判定 `migration` 與公開 API；對抗驗證 lane 判定未觸發。原始分類衝突保留至
+  reconciliation，且依 fail-safe 原則保留使用者最終人工閘門。
 
 ## 4. 整合 QA
 
@@ -63,26 +64,41 @@
 所有 lane 使用同一個候選 target，並在讀取其他 lane 前獨立完成。Raw findings 必須先落入本節，
 才可開始 §6 reconciliation；沒有 finding 的 lane 也要留下「無」及其實跑證據。
 
-**Panel Candidate Target:** —（整合 QA 與審查前結案 commit 後固定）
+**Panel Candidate Target:** `base=247de42b9b09026cdbdad33eb6564b5fe86db085; head=83ed5cc7c74580050056e698e98189b6b2977c06; id=ROUND-001`
 
 | ID | Lane | Severity | Claim | File／Line | Reproducible Evidence | Recommended Verdict | Reviewed Target |
 |---|---|---|---|---|---|---|---|
-| — | — | — | 待雙 lane 獨立取證 | — | — | — | — |
+| `INT-F-001` | integration-semantics | blocking | 只有 043 在固定樹內具可重建的最終 APPROVED；044 artifact 停在第五輪 CHANGES REQUESTED，045～047 缺正式 review artifact／審查結論，無法證明 Task→Round merge 前完成 pinned fresh-context 窄審。 | `docs/features/process_evolution/reviews/PEV-DEV-AGENT-044.md:3,61`；045～047 對應 review 檔不存在；`team_protocol.md:333-376` | 固定 Head 的 `git cat-file -e`：044 exit 0，045～047 exit 128；044 artifact 僅第一至第五輪 CHANGES REQUESTED；歷史卻已有 044～047 merge `2e02787`、`06c6848`、`7ed4512`、`98dfad7`。 | CHANGES REQUESTED | `base=247de42b9b09026cdbdad33eb6564b5fe86db085; head=83ed5cc7c74580050056e698e98189b6b2977c06; id=ROUND-001` |
+| `INT-F-002` | integration-semantics | blocking | 043～045 已標 Done，但各自保留給後續正式入口複驗的最後一條 AC 仍未核取；固定 Head 已包含 047 同步與 QA，狀態與驗收紀錄矛盾。 | `PEV-DEV-AGENT-043.md:15,46-47`；`044.md:16,46-49`；`045.md:15,45-48` | 三張工單均為 Done，但 AC-06／AC-07／AC-07 仍是未勾選；本 lane 重跑 259 passed、root／kit precheck 各 9/9、installer 零待合併、diff check 通過。047 AC-09 是 panel 尚未完成的刻意保留，不納入本 finding。 | CHANGES REQUESTED | `base=247de42b9b09026cdbdad33eb6564b5fe86db085; head=83ed5cc7c74580050056e698e98189b6b2977c06; id=ROUND-001` |
+| `INT-F-003` | integration-semantics | blocking | 固定 target 修改 installer upgrade／migrate 行為，Manifest 卻仍標風險專家未觸發；命中 migration 即須增加第三 lane 並保留使用者最終閘門。 | `install.sh:75-80`；`tests/test_install.py:193-230`；本檔原 `:47-48,82-85` | installer 對舊專案缺少新版 seed 提示執行 migrate；測試 `test_升級不直接補缺少的種子檔而是提示_migrate` 實際覆核該行為。 | CHANGES REQUESTED | `base=247de42b9b09026cdbdad33eb6564b5fe86db085; head=83ed5cc7c74580050056e698e98189b6b2977c06; id=ROUND-001` |
+| `QA-E-001` | adversarial-qa-evidence | none | 無 blocking 或 non-blocking finding；DAG、外部副作用 fail-closed、兩層拓撲、head 漂移、installer／upgrade 與結案前證據均可重跑。 | — | 259 passed；root／kit precheck 各 9/9；graph `errors=[]`、waves 1／2／3／4；installer dry-run 0／0／82／6／0；head 漂移、安全刪 branch、外部副作用與輪外前置等六項負向測試通過。 | APPROVED | `base=247de42b9b09026cdbdad33eb6564b5fe86db085; head=83ed5cc7c74580050056e698e98189b6b2977c06; id=ROUND-001` |
+| `RISK-F-001` | conditional-risk | blocking | 舊版專案升級後無法取得新增的 `overlap_zones.md`：installer 要求 migrate，但 migrate 只處理 AGENTS／CLAUDE，既不建立檔案也不產生 `.new`，後續升級無限重複告警。 | `install.sh:80,140-145`；`kit/.agent/scripts/agent_runtime.py:626-647,661-670` | Base 首次安裝後以 Head upgrade，再跑 `agent_runtime.py migrate --dry-run --json`；targets 只有 AGENTS／CLAUDE，`overlap_zones.md` 仍不存在，第二次 upgrade 再次告警。現有 install test 只驗提示，未證明 migration 可用。 | CHANGES REQUESTED | `base=247de42b9b09026cdbdad33eb6564b5fe86db085; head=83ed5cc7c74580050056e698e98189b6b2977c06; id=ROUND-001` |
+| `RISK-F-002` | conditional-risk | blocking | `Integration Review Target` 只驗欄位存在，不驗 `base/head/id` schema、SHA 或 Round ID；In Review manifest 填 `banana` 仍可由 graph 發布且 precheck 全綠。 | `kit/.agent/scripts/scan_backlog.py:545-552,960-966,1133-1139` | 兩張合法工單搭配 `Status: In Review`、`Integration Review Target: banana`：graph、BACKLOG、precheck 均 exit 0，graph 原樣輸出 `banana`；現有測試只覆蓋欄位缺失。 | CHANGES REQUESTED | `base=247de42b9b09026cdbdad33eb6564b5fe86db085; head=83ed5cc7c74580050056e698e98189b6b2977c06; id=ROUND-001` |
 
 ### 5.1 整合語意 lane
 
-- **Fresh-context 聲明**：待 047 合併進輪次後由與開發隔離的 reviewer 填寫。
-- **Raw output**：待正式 target。
+- **Fresh-context 聲明**：reviewer 與開發 context 隔離，未沿用舊 Task verdict，未讀其他 lane；
+  固定提交與輸出僅在 `/tmp`，repo／refs／worktree 全程唯讀。
+- **取證保真**：§1.12 五行探針逐字通過，表格與前後散文完整。
+- **Raw output**：`INT-F-001`～`INT-F-003`；建議 `CHANGES REQUESTED`。功能整合、安裝同步、
+  DAG 與 Git 拓撲本身無新增實作缺陷，阻擋點在窄審證據、結案 AC 與風險閘門。
 
 ### 5.2 對抗驗證 lane
 
-- **Fresh-context 聲明**：待 047 合併進輪次後由與開發及整合語意 lane 隔離的 reviewer 填寫。
-- **Raw output**：待正式 target。
+- **Fresh-context 聲明**：reviewer 與開發 context 隔離，未沿用舊 Task verdict，未讀其他 lane；
+  暫存測試僅在 `/tmp`，未修改 repo／ref／worktree。
+- **取證保真**：§1.12 五行探針逐字通過，表格與前後散文完整。
+- **Raw output**：`QA-E-001`，無 findings；建議 `APPROVED`。本 lane 將四類風險 trigger
+  人工分類為未觸發，此判定與另外兩條 lane 衝突，尚未 reconciliation。
 
 ### 5.3 條件式風險專家 lane
 
-目前未觸發；正式 target 若命中安全政策、migration、公開 API 或 `critical` overlap zone 才新增，
-不以空白第三人增加固定成本。
+- **Fresh-context 聲明**：由無歷史 fork 的獨立 reviewer 取證，與開發及雙路 panel 隔離，
+  未讀其他 lane、未做 reconciliation；所有暫存位於 `/tmp`。
+- **取證保真**：§1.12 五行探針逐字通過。
+- **Trigger 原始判定**：`migration` 與公開 API 成立；安全政策未另行觸發，未命中已登記的
+  `critical` overlap zone。此判定要求保留使用者最終人工裁定。
+- **Raw output**：`RISK-F-001`、`RISK-F-002`；建議 `CHANGES REQUESTED`。
 
 ## 6. Reconciliation 與人為閘門
 
