@@ -133,6 +133,13 @@ def test_frontmatter_的_name_與目錄名相符(skill_dir: Path):
     assert fields["description"].strip(), "description 不可為空——它是自動觸發的唯一依據"
 
 
+def test_超過一百五十行的_skill_說明篇幅例外(skill_dir: Path):
+    """軟上限不擋必要內容，但長 skill 必須說清楚為何不能再拆。"""
+    text = (skill_dir / "SKILL.md").read_text(encoding="utf-8")
+    if len(text.splitlines()) > 150:
+        assert "篇幅例外" in text, f"{skill_dir.name}/SKILL.md 超過 150 行卻未說明篇幅例外"
+
+
 def test_每個角色都有_evals(skill_dir: Path):
     assert (skill_dir / "evals" / "evals.json").is_file()
 
@@ -228,6 +235,95 @@ def test_指路檔章節索引與正版同步(kit_root: Path):
     assert 章節, "正版找不到任何 §x.y 章節，測試本身可能過期了"
     缺漏 = [f"§{s}" for s in 章節 if f"| §{s} |" not in 指路檔]
     assert not 缺漏, "指路檔的章節索引漏了：" + "、".join(缺漏)
+
+
+def test_工單審查範本固定不可變_target_且只承載窄審(kit_root: Path):
+    """正式工單審查不能只指 branch，也不能與 Round panel 共用第二份載體。"""
+    範本 = (
+        kit_root / "docs/features/_TEMPLATE/reviews/_REVIEW_TEMPLATE.md"
+    ).read_text(encoding="utf-8")
+
+    for 必要 in (
+        "Task ID",
+        "Base SHA",
+        "Head SHA",
+        "完整 40 字元 SHA",
+        "工單窄審（只查本工單 AC、Write Scope 與測試）",
+        "自查不得簽 APPROVED",
+        "Head 改變時，本輪 verdict 立即失效",
+        "Reproducible Evidence",
+        "Recommended Verdict",
+    ):
+        assert 必要 in 範本, f"工單審查範本缺少不可變審查欄位：{必要}"
+
+    assert "Round panel" in 範本
+    assert "不另建 round review 檔" in 範本
+
+
+def test_round_manifest_範本承載完整_panel_證據鏈(kit_root: Path):
+    """Raw findings 必須先落同一份 manifest，之後才 reconciliation 與 final verdict。"""
+    路徑 = kit_root / "docs/development/rounds/_TEMPLATE.md"
+    assert 路徑.is_file(), "kit 缺少 Round Manifest 範本"
+    範本 = 路徑.read_text(encoding="utf-8")
+
+    for 必要 in (
+        "Integration Review Target",
+        "QA Candidate Target",
+        "Panel Candidate Target",
+        "ID | Lane | Severity | Claim | File／Line | Reproducible Evidence",
+        "Recommended Verdict | Reviewed Target",
+        "accept／reject／duplicate／defer",
+        "Blocking 回查／重跑證據",
+        "未解證據衝突",
+        "關鍵 overlap zone 最終人工裁定",
+        "Final Review Target",
+        "APPROVED 後不得修改",
+        "目的端 merge commit",
+    ):
+        assert 必要 in 範本, f"Round Manifest 範本缺少 panel 證據欄位：{必要}"
+
+    assert 範本.index("## 5. Panel Raw Findings") < 範本.index(
+        "## 6. Reconciliation 與人為閘門"
+    )
+    assert 範本.index("## 6. Reconciliation 與人為閘門") < 範本.index(
+        "## 7. 最終 Review Target 與 Verdict"
+    )
+    assert "不另建 round review 檔" in 範本
+
+
+def test_panel_角色指引保留獨立取證與條件式風險專家(kit_root: Path):
+    """兩個基線 lane 固定存在；第三位只在關鍵風險觸發，不靠供應商或模型湊人數。"""
+    守則 = (kit_root / ".agent/resources/team_protocol.md").read_text(encoding="utf-8")
+    審查 = (kit_root / ".agent/skills/code-reviewer/SKILL.md").read_text(encoding="utf-8")
+    對抗 = (kit_root / ".agent/skills/qa-automation-engineer/SKILL.md").read_text(
+        encoding="utf-8"
+    )
+    全文 = "\n".join((守則, 審查, 對抗))
+
+    for 必要 in (
+        "base SHA + head SHA + Round ID",
+        "同 session 換角色只能",
+        "整合語意",
+        "對抗驗證",
+        "安全政策",
+        "migration",
+        "公開 API",
+        "critical",
+        "未落盤不得開始 reconciliation",
+        "accept|reject|duplicate|defer",
+    ):
+        assert 必要 in 全文, f"panel 角色指引缺少必要不變式：{必要}"
+
+    assert "不要求特定模型、供應商或模型多樣性" in 守則
+    assert "完成前不得閱讀對抗驗證者的 finding" in 審查
+    assert "在讀取 `code-reviewer` finding 前先獨立重跑" in 對抗
+
+    禁止 = (
+        r"正式審查[^\n]{0,40}必須使用\s*(?:Claude|Codex)",
+        r"APPROVED[^\n]{0,40}必須[^\n]{0,20}(?:不同模型|不同供應商)",
+    )
+    for pattern in 禁止:
+        assert not re.search(pattern, 全文), f"正式審查被綁定特定模型／供應商：{pattern}"
 
 
 # --- skill 與守則的一致性（PEV-DEV-AGENT-026）-------------------------------

@@ -375,6 +375,36 @@ CI runner 沒有 agent 的 context，shell 輸出必然保真，該檢查會永�
   execution profile、候選排除理由、probe 時間、是否使用過期 cache 與中途交接。
   `docs/standards/agent_runtime.md` §7／§12 是正版；只寫「這次用 Codex」不構成可重建證據。
 
+### 2.4 多工單輪次 Panel 與 Reconciliation
+
+本節定義角色交接順序；panel 的人數、觸發條件與完成閘門以
+`docs/standards/parallel_development.md` §7 為正版。單張工單只做 §2.3 的窄審，**不為形式啟動
+panel**；多工單輪次則在所有工單通過窄審並完成整合 QA 後，依下列順序執行：
+
+1. **固定候選對象**：以完整 `base SHA + head SHA + Round ID` 交給所有 lane。PR／MR 與 branch
+   diff 只是介面；任何 lane 都必須在報告中逐字重述 target。能簽發正式 APPROVED 的執行者必須
+   使用與開發隔離的 fresh context；同 session 換角色只算自查。
+2. **先獨立取證**：基線為整合語意與對抗驗證兩個 lane。`code-reviewer` 必須先完成自己的整合
+   語意 lane，才可讀取另一 lane 的 finding。安全政策、migration、公開 API 或命中
+   `overlap_zones.md` 的 `critical` 範圍時，才增加第 3 位風險專家並保留使用者最終閘門；
+   不以固定第三人增加一般輪次成本，也不要求特定模型、供應商或模型多樣性。
+3. **Raw findings 先落盤**：每筆至少包含 `ID`、`severity`、`claim`、`file/line`、可重跑
+   `evidence`、`recommended verdict` 及其實際審查 target。所有 lane 的原始輸出先寫入唯一的
+   Round Manifest，**未落盤不得開始 reconciliation**；不另建重複的 round review 檔。
+4. **逐項 reconciliation**：`code-reviewer` 對每筆標示 `accept|reject|duplicate|defer` 與理由。
+   blocking finding 必須回到原始證據重跑；證據衝突仍無法消解時停止，不得投票或取多數決，
+   依 §1.2 詢問使用者。修正若改到實作，舊 target 失效並只重跑受影響 lane。
+5. **固定最終 Review Target**：QA、raw findings、reconciliation、blocking 回查與必要人工裁定
+   都已落盤後，重新固定完整 `base SHA + head SHA + Round ID`。`code-reviewer` 必須對最終 target
+   重新確認候選到最終 head 的差異；只有 panel 證據與裁定 metadata 可沿用原 lane 證據，任何
+   實作或測試變更都要重跑受影響 lane。正式 verdict 只能綁這個最終 target，APPROVED 後不得
+   再改 reviewed head。
+
+Review Target 的 head SHA 不要求自我嵌入被審 commit（commit 無法可靠保存自己的 SHA）。正式輸出
+先在審查報告綁定 target；APPROVED 的 target、verdict 與尚待補記的審查 metadata 依 §2.3 由
+**目的端 merge commit** 寫回 Round Manifest，不回頭修改 reviewed round head。合併結果相對核准
+head 只准新增這些 metadata；若混入實作變更，視為 head 漂移並重新審查。
+
 ---
 
 ## 3. 共用命名約定 (Naming Conventions)

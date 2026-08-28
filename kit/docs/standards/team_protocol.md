@@ -32,6 +32,7 @@
 | §2.1 | Scrum Master → Developer |
 | §2.2 | Developer → Code Reviewer |
 | §2.3 | Code Reviewer → Done / 退回 |
+| §2.4 | 多工單輪次 Panel 與 Reconciliation |
 | §3 | 共用命名約定 (Naming Conventions) |
 | §3.1 | Task ID 編碼規則 |
 | §3.2 | 檔案存放慣例 |
