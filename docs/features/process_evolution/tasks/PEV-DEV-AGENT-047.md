@@ -12,9 +12,9 @@
 **📜 共用契約 (Contract):** `kit/docs/standards/parallel_development.md`
 **🔁 變更集合 (Change Set):** —
 **🪜 變更階段 (Phase):** —
-**🚥 任務狀態 (Status):** In Review
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-27T10:18+08:00
-**✅ 完成時間 (Closed):** —
+**✅ 完成時間 (Closed):** 2026-08-28T12:03+08:00
 **🔀 審查載體編號 (PR/MR):** —
 
 ## 1. 任務描述 (Description)
@@ -45,9 +45,9 @@ worktree、兩層 merge、整合 QA、fresh-context panel、head 失效、退回
 - [x] AC-08：`uv run pytest`、`precheck.py`、安裝／升級／dry-run、BACKLOG 重建與 `git diff --check` 全部通過。
 - [ ] AC-09：`ROUND-001` 記錄 pinned integration target、可重跑 QA 證據、所有 raw findings、reconciliation、阻塞項處置與必要的人為裁定。
 
-> AC-09 的 manifest schema 與 047 分支前置證據已落盤；完整 integration target 必須等本工單
-> 通過窄審並以 merge commit 進入 `feature/parallel-development` 後才能固定，雙 lane raw findings、
-> reconciliation 與最終 verdict 依序在 Round 分支補齊，不以 Task branch SHA 冒充輪次 head。
+> AC-09 的 manifest schema、pinned integration target 與整合 QA 證據已在本工單通過窄審並以
+> merge commit 進入 `feature/parallel-development` 後落盤；尚待雙 lane raw findings、
+> reconciliation 與最終 verdict 依序完成，不能在 panel 前提前核取。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 

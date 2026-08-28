@@ -1,11 +1,11 @@
 # [Round ID: ROUND-001] 並行開發流程落地
 
-**🚥 輪次狀態 (Status):** Open
+**🚥 輪次狀態 (Status):** In Review
 **🎯 輪次目標 (Goal):** 將 DN-005、DN-006、DN-008 的已簽核設計落成可安裝、可驗證並能自我 dogfood 的並行開發流程。
 **🌿 輪次分支 (Branch):** `feature/parallel-development`
 **📍 開輪基準 (Opening Base):** `247de42b9b09026cdbdad33eb6564b5fe86db085`
 **📅 建立時間 (Created):** 2026-08-27T10:18+08:00
-**🔎 整合審查對象 (Integration Review Target):** —（047 合併進輪次並完成審查前結案 commit 後固定）
+**🔎 整合審查對象 (Integration Review Target):** `base=247de42b9b09026cdbdad33eb6564b5fe86db085; head=98dfad7e64375edd2c1ee769ae3d06dffc4a3ac3; id=ROUND-001`
 
 > 📌 **Bootstrap 說明：** 本 manifest 是 Round Manifest schema 與掃描器實作前的第一份 dogfood 資料，
 > 依 DN-005 §5.8 人工建立。正式 schema 由 `PEV-DEV-AGENT-043` 落地、機械驗證由 `044` 落地；
@@ -51,12 +51,12 @@
 
 | 欄位 | 證據 |
 |---|---|
-| QA Candidate Target | —（047 Task merge 與審查前結案 commit 後固定） |
-| 當下主線 SHA | —（整合 QA 執行當下讀取完整 SHA） |
-| 輪次 head SHA | —（整合 QA 執行當下讀取完整 SHA） |
+| QA Candidate Target | `base=247de42b9b09026cdbdad33eb6564b5fe86db085; head=98dfad7e64375edd2c1ee769ae3d06dffc4a3ac3; id=ROUND-001` |
+| 當下主線 SHA | `feature/kit-dev-process@247de42b9b09026cdbdad33eb6564b5fe86db085` |
+| 輪次 head SHA | `feature/parallel-development@98dfad7e64375edd2c1ee769ae3d06dffc4a3ac3` |
 | 執行者／Task Profile | `qa-automation-engineer`／`test_verification` |
-| 指令與原始結果 | 047 分支前置證據：`tests/test_parallel_development_e2e.py` 3 passed；installer 正式同步後再次 `--upgrade --dry-run` 為新增 0、更新 0、待合併 0；正式 target 結果待回填 |
-| 失敗歸因／退回紀錄 | 前置證據無失敗；正式 target 若失敗，依原 Task ID／integration-fix／超過五張停止擴張三分法處置 |
+| 指令與原始結果 | 2026-08-28T12:03+08:00：`uv run pytest` 259 passed；root／kit `precheck.py` 各 9/9；installer `--upgrade --dry-run` 為新增 0、更新 0、最新 82、保留 seed 6、待合併 0；graph exit 0、`errors=[]`、waves `1:{043}, 2:{044,045}, 3:{046}, 4:{047}`；`git diff --check` 通過；worktree 僅主工作目錄 |
+| 失敗歸因／退回紀錄 | 無；本次 QA 未觸發原 Task ID 退回、integration-fix 或超過五張停止擴張 |
 
 ## 5. Panel Raw Findings
 

@@ -12,9 +12,9 @@
 **📜 共用契約 (Contract):** —
 **🔁 變更集合 (Change Set):** —
 **🪜 變更階段 (Phase):** —
-**🚥 任務狀態 (Status):** In Review
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-27T10:18+08:00
-**✅ 完成時間 (Closed):** —
+**✅ 完成時間 (Closed):** 2026-08-28T12:03+08:00
 **🔀 審查載體編號 (PR/MR):** —
 
 ## 1. 任務描述 (Description)

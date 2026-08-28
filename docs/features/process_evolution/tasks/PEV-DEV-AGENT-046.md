@@ -12,9 +12,9 @@
 **📜 共用契約 (Contract):** `kit/docs/standards/parallel_development.md`
 **🔁 變更集合 (Change Set):** —
 **🪜 變更階段 (Phase):** —
-**🚥 任務狀態 (Status):** In Review
+**🚥 任務狀態 (Status):** Done
 **📅 建立時間 (Created):** 2026-08-27T10:18+08:00
-**✅ 完成時間 (Closed):** —
+**✅ 完成時間 (Closed):** 2026-08-28T12:03+08:00
 **🔀 審查載體編號 (PR/MR):** —
 
 ## 1. 任務描述 (Description)
@@ -43,10 +43,10 @@
 - [x] AC-05：每份 raw finding 至少含 ID、severity、claim、file／line、可重跑 evidence 與 recommended verdict，且先落盤後才允許 reconciliation。
 - [x] AC-06：`code-reviewer` 先獨立完成自己的 lane，再逐項標示 accept／reject／duplicate／defer 與理由；所有 blocking finding 直接回查，證據衝突未解時停止並詢問使用者。
 - [x] AC-07：Round Manifest 的 QA、raw findings、reconciliation 與人工閘門欄位齊全；不另建重複的 round review 檔。
-- [ ] AC-08：完整性／precheck 測試通過，且不把特定模型或供應商設為正式審查的必要條件。
+- [x] AC-08：完整性／precheck 測試通過，且不把特定模型或供應商設為正式審查的必要條件。
 
-> AC-08 的開發分支證據已通過；核取留待 047 將新版流程與範本同步至根目錄安裝實例後，
-> 由 fresh-context reviewer 以正式安裝入口複驗。
+> AC-08 已由 047 將新版流程與範本同步至根目錄安裝實例，並由 fresh-context reviewer 以
+> 正式安裝入口複驗；全套 259 passed、root／kit precheck 各 9/9。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
