@@ -1,4 +1,4 @@
-"""precheck.py 的八項第 1 層流程檢查。
+"""precheck.py 的九項第 1 層流程檢查。
 
 每一項都有負向對照（造出違規輸入，確認會紅），另有兩支防假紅燈的迴歸：
 檢查器誤把合法內容判成違規，比漏抓更糟——它會逼作者改成不自然的寫法來閃避。
@@ -6,6 +6,7 @@
 
 import json
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -28,6 +29,7 @@ def _工單(
     打勾=None,
     assignee="backend-developer",
     runtime="",
+    planning="",
 ):
     return (
         "# [Task ID: MOD-DEV-BE-001] 測試工單\n\n"
@@ -35,6 +37,7 @@ def _工單(
         "**🏷️ 任務類型 (Task Type):** queue_agent\n"
         f"**👤 負責人 (Assignee):** {assignee}\n"
         + runtime
+        + planning
         + f"**🚥 任務狀態 (Status):** {status}\n"
         f"**📅 建立時間 (Created):** {created}\n"
         f"**✅ 完成時間 (Closed):** {closed}\n"
@@ -63,6 +66,10 @@ def 乾淨專案(bare_install: Path, tmp_path: Path) -> Path:
     target = tmp_path / "clean"
     shutil.copytree(bare_install, target)
     shutil.copytree(target / "docs/features/_TEMPLATE", target / "docs/features/my_module")
+    subprocess.run(["git", "init", "-q"], cwd=target, check=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=target, check=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=target, check=True)
+    subprocess.run(["git", "commit", "--allow-empty", "-qm", "precheck base"], cwd=target, check=True)
     (target / TASK).write_text(_工單(), encoding="utf-8")
     重生(target)
     return target
@@ -84,6 +91,52 @@ def _runtime欄位(
         f"**🧩 必備能力覆寫 (Required Capabilities):** {capabilities}\n"
         f"**🔐 資料分級 (Data Class):** {data_class}\n"
         f"**↪️ Execution 覆寫 (Execution Override):** {execution_override}\n"
+    )
+
+
+def _規劃欄位(
+    blocked_by="—",
+    write_scope="`src/example.py`",
+    external_effects="—",
+    contract="—",
+    change_set="—",
+    phase="—",
+):
+    return (
+        f"**⛓️ 前置工單 (Blocked By):** {blocked_by}\n"
+        f"**✍️ 寫入範圍 (Write Scope):** {write_scope}\n"
+        f"**🌐 外部副作用 (External Effects):** {external_effects}\n"
+        f"**📜 共用契約 (Contract):** {contract}\n"
+        f"**🔁 變更集合 (Change Set):** {change_set}\n"
+        f"**🪜 變更階段 (Phase):** {phase}\n"
+    )
+
+
+def _寫_round(專案: Path, task_ids: list[str]) -> None:
+    rounds = 專案 / "docs/development/rounds"
+    rounds.mkdir(parents=True, exist_ok=True)
+    rows = "\n".join(f"| `{task_id}` | 測試 | Pending |" for task_id in task_ids)
+    opening_base = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=專案,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    (rounds / "ROUND-001_test.md").write_text(
+        "# [Round ID: ROUND-001] precheck 測試\n\n"
+        "**🚥 輪次狀態 (Status):** Open\n"
+        "**🎯 輪次目標 (Goal):** 驗證窄審狀態\n"
+        "**🌿 輪次分支 (Branch):** `feature/precheck-test`\n"
+        f"**📍 開輪基準 (Opening Base):** `{opening_base}`\n"
+        "**🔎 整合審查對象 (Integration Review Target):** —\n\n"
+        "## 1. 封閉工單集合（唯一來源）\n\n"
+        "| Task ID | 目標 | 初始狀態 |\n"
+        "|---|---|---|\n"
+        f"{rows}\n\n"
+        "## 2. 衍生視圖\n\n"
+        "由 scanner 重算。\n",
+        encoding="utf-8",
     )
 
 
@@ -302,6 +355,115 @@ def test_ac_全打勾但未結案會紅(乾淨專案: Path):
     assert result.returncode != 0
     assert "全數打勾" in result.stdout
     assert "In Review" in result.stdout
+
+
+def test_dag_有未知依賴時_precheck_會紅(乾淨專案: Path):
+    """scanner 與 precheck 必須共用同一判準，不能只有 `--format graph` 看得到壞圖。"""
+    (乾淨專案 / TASK).write_text(
+        _工單(
+            status="In Progress",
+            closed="—",
+            planning=_規劃欄位(blocked_by="MOD-DEV-BE-099"),
+        ),
+        encoding="utf-8",
+    )
+    result = 跑(乾淨專案)
+    assert result.returncode != 0
+    assert "工單 DAG／Round／Parallel Change 是否有效" in result.stdout
+    assert "不存在的 Task ID：MOD-DEV-BE-099" in result.stdout
+
+
+def test_round_非法成員與重複表格結構會讓_precheck_紅(乾淨專案: Path):
+    (乾淨專案 / TASK).write_text(
+        _工單(
+            status="In Progress",
+            closed="—",
+            planning=_規劃欄位(write_scope="`src/first.py`"),
+        ),
+        encoding="utf-8",
+    )
+    第二張 = 乾淨專案 / "docs/features/my_module/tasks/MOD-DEV-BE-002.md"
+    第二張.write_text(
+        _工單(
+            status="Pending",
+            closed="—",
+            planning=_規劃欄位(write_scope="`src/second.py`"),
+        ).replace("MOD-DEV-BE-001", "MOD-DEV-BE-002"),
+        encoding="utf-8",
+    )
+    _寫_round(乾淨專案, ["MOD-DEV-BE-001", "MOD-DEV-BE-002"])
+    重生(乾淨專案)
+    round_path = 乾淨專案 / "docs/development/rounds/ROUND-001_test.md"
+    content = round_path.read_text(encoding="utf-8").replace(
+        "| `MOD-DEV-BE-001` | 測試 | Pending |\n",
+        "| `MOD-DEV-BE-001` | 測試 | Pending |\n"
+        "| Task ID | 目標 | 初始狀態 |\n"
+        "|---|---|---|\n"
+        "| TBD | 不合法但仍在封閉集合 | Pending |\n",
+    )
+    round_path.write_text(content, encoding="utf-8")
+
+    result = 跑(乾淨專案)
+    assert result.returncode != 0
+    assert "工單 DAG／Round／Parallel Change 是否有效" in result.stdout
+    assert "重複或錯位的 header" in result.stdout
+    assert "重複或錯位的 separator" in result.stdout
+    assert "Round 封閉集合含非法 Task ID token：TBD" in result.stdout
+
+
+def test_write_scope_placeholder_會讓_precheck_紅(乾淨專案: Path):
+    (乾淨專案 / TASK).write_text(
+        _工單(
+            status="In Progress",
+            closed="—",
+            planning=_規劃欄位(write_scope="TBD"),
+        ),
+        encoding="utf-8",
+    )
+    第二張 = 乾淨專案 / "docs/features/my_module/tasks/MOD-DEV-BE-002.md"
+    第二張.write_text(
+        _工單(
+            status="Pending",
+            closed="—",
+            planning=_規劃欄位(write_scope="—/src"),
+        ).replace("MOD-DEV-BE-001", "MOD-DEV-BE-002"),
+        encoding="utf-8",
+    )
+    _寫_round(乾淨專案, ["MOD-DEV-BE-001", "MOD-DEV-BE-002"])
+
+    result = 跑(乾淨專案)
+    assert result.returncode != 0
+    assert "工單 DAG／Round／Parallel Change 是否有效" in result.stdout
+    assert "Write Scope 含非法或不完整路徑 token：TBD" in result.stdout
+    assert "Write Scope 含非法或不完整路徑 token：—/src" in result.stdout
+
+
+def test_round_窄審全勾仍維持_in_review_不算漏關帳(乾淨專案: Path):
+    """多工單要等整合 QA 後才在 round 統一結案，舊檢查不能逼 Task 提前 Done。"""
+    (乾淨專案 / TASK).write_text(
+        _工單(
+            status="In Review",
+            closed="—",
+            打勾=True,
+            planning=_規劃欄位(write_scope="`src/first.py`"),
+        ),
+        encoding="utf-8",
+    )
+    第二張 = 乾淨專案 / "docs/features/my_module/tasks/MOD-DEV-BE-002.md"
+    第二張.write_text(
+        _工單(
+            status="Pending",
+            closed="—",
+            planning=_規劃欄位(write_scope="`src/second.py`"),
+        ).replace("MOD-DEV-BE-001", "MOD-DEV-BE-002"),
+        encoding="utf-8",
+    )
+    _寫_round(乾淨專案, ["MOD-DEV-BE-001", "MOD-DEV-BE-002"])
+    重生(乾淨專案)
+
+    result = 跑(乾淨專案)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "✅ AC 全打勾的工單是否已結案" in result.stdout
 
 
 def test_assignee_不是實際存在的角色會紅(乾淨專案: Path):

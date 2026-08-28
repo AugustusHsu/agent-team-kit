@@ -25,13 +25,23 @@
 | 欄位 | 唯一語意 | 不得拿來做什麼 |
 |---|---|---|
 | `Blocked By` | 正向硬依賴的 Task ID；無則 `—` | 不手寫反向 `blocks`、wave 或 `[P]` |
-| `Write Scope` | 本工單可寫的檔案／目錄／glob | 不取代專案級長期風險登記 |
+| `Write Scope` | 本工單可寫的檔案／glob；目錄必須明示為 `path/**` | 不取代專案級長期風險登記 |
+| `External Effects` | 外部寫入作用域的 `category:resource`；明確無外部寫入填 `—` | 不從標題、Task Type 或未列出關鍵詞推測安全 |
 | `Contract` | 已位於本輪 base 的第 1 層共用契約路徑；無則 `—` | 不指向未合併分支或 DN |
-| `Change Set` | Parallel Change 三階段共用識別；不用則 `—` | 不當 Epic 或 Round ID |
+| `Change Set` | Parallel Change 三階段共用的單一識別碼；不用則 `—` | 不當清單、Epic 或 Round ID |
 | `Phase` | `expand`、`migrate`、`contract`；不用則 `—` | 不新增同名 Task Type |
 
-舊工單沒有這五欄仍合法；只有新建或重新規劃的工單必須使用。`Assignee` 仍是專業角色，
+舊工單沒有原五欄仍合法；已採原五欄但沒有 `External Effects` 的過渡工單也可讀，
+但外部副作用視為未知，不能取得並行資格。新建或重新規劃的工單必須填齊六欄；
+`External Effects: —` 是「明確沒有外部寫入」，與缺欄的 unknown 不同。`Assignee` 仍是專業角色，
 執行者由 [agent_runtime.md](agent_runtime.md) 的能力路由決定。
+
+六欄的破折號空值必須是**整個欄位的唯一內容**；`—、TBD`、`—、實際值` 等混合表示一律無效。
+清單只要使用 backtick，所有 token 都必須放在 backtick 內，外部只能有分隔符與空白；任何殘留
+文字都視為來源資料不完整。`TBD`、`N/A`、`None` 是未完成 placeholder，不能當成路徑或
+Change Set；Change Set 只接受一個英數開頭、後續可含 `._-` 的識別碼。precheck 必須
+fail closed，不能靜默丟棄後繼續推導。破折號空值也不得成為路徑的一部分：`—/src`、
+`–src`、`-/src` 等表示一律無效。
 
 ### 2.2 Round Manifest
 
@@ -45,6 +55,9 @@
 
 manifest **不手寫** wave、反向 blocks 或彙總狀態。介面可顯示由工單 DAG 重算的快照，
 但必須標明是衍生視圖，衝突時回到工單與 manifest 的來源欄位。
+封閉集合表格中除 header／separator 外，每個資料列的第一欄都必須完整匹配 Task ID；非法或
+非空未知列不得略過，否則 manifest 不再是可驗證的封閉集合。header 與 separator 都只能
+各出現一次、依序位於第一筆資料列之前；重複、錯位或缺漏都使整份 manifest 無效。
 
 ## 3. 排程與拆解
 
@@ -55,10 +68,18 @@ manifest **不手寫** wave、反向 blocks 或彙總狀態。介面可顯示由
 
 1. DAG 之間沒有先後邊；
 2. `Write Scope` 不重疊；
-3. 共用 `Contract` 已存在於 opening base 或已由前置工單合併進輪次；
-4. 網路寫入、部署、migration、帳號或其他外部副作用可彼此隔離。
+3. 共用 `Contract` 已存在於 opening base 或已由前置工單合併進輪次，且沒有同 wave peer 正在修改；
+   前置工單以 literal 宣告 Write Scope 時只接受與 Contract 完整相等；目錄必須使用 `path/**`
+   glob，並由錨定完整路徑的 glob 實際匹配。只有靜態前綴、反向父子路徑、路徑深度不符或含
+   無法明確解讀的表示都不算已提供；
+4. 兩張工單都有 `External Effects` 來源證據，且網路寫入、部署、migration、帳號或其他
+   外部寫入作用域可證明互不重疊；`—` 代表明確沒有外部寫入。
 
-不同 Epic／模組只能當低耦合提示，不是放行條件。任何一項無法判定時，預設排序執行。
+外部作用域使用不含 glob 的 `category:resource` opaque key，例如 `deploy:staging`、
+`account:vendor/project`；相同作用域或父子作用域視為重疊。不同 Epic／模組只能當低耦合提示，
+不是放行條件。工單、Parallel Change 或所屬 Round 只要有任何來源驗證錯誤，該 Round 的
+全部配對都不得列入並行候選；同一工單重複歸屬時，所有涉入 Round 一律無效。缺欄、格式
+不合法或任何一項無法判定時，預設排序執行。
 
 ### 3.2 執行中發現新依賴
 

@@ -3,6 +3,12 @@
 **🔗 依附母任務 (Parent Task ID):** [在此填寫追溯來源，例如: ABC-DOC-HLD-001 或 Independent]
 **🏷️ 任務類型 (Task Type):** [在此填寫類型，例如: queue_frontend, queue_backend, queue_agent, queue_data, docs_generation, manual_user]
 **👤 負責人 (Assignee):** [指定 Skill 名稱，例如: backend-developer, frontend-developer, devops-engineer；若需使用者親自處理填 manual_user]
+**⛓️ 前置工單 (Blocked By):** — [只填正向硬依賴的 Task ID；無則填 —，不要手寫 blocks／wave／`[P]`]
+**✍️ 寫入範圍 (Write Scope):** [列出本工單唯一可寫的 repo 相對路徑或 glob；目錄使用 `path/**`]
+**🌐 外部副作用 (External Effects):** — [明確無外部寫入填 —；否則列出 `category:resource` 作用域，例如 `deploy:staging`、`account:vendor/project`]
+**📜 共用契約 (Contract):** — [填已位於 round base 的第 1 層契約路徑；無共享介面填 —]
+**🔁 變更集合 (Change Set):** — [只供 Parallel Change 三階段共用的單一識別碼；不用則填 —]
+**🪜 變更階段 (Phase):** — [Change Set 使用 `expand`／`migrate`／`contract`；不用則填 —]
 **🚥 任務狀態 (Status):** Pending / Ready / In Progress / In Review / Done
 **📅 建立時間 (Created):** {YYYY-MM-DDTHH:MM+08:00}
 **✅ 完成時間 (Closed):** —

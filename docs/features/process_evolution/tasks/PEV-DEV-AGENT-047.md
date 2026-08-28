@@ -8,7 +8,7 @@
 **🔐 資料分級 (Data Class):** —
 **↪️ Execution 覆寫 (Execution Override):** —
 **⛓️ 前置工單 (Blocked By):** PEV-DEV-AGENT-046
-**✍️ 寫入範圍 (Write Scope):** `tests/test_parallel_development_e2e.py`、`tests/fixture_project/**`、根目錄安裝實例同步產物、`docs/development/rounds/ROUND-001_parallel-development.md`、`docs/development/BACKLOG.md`
+**✍️ 寫入範圍 (Write Scope):** `tests/test_parallel_development_e2e.py`、`tests/fixture_project/**`、`.agent/**`、`.github/**`、`docs/**`
 **📜 共用契約 (Contract):** `kit/docs/standards/parallel_development.md`
 **🔁 變更集合 (Change Set):** —
 **🪜 變更階段 (Phase):** —
