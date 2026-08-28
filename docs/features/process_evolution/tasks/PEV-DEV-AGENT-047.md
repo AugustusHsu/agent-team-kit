@@ -12,7 +12,7 @@
 **📜 共用契約 (Contract):** `kit/docs/standards/parallel_development.md`
 **🔁 變更集合 (Change Set):** —
 **🪜 變更階段 (Phase):** —
-**🚥 任務狀態 (Status):** Pending
+**🚥 任務狀態 (Status):** In Review
 **📅 建立時間 (Created):** 2026-08-27T10:18+08:00
 **✅ 完成時間 (Closed):** —
 **🔀 審查載體編號 (PR/MR):** —
@@ -35,15 +35,19 @@ worktree、兩層 merge、整合 QA、fresh-context panel、head 失效、退回
 
 ## 3. 驗收標準 (Acceptance Criteria)
 
-- [ ] AC-01：隔離專案可完成 install → 建輪次 → 解析五張工單 → 推導 wave → 驗證 Write Scope／Contract → 建立與清理 worktree。
-- [ ] AC-02：暫存 Git repo 實跑工單→輪次→當下主線候選的兩層 merge，驗證 first-parent、同期主線變更、保留拓撲與安全刪支。
-- [ ] AC-03：工單與輪次 Review Target 都固定 SHA；審查後改變 head 的負向案例會使 verdict 失效並要求只重跑受影響層。
-- [ ] AC-04：整合失敗可歸因時退回原 Task ID，不可歸因時要求 integration-fix；不得靜默超過一輪五張上限。
-- [ ] AC-05：單一可用 provider、沒有 Codex App／PR 平台的本機環境仍能完成流程；不依賴網路、付費額度或特定供應商。
-- [ ] AC-06：測試不使用 mock，以 `tmp_path`、真實檔案及 `subprocess` 執行；中文測試名、assert 訊息與負向案例符合專案測試慣例。
-- [ ] AC-07：先跑 `./install.sh . --upgrade --dry-run` 再正式同步；同步後無 `.new`、manifest 一致，根目錄安裝實例只來自 `kit/`。
-- [ ] AC-08：`uv run pytest`、`precheck.py`、安裝／升級／dry-run、BACKLOG 重建與 `git diff --check` 全部通過。
+- [x] AC-01：隔離專案可完成 install → 建輪次 → 解析五張工單 → 推導 wave → 驗證 Write Scope／Contract → 建立與清理 worktree。
+- [x] AC-02：暫存 Git repo 實跑工單→輪次→當下主線候選的兩層 merge，驗證 first-parent、同期主線變更、保留拓撲與安全刪支。
+- [x] AC-03：工單與輪次 Review Target 都固定 SHA；審查後改變 head 的負向案例會使 verdict 失效並要求只重跑受影響層。
+- [x] AC-04：整合失敗可歸因時退回原 Task ID，不可歸因時要求 integration-fix；不得靜默超過一輪五張上限。
+- [x] AC-05：單一可用 provider、沒有 Codex App／PR 平台的本機環境仍能完成流程；不依賴網路、付費額度或特定供應商。
+- [x] AC-06：測試不使用 mock，以 `tmp_path`、真實檔案及 `subprocess` 執行；中文測試名、assert 訊息與負向案例符合專案測試慣例。
+- [x] AC-07：先跑 `./install.sh . --upgrade --dry-run` 再正式同步；同步後無 `.new`、manifest 一致，根目錄安裝實例只來自 `kit/`。
+- [x] AC-08：`uv run pytest`、`precheck.py`、安裝／升級／dry-run、BACKLOG 重建與 `git diff --check` 全部通過。
 - [ ] AC-09：`ROUND-001` 記錄 pinned integration target、可重跑 QA 證據、所有 raw findings、reconciliation、阻塞項處置與必要的人為裁定。
+
+> AC-09 的 manifest schema 與 047 分支前置證據已落盤；完整 integration target 必須等本工單
+> 通過窄審並以 merge commit 進入 `feature/parallel-development` 後才能固定，雙 lane raw findings、
+> reconciliation 與最終 verdict 依序在 Round 分支補齊，不以 Task branch SHA 冒充輪次 head。
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 

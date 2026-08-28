@@ -2,6 +2,10 @@
 
 一張工單一個檔，與工單同名：`tasks/<TaskID>.md` ↔ `reviews/<TaskID>.md`。
 
+- 這裡只保存**工單窄審**；窄審只查該工單 AC、Write Scope 與測試。多工單 Round panel
+  統一寫入 `docs/development/rounds/<RoundID>.md`，不另建重複的 round review 檔。
+- 每輪先固定完整 `base SHA + head SHA + Task ID`。PR／MR 或 branch 只是定位介面；head 改變後
+  舊 verdict 失效。同 session 換角色只能標自查，不能正式 APPROVED。
 - 放的是 `code-reviewer` SKILL.md §4 的**完整審查報告**：AC 逐條核對表、
   重大瑕疵與建議改法、Nitpicks、僅人工判讀的部分。
 - 多輪審查**追加在同一檔內，新的放最前面**，每輪以

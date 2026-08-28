@@ -5,15 +5,16 @@
 檢查「流程有沒有被遵守」，不跑專案自己的單元測試——後者是第 2 層，
 只有專案自己知道要跑什麼。本腳本的輸入全在 repo 內，跟技術棧無關。
 
-八項檢查（見 docs/standards/git_workflow.md §8）：
+九項檢查（見 docs/standards/git_workflow.md §8 與 parallel_development.md §2～§3）：
   1. BACKLOG 是否過期——重跑產生器比對現檔
-  2. 工單 Status 值是否合法
-  3. Created / Closed 是否為 ISO 8601，且 Closed 不早於 Created
-  4. 文件相對連結是否指向存在的檔案
-  5. Status 為 Done 卻沒填 Closed
-  6. AC 全數打勾卻還沒結案
-  7. 未結案工單的 Assignee 是否對應得到實際存在的 skill
-  8. 版控中的 agent runtime 政策、引用與秘密邊界是否合法
+  2. 工單 DAG／Round Manifest／Parallel Change 是否有效
+  3. 工單 Status 值是否合法
+  4. Created / Closed 是否為 ISO 8601，且 Closed 不早於 Created
+  5. 文件相對連結是否指向存在的檔案
+  6. Status 為 Done 卻沒填 Closed
+  7. AC 全數打勾卻還沒結案
+  8. 未結案工單的 Assignee 是否對應得到實際存在的 skill
+  9. 版控中的 agent runtime 政策、引用與秘密邊界是否合法
 
 使用方式:
   python3 .agent/scripts/precheck.py            # 全部檢查
@@ -144,6 +145,15 @@ def check_backlog_current(root):
     ]
 
 
+def check_planning_model(root):
+    """工單、Round 與 Parallel Change 共用同一份解析器，避免 scanner／precheck 漂移。"""
+    view = sb.build_planning_view(root)
+    return [
+        Finding(error["location"], error["message"])
+        for error in view["errors"]
+    ]
+
+
 def check_status_values(root):
     """Status 打錯字不會讓任何東西壞掉，工單只是從所有視圖裡靜默消失。"""
     findings = []
@@ -241,9 +251,14 @@ def check_ac_matches_status(root):
     屬第 2 層。這一項抓的是純粹的漏關帳。
     """
     findings = []
+    planning = sb.build_planning_view(root)
+    round_membership = planning["task_round_membership"]
     for task in iter_tasks(root):
         status = task.get("status")
         if status is None or status in AC_EXEMPT_STATUSES:
+            continue
+        if status == "In Review" and task["task_id"] in round_membership:
+            # 多工單窄審通過後 AC 可以全勾，但結案資料要等 round 整合 QA 後才統一寫入。
             continue
         boxes = CHECKBOX_RE.findall(Path(task["file"]).read_text(encoding="utf-8"))
         if boxes and all(box.lower() == "x" for box in boxes):
@@ -424,6 +439,7 @@ def rel(root, task):
 
 CHECKS = [
     ("BACKLOG 是否為最新", check_backlog_current),
+    ("工單 DAG／Round／Parallel Change 是否有效", check_planning_model),
     ("工單 Status 值是否合法", check_status_values),
     ("工單時間戳是否正確", check_timestamps),
     ("文件是否有死連結", check_dead_links),

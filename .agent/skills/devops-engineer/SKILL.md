@@ -32,7 +32,34 @@ description: 負責執行所有開發環境建設、容器化配置與 DevOps �
 - **官方文件優先**：當工單 Inputs 提供了官方文件連結（如 uv Docker 指南），務必使用 `read_url_content` 查閱最新內容，以官方推薦的最佳實踐為準。
 - **確認你查到的是原文**：查閱檔案或判讀建置／部署 log 前，先依 `.agent/resources/team_protocol.md` §1.12 取證通道保真 做開工自檢——輸出可能在抵達你之前被中間層改寫，最嚴重的那種失效不留任何提示。**log 結構規律、重複度高，正是最容易被改寫的一類。**
 
-## 4. 交付與回報格式 (Delivery Report)
+## 4. 工作輪次、Worktree 與所有權操作
+
+涉及多工單輪次時，以 `docs/standards/parallel_development.md` 與
+`docs/standards/git_workflow.md` 為流程正版，並依下列順序操作：
+
+1. **開輪前查核**：確認 Round Manifest 的封閉工單集合與 opening base；逐張檢查 `Blocked By`、
+   `Write Scope`、`Contract`、`External Effects`，並比對
+   `docs/development/overlap_zones.md`。Write Scope、Contract 或長期熱區重疊時，預設指定單一
+   owner 並排序，不得只靠 worktree 宣稱已隔離。
+2. **按活躍數量隔離**：只有同一輪有兩張以上工單同時活躍，才為每條 Task ID branch 建立獨立
+   worktree；只有一張活躍時沿用主工作目錄。建立新分支使用
+   `git worktree add -b <TaskID> <path> <round-branch>`，既有分支重建則使用
+   `git worktree add <path> <TaskID>`，不得以 worktree 取代 Write Scope 所有權。
+3. **保留兩層拓撲**：Task branch 以 `git merge --no-ff` 進 round，round branch 再以
+   `git merge --no-ff` 進 main。task merge 訊息保留完整 Task ID；round merge 訊息保留 Round ID，
+   Body 逐張列出 Task ID。不得 squash 或 rebase merge。
+4. **合併後清理**：Task 進 round 後，以不含 `--force` 的 `git worktree remove <path>` 移除其
+   worktree，但保留 Task branch。退回時從同一 Task ID branch 重建；整輪進 main 後先用
+   `git merge-base --is-ancestor <branch> main` 驗證，再以 `git branch -d <branch>` 安全回收。
+   `git worktree list` 最後只能剩主工作目錄，刪除失敗不得改用 `-D` 繞過。
+5. **驗證可讀歷史**：分別檢查 `git log --first-parent main` 與
+   `git log --first-parent <round-branch>`，確認主線一輪一行、輪次一張工單一行；branch ref 刪除後，
+   仍須能從 merge 訊息反查 Task／Round ID。
+
+`git rerere` 僅能由專案選擇以 `git config --local rerere.enabled true` 啟用；kit 不設定預設值，
+也不搬移或版控 `.git/rr-cache`。任何自動重用結果仍要人工檢查 diff 並重跑受影響測試。
+
+## 5. 交付與回報格式 (Delivery Report)
 
 當開發完成（或因察覺矛盾而暫停時），請遵循以下結構向使用者回報：
 
@@ -42,5 +69,5 @@ description: 負責執行所有開發環境建設、容器化配置與 DevOps �
 - **🧪 驗證/測試建議**: 附上驗證此配置的具體指令（例如 `docker compose config --quiet`、`make help`、`pre-commit run --all-files`、`docker compose up -d && docker compose ps` 等）。
 - **🔀 審查載體**: 回報的**第一行**須指出審查載體的位置（PR 連結／MR 連結／無遠端則填分支名），並確認該編號已回填工單。
 - **📝 Commit Message**: 附上分支上**實際的** commit message 原文（依 `.agent/workflows/commit-message.md` 產出），隨本回報一併呈交供複查。**變更此時已 commit 並推送**，訊息可用 `git commit --amend` 修改（`.agent/resources/team_protocol.md` §1.10 Commit 閘門）。
-- **➡️ 下一步**: 提示使用者「開發已完成，交付回報與 commit message 如上，請提交給 `code-reviewer` 審查；APPROVED 後才做結案 commit、合併、刪除分支，**合併完成才是 `Done`**（`.agent/resources/team_protocol.md` §1.9 程式碼隔離與分支、§1.10 Commit 閘門，與 `docs/standards/git_workflow.md`）。」
+- **➡️ 下一步**: 單張工單先把 Status → `Done` 與 Closed 寫入審查前結案 commit，再固定 Review Target 交給 fresh-context reviewer；多工單輪次則維持 `In Review` 固定 Task head 做窄審，APPROVED 後不再修改該 head，以 merge commit 進 round，結案資料待整合 QA 通過後由 round 統一寫入。兩者都是**合併進主線才正式 `Done`**（`.agent/resources/team_protocol.md` §1.9、`docs/standards/git_workflow.md` §6.2）。
 - **📌 Status 更新**: 開始執行時將工單 Status 改為 `In Progress`；交付完成時改為 `In Review`。（詳見 `.agent/resources/team_protocol.md` §1.5 狀態更新操作方式）

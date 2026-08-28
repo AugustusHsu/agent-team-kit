@@ -32,6 +32,7 @@
 | §2.1 | Scrum Master → Developer |
 | §2.2 | Developer → Code Reviewer |
 | §2.3 | Code Reviewer → Done / 退回 |
+| §2.4 | 多工單輪次 Panel 與 Reconciliation |
 | §3 | 共用命名約定 (Naming Conventions) |
 | §3.1 | Task ID 編碼規則 |
 | §3.2 | 檔案存放慣例 |
@@ -41,6 +42,7 @@
 ## 相關
 
 - Git 流程正版（§1.9／§1.10 的操作手冊面）：[git_workflow.md](git_workflow.md)
+- 並行流程正版（DAG、所有權、工作輪次與 panel）：[parallel_development.md](parallel_development.md)
 - 工單模板：[`.agent/resources/task_template.md`](../../.agent/resources/task_template.md)
 - 文件分檔與交叉引用守則：[documentation_conventions.md](documentation_conventions.md)
 - Commit message 正版：[`.agent/workflows/commit-message.md`](../../.agent/workflows/commit-message.md)
