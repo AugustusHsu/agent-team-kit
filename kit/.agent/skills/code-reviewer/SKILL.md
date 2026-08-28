@@ -94,7 +94,9 @@ Round Manifest。執行順序如下：
 1. 對同一組完整 `base SHA + head SHA + Round ID`，先在 fresh context 獨立完成「整合語意」lane；
    完成前不得閱讀對抗驗證者的 finding。模型或供應商不是正式核可條件。
 2. 取得對抗驗證 lane；只有安全政策、migration、公開 API 或 `critical` overlap zone 才加入
-   第 3 位風險專家。每個 lane 都只能提交 raw finding 與 recommended verdict，不能以多數決放行。
+   第 3 位風險專家。任一類觸發都要在「條件式風險最終人工裁定」記錄觸發類型、使用者裁定
+   原文與時間；只有四類都未觸發時才可填不適用。每個 lane 都只能提交 raw finding 與
+   recommended verdict，不能以多數決放行。
 3. 每筆 raw finding 先由目的端寫入 Round Manifest，至少保留以下欄位；未落盤不得 reconciliation：
 
    | ID | Severity | Claim | File／Line | Reproducible Evidence | Recommended Verdict | Reviewed Target |

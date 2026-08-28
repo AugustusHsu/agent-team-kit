@@ -275,7 +275,7 @@ def test_round_manifest_範本承載完整_panel_證據鏈(kit_root: Path):
         "accept／reject／duplicate／defer",
         "Blocking 回查／重跑證據",
         "未解證據衝突",
-        "關鍵 overlap zone 最終人工裁定",
+        "條件式風險最終人工裁定",
         "Final Review Target",
         "APPROVED 後不得修改",
         "目的端 merge commit",
@@ -289,6 +289,14 @@ def test_round_manifest_範本承載完整_panel_證據鏈(kit_root: Path):
         "## 7. 最終 Review Target 與 Verdict"
     )
     assert "不另建 round review 檔" in 範本
+
+    裁定欄起點 = 範本.index("- **條件式風險最終人工裁定**")
+    裁定欄終點 = 範本.index("\n- **修正與重跑範圍**", 裁定欄起點)
+    人工裁定欄 = 範本[裁定欄起點:裁定欄終點]
+    for 觸發類型 in ("安全政策", "migration", "公開 API", "critical overlap zone"):
+        assert 觸發類型 in 人工裁定欄, f"條件式人工閘門漏列觸發類型：{觸發類型}"
+    for 證據欄位 in ("觸發類型", "使用者裁定原文", "時間"):
+        assert 證據欄位 in 人工裁定欄, f"條件式人工閘門缺少裁定證據：{證據欄位}"
 
 
 def test_panel_角色指引保留獨立取證與條件式風險專家(kit_root: Path):

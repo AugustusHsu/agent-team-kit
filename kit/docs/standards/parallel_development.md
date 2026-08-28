@@ -206,8 +206,10 @@ head 改變時，對不上該 SHA 的核可失效：task head 改變重跑該工
 1. `code-reviewer`：整合語意、Contract、依賴、Write Scope 與架構一致性；
 2. 對抗驗證者：可重跑證據、錯誤路徑、回歸與負向對照。
 
-命中安全、migration、公開 API 或關鍵 overlap zone 才加第三位風險專家。各成員取得相同 pinned
-target 與必要第 1 層文件，先獨立完成；`code-reviewer` 在讀取其他 finding 前完成自己的 lane。
+命中安全政策、migration、公開 API 或 `critical` overlap zone 才加第三位風險專家。任一類
+觸發都必須在 Round Manifest 的「條件式風險最終人工裁定」記錄觸發類型、使用者裁定原文與
+時間；只有四類都未觸發時才可填不適用。各成員取得相同 pinned target 與必要第 1 層文件，
+先獨立完成；`code-reviewer` 在讀取其他 finding 前完成自己的 lane。
 
 每筆 raw finding 至少包含 ID、severity、claim、file／line、可重跑 evidence、recommended verdict，
 先寫入 Round Manifest。`code-reviewer` 再逐項 reconciliation：`accept|reject|duplicate|defer` 加理由；
@@ -220,7 +222,8 @@ target 與必要第 1 層文件，先獨立完成；`code-reviewer` 在讀取其
 - 封閉工單集合全部 terminal，且沒有未記錄的新依賴；
 - 當下主線＋輪次 QA 通過；
 - pinned round panel 通過，blocking finding 全數 reconciliation；
-- 關鍵 overlap zone 已取得最終人工裁定；
+- 安全政策、migration、公開 API 或 `critical` overlap zone 任一觸發時，已取得並記錄條件式
+  風險最終人工裁定；
 - round merge 訊息已取得當次使用者同意；
 - merge 成功後 Task ID／round branches 都可用 `git branch -d` 安全回收；
 - 所有 task worktree 已移除，BACKLOG 與 Round Manifest 已更新。

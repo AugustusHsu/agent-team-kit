@@ -76,7 +76,8 @@
 - **Code Reviewer 自己的 lane 完成時間**：[必須早於讀取其他 lane]
 - **Raw findings 落盤 commit**：`[SHA；必須早於 reconciliation]`
 - **未解證據衝突**：[無／停止原因與使用者裁定]
-- **關鍵 overlap zone 最終人工裁定**：[不適用／使用者原文與時間]
+- **條件式風險最終人工裁定**：[不適用（安全政策、migration、公開 API、critical overlap zone
+  均未觸發）／觸發類型、使用者裁定原文與時間]
 - **修正與重跑範圍**：[無／只重跑哪些受影響 lane 及理由]
 
 ## 7. 最終 Review Target 與 Verdict

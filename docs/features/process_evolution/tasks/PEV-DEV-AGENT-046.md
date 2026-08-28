@@ -8,7 +8,7 @@
 **🔐 資料分級 (Data Class):** —
 **↪️ Execution 覆寫 (Execution Override):** —
 **⛓️ 前置工單 (Blocked By):** PEV-DEV-AGENT-044, PEV-DEV-AGENT-045
-**✍️ 寫入範圍 (Write Scope):** `kit/.agent/skills/code-reviewer/SKILL.md`、`kit/.agent/skills/qa-automation-engineer/SKILL.md`、`kit/.agent/resources/team_protocol.md`、`kit/docs/standards/team_protocol.md`、`kit/docs/features/_TEMPLATE/reviews/_REVIEW_TEMPLATE.md`、`kit/docs/features/_TEMPLATE/reviews/README.md`、`kit/docs/development/rounds/_TEMPLATE.md`、`tests/test_kit_integrity.py`
+**✍️ 寫入範圍 (Write Scope):** `kit/.agent/skills/code-reviewer/SKILL.md`、`kit/.agent/skills/qa-automation-engineer/SKILL.md`、`kit/.agent/resources/team_protocol.md`、`kit/docs/standards/team_protocol.md`、`kit/docs/standards/parallel_development.md`、`kit/docs/features/_TEMPLATE/reviews/_REVIEW_TEMPLATE.md`、`kit/docs/features/_TEMPLATE/reviews/README.md`、`kit/docs/development/rounds/_TEMPLATE.md`、`tests/test_kit_integrity.py`
 **📜 共用契約 (Contract):** `kit/docs/standards/parallel_development.md`
 **🔁 變更集合 (Change Set):** —
 **🪜 變更階段 (Phase):** —
@@ -50,7 +50,7 @@
 
 ## 4. 人為補充與確認 (Human-in-the-loop)
 
-- **❓ 需要確認的事項 (Agent 提問)**：只在 blocking 證據衝突無法消解，或命中關鍵 overlap zone 最終閘門時詢問。
+- **❓ 需要確認的事項 (Agent 提問)**：只在 blocking 證據衝突無法消解，或安全政策、migration、公開 API、`critical` overlap zone 任一觸發條件式風險最終人工閘門時詢問。
 - **✍️ User 補充回覆 (User Input)**：已同意 DN-008 第一、第二批裁定。
 
 ## 5. 範圍外 (Out of Scope)

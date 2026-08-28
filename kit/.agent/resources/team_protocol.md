@@ -387,7 +387,9 @@ panel**；多工單輪次則在所有工單通過窄審並完成整合 QA 後，
 2. **先獨立取證**：基線為整合語意與對抗驗證兩個 lane。`code-reviewer` 必須先完成自己的整合
    語意 lane，才可讀取另一 lane 的 finding。安全政策、migration、公開 API 或命中
    `overlap_zones.md` 的 `critical` 範圍時，才增加第 3 位風險專家並保留使用者最終閘門；
-   不以固定第三人增加一般輪次成本，也不要求特定模型、供應商或模型多樣性。
+   任一類觸發都必須在 Round Manifest 的「條件式風險最終人工裁定」記錄觸發類型、使用者
+   裁定原文與時間，只有四類都未觸發時才可填不適用。不以固定第三人增加一般輪次成本，
+   也不要求特定模型、供應商或模型多樣性。
 3. **Raw findings 先落盤**：每筆至少包含 `ID`、`severity`、`claim`、`file/line`、可重跑
    `evidence`、`recommended verdict` 及其實際審查 target。所有 lane 的原始輸出先寫入唯一的
    Round Manifest，**未落盤不得開始 reconciliation**；不另建重複的 round review 檔。
