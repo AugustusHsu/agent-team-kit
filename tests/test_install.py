@@ -191,7 +191,7 @@ def test_升級不覆蓋使用者改過的檔案而是另存_new(tmp_path: Path)
 
 
 def test_升級保留種子檔(tmp_path: Path):
-    """雙入口、.gitignore、BACKLOG 與模組登記表安裝後由專案接手，升級不得動。"""
+    """專案入口、規劃資料與模組登記表安裝後由專案接手，升級不得動。"""
     target = tmp_path / "proj"
     target.mkdir()
     _安裝(target)
@@ -201,6 +201,7 @@ def test_升級保留種子檔(tmp_path: Path):
         "CLAUDE.md": "# 我的專案\n",
         ".gitignore": "node_modules/\n",
         "docs/development/BACKLOG.md": "# 我的 BACKLOG\n",
+        "docs/development/overlap_zones.md": "# 我的長期重疊熱區\n",
         "docs/features/README.md": "# 我的模組登記表\n",
     }
     for rel, 內容 in 種子.items():
@@ -217,13 +218,16 @@ def test_升級不直接補缺少的種子檔而是提示_migrate(tmp_path: Path
     target = tmp_path / "proj"
     target.mkdir()
     _安裝(target)
-    (target / "AGENTS.md").unlink()
+    missing_seeds = ("AGENTS.md", "docs/development/overlap_zones.md")
+    for rel in missing_seeds:
+        (target / rel).unlink()
 
     result = _安裝(target, "--upgrade")
 
-    assert not (target / "AGENTS.md").exists()
-    assert not (target / "AGENTS.md.new").exists()
-    assert "缺少種子檔，請執行 migrate：AGENTS.md" in result.stdout
+    for rel in missing_seeds:
+        assert not (target / rel).exists(), rel
+        assert not (target / f"{rel}.new").exists(), rel
+        assert f"缺少種子檔，請執行 migrate：{rel}" in result.stdout
 
 
 def test_升級對沒有基準線的舊安裝採保守處理(tmp_path: Path):
