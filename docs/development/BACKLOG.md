@@ -22,8 +22,9 @@
 | 1 | PEV-DEV-AGENT-043 | 落地並行開發標準與架構決策 | process_evolution | system-architect | In Review |
 | 2 | PEV-DEV-AGENT-044 | 實作工單 DAG、欄位與 wave 驗證 | process_evolution | backend-developer | In Review |
 | 3 | PEV-DEV-AGENT-045 | 實作輪次分支、worktree 與所有權流程 | process_evolution | devops-engineer | In Review |
+| 4 | PEV-DEV-AGENT-046 | 實作 fresh-context panel 與不可變 Review Target | process_evolution | tech-lead | In Review |
 
-**小計**：3 張
+**小計**：4 張
 
 ---
 
@@ -33,10 +34,9 @@
 
 | # | Task ID | 標題 | 專案 | 負責人 (Assignee) | 狀態 (Status) |
 |---|---------|------|------|-------------------|---------------|
-| 1 | PEV-DEV-AGENT-046 | 實作 fresh-context panel 與不可變 Review Target | process_evolution | tech-lead | ⏳ Pending |
-| 2 | PEV-DEV-AGENT-047 | 並行流程端到端驗證與安裝同步 | process_evolution | qa-automation-engineer | ⏳ Pending |
+| 1 | PEV-DEV-AGENT-047 | 並行流程端到端驗證與安裝同步 | process_evolution | qa-automation-engineer | ⏳ Pending |
 
-**小計**：2 張
+**小計**：1 張
 
 ---
 
@@ -76,8 +76,8 @@
 
 | 狀態 | 數量 | 佔比 |
 |------|------|------|
-| 🟡 In Review | 3 | 6.2% |
-| ⏳ Pending | 2 | 4.2% |
+| 🟡 In Review | 4 | 8.3% |
+| ⏳ Pending | 1 | 2.1% |
 | ✅ Done | 43 | 89.6% |
 | **總計** | **48** | **100%** |
 

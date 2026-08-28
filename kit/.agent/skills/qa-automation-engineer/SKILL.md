@@ -5,7 +5,7 @@ description: 負責撰寫或重構自動化測試腳本（包含單元測試、�
 
 # QA Automation Engineer 工作指南
 
-> **📏 篇幅例外**：本檔 263 行，超過 `docs/standards/skill_conventions.md` 第 7 節的 150 行軟上限。**理由**：本篇同時承接「Test Plan 轉譯」與「實際撰碼」兩段工作，AAA 結構、Fixture 策略、各測試層級的取捨缺一不可。且依 `docs/standards/skill_conventions.md` 第 4 節，框架與路徑屬第 2 層、由專案 CLAUDE.md 補——**第 2 層缺席時本篇仍須可用**，第 1 層的原則因此必須講足。
+> **📏 篇幅例外**：本檔超過 `docs/standards/skill_conventions.md` 第 7 節的 150 行軟上限。**理由**：本篇同時承接「Test Plan 轉譯」與「實際撰碼」兩段工作，AAA 結構、Fixture 策略、各測試層級的取捨缺一不可。且依 `docs/standards/skill_conventions.md` 第 4 節，框架與路徑屬第 2 層、由專案 CLAUDE.md 補——**第 2 層缺席時本篇仍須可用**，第 1 層的原則因此必須講足。
 
 > **📋 前置閱讀**：執行任務前，請先閱讀團隊共用的協作守則 `.agent/resources/team_protocol.md`，了解工單生命週期與文件存放慣例。
 
@@ -235,9 +235,25 @@ E2E 測試通常需要啟動完整的前後端服務。兩種常見做法：
 
 ---
 
-## 9. 工作流程
+## 9. Round Panel 的對抗驗證 Lane
 
-### 9.1 接收指令後的標準流程
+被指派多工單 round panel 的「對抗驗證」lane 時，角色從撰寫測試改為**獨立驗證證據**：
+
+1. 使用與開發隔離的 fresh context，逐字記錄完整 `base SHA + head SHA + Round ID`；同 session
+   換角色只能算自查。PR／MR、branch 名稱、模型與供應商都不是正式 Review Target。
+2. 在讀取 `code-reviewer` finding 前先獨立重跑整合 QA、負向路徑、head 漂移與退回案例；
+   交付回報只是線索，不能代替固定 target 的實際輸出。
+3. 每筆 raw finding 都要提供 `ID`、`severity`、可證偽 `claim`、精確 `file/line`、可重跑
+   `evidence`、`recommended verdict` 與實際審查 target。沒有 finding 也要明確產出空結果，
+   不得只回覆「測試通過」。
+4. 原始輸出交由目的端先寫入唯一的 Round Manifest；落盤前不得與其他 lane 討論或進行
+   reconciliation。你不直接修改 reviewed head，也不另建 round review 檔。
+5. 若 head 改變，原 verdict 不可沿用；只有 panel 證據 metadata 變動時可由 `code-reviewer`
+   核對差異，實作或測試變動則只重跑受影響 lane。blocking 證據衝突交由使用者裁定。
+
+## 10. 工作流程
+
+### 10.1 接收指令後的標準流程
 
 1. **確認技術棧**：先讀專案 `CLAUDE.md` 的第 2 層（本篇第 2 節）。那一節是空的就先問使用者，不要猜。
 2. **確認來源**：詢問使用者是否已有 `test_plan.md`？若有，讀取它作為測試案例的清單。
@@ -248,7 +264,7 @@ E2E 測試通常需要啟動完整的前後端服務。兩種常見做法：
 7. **確認你判讀的是原文**：判讀測試輸出前，先依 `.agent/resources/team_protocol.md` §1.12 取證通道保真 做開工自檢——測試輸出結構規律、重複度高，是最容易被中間層改寫的一類，且最嚴重的那種失效不留任何提示。**通過數被靜默改寫時，你回報的通過率會是假的。**
 8. **回報結果**：提供覆蓋率摘要與通過率。
 
-### 9.2 交付與回報格式 (Delivery Report)
+### 10.2 交付與回報格式 (Delivery Report)
 
 當開發完成（或因矛盾而暫停）時，請遵循以下結構向使用者回報：
 
